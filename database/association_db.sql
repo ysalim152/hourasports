@@ -358,44 +358,229 @@ INSERT INTO `planning` (`titre`,`equipe_id`,`couleur`,`date_debut`,`date_fin`,`r
 ('Assemblée Générale',       NULL,'#9b59b6','2025-05-25 18:00:00','2025-05-25 20:00:00','aucune','Salle de Réunion',1);
 
 -- -----------------------------------------------------------
+-- TABLE: sports (référentiel des sports)
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sports` (
+  `id`          TINYINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  `nom`         VARCHAR(50)       NOT NULL,
+  `slug`        VARCHAR(50)       NOT NULL,
+  `icone`       VARCHAR(5)        DEFAULT '⚽',
+  `couleur`     VARCHAR(7)        DEFAULT '#e63946',
+  `description` VARCHAR(200)      DEFAULT NULL,
+  `actif`       TINYINT(1)        DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sports_nom` (`nom`),
+  UNIQUE KEY `uk_sports_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `sports` (`nom`,`slug`,`icone`,`couleur`,`description`) VALUES
+('Football','football','⚽','#e63946','Sport collectif à ballon'),
+('Basketball','basketball','🏀','#f4a261','Sport collectif à panier'),
+('Volleyball','volleyball','🏐','#2ecc71','Sport collectif au filet'),
+('Handball','handball','🤾','#3498db','Sport collectif à main'),
+('Natation','natation','🏊','#9b59b6','Sport aquatique'),
+('Athlétisme','athletisme','🏃','#e74c3c','Sports piste et terrain'),
+('Judo','judo','🥋','#34495e','Arts martiaux'),
+('Tennis','tennis','🎾','#f1c40f','Sport de raquette');
+
+-- -----------------------------------------------------------
 -- TABLE: actualites (blog)
 -- -----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `actualites` (
-  `id`           INT UNSIGNED      NOT NULL AUTO_INCREMENT,
-  `titre`        VARCHAR(200)      NOT NULL,
-  `slug`         VARCHAR(220)      NOT NULL,
-  `contenu`      LONGTEXT          NOT NULL,
-  `extrait`      TEXT              DEFAULT NULL,
-  `image`        VARCHAR(255)      DEFAULT NULL,
-  `categorie`    VARCHAR(80)       DEFAULT NULL,
-  `tags`         VARCHAR(255)      DEFAULT NULL COMMENT 'JSON array',
-  `auteur_id`    INT UNSIGNED      DEFAULT NULL,
-  `statut`       ENUM('brouillon','publie','archive') NOT NULL DEFAULT 'brouillon',
-  `vues`         INT UNSIGNED      NOT NULL DEFAULT 0,
-  `published_at` DATETIME          DEFAULT NULL,
-  `created_at`   TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`   TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id`             INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+  `titre`          VARCHAR(200)      NOT NULL,
+  `slug`           VARCHAR(220)      NOT NULL,
+  `contenu`        LONGTEXT          NOT NULL,
+  `extrait`        TEXT              DEFAULT NULL,
+  `image`          VARCHAR(255)      DEFAULT NULL,
+  `image_thumbnail` VARCHAR(255)     DEFAULT NULL,
+  `image_webp`     VARCHAR(255)      DEFAULT NULL,
+  `categorie`      VARCHAR(80)       DEFAULT NULL,
+  `sport_id`       TINYINT UNSIGNED  DEFAULT NULL,
+  `age_group`      JSON              DEFAULT NULL,
+  `tags`           VARCHAR(255)      DEFAULT NULL COMMENT 'JSON array',
+  `auteur_id`      INT UNSIGNED      DEFAULT NULL,
+  `statut`         ENUM('brouillon','publie','archive') NOT NULL DEFAULT 'brouillon',
+  `vues`           INT UNSIGNED      NOT NULL DEFAULT 0,
+  `likes_count`    INT UNSIGNED      NOT NULL DEFAULT 0,
+  `comments_count` INT UNSIGNED      NOT NULL DEFAULT 0,
+  `shares_count`   INT UNSIGNED      NOT NULL DEFAULT 0,
+  `reading_time`   TINYINT UNSIGNED  NOT NULL DEFAULT 5,
+  `is_featured`    TINYINT(1)        NOT NULL DEFAULT 0,
+  `featured_until` DATETIME          DEFAULT NULL,
+  `notif_sent`     TINYINT(1)        NOT NULL DEFAULT 0,
+  `notif_sent_at`  DATETIME          DEFAULT NULL,
+  `meta_description` VARCHAR(160)    DEFAULT NULL,
+  `meta_keywords`  VARCHAR(200)      DEFAULT NULL,
+  `published_at`   DATETIME          DEFAULT NULL,
+  `created_at`     TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`     TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_slug` (`slug`),
   KEY `fk_actualites_auteur` (`auteur_id`),
+  KEY `fk_actualites_sport` (`sport_id`),
   KEY `idx_actualites_statut` (`statut`),
+  KEY `idx_scheduled_at` (`scheduled_at`),
+  KEY `idx_featured` (`is_featured`,`featured_until`),
+  KEY `idx_sport_id` (`sport_id`),
+  KEY `idx_published_recent` (`published_at`,`statut`),
   CONSTRAINT `fk_actualites_auteur`
-    FOREIGN KEY (`auteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL
+    FOREIGN KEY (`auteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_actualites_sport`
+    FOREIGN KEY (`sport_id`) REFERENCES `sports` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `actualites` (`titre`,`slug`,`contenu`,`extrait`,`categorie`,`tags`,`auteur_id`,`statut`,`vues`,`published_at`) VALUES
+INSERT INTO `actualites` (`titre`,`slug`,`contenu`,`extrait`,`categorie`,`sport_id`,`tags`,`auteur_id`,`statut`,`vues`,`published_at`) VALUES
 ('Victoire Éclatante en Finale Régionale','victoire-finale-regionale',
  '<p>Notre équipe première a remporté la finale régionale de football avec un score de 3-1 contre les champions sortants. Une victoire méritée après des mois d\'entraînement intensif.</p>',
  'Notre équipe première a remporté la finale régionale de football avec un score de 3-1.',
- 'Football','["football","victoire","finale"]',1,'publie',342,NOW()),
+ 'Football',1,'["football","victoire","finale"]',1,'publie',342,NOW()),
 ('Inscriptions Ouvertes Saison 2025-2026','inscriptions-ouvertes-2025',
  '<p>Les inscriptions pour la nouvelle saison sportive sont officiellement ouvertes. Rejoignez-nous dans toutes les disciplines!</p>',
  'Les inscriptions pour la nouvelle saison sont officiellement ouvertes.',
- 'Association','["inscription","saison","nouveautés"]',1,'publie',215,NOW()),
+ 'Association',NULL,'["inscription","saison","nouveautés"]',1,'publie',215,NOW()),
 ('Nouveau Coach pour l\'Équipe Basketball','nouveau-coach-basketball',
  '<p>Nous avons le plaisir d\'accueillir notre nouveau coach professionnel de basketball. Bienvenue dans la famille!</p>',
  'Nous accueillons notre nouveau coach professionnel de basketball.',
- 'Basketball','["basketball","coach"]',1,'publie',178,NOW());
+ 'Basketball',2,'["basketball","coach"]',1,'publie',178,NOW());
+
+-- -----------------------------------------------------------
+-- TABLE: actualite_likes (likes articles)
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `actualite_likes` (
+  `id`            BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT,
+  `actualite_id`  INT UNSIGNED      NOT NULL,
+  `user_id`       INT UNSIGNED      NOT NULL,
+  `created_at`    TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_article` (`actualite_id`,`user_id`),
+  KEY `fk_likes_actualite` (`actualite_id`),
+  KEY `fk_likes_user` (`user_id`),
+  KEY `idx_likes_date` (`created_at`),
+  CONSTRAINT `fk_likes_actualite`
+    FOREIGN KEY (`actualite_id`) REFERENCES `actualites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_likes_user`
+    FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------
+-- TABLE: actualite_saves (favoris articles)
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `actualite_saves` (
+  `id`            BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT,
+  `actualite_id`  INT UNSIGNED      NOT NULL,
+  `user_id`       INT UNSIGNED      NOT NULL,
+  `saved_at`      TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_saved` (`actualite_id`,`user_id`),
+  KEY `fk_saves_user` (`user_id`),
+  CONSTRAINT `fk_saves_actualite`
+    FOREIGN KEY (`actualite_id`) REFERENCES `actualites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_saves_user`
+    FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------
+-- TABLE: actualite_commentaires (commentaires articles)
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `actualite_commentaires` (
+  `id`                INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+  `actualite_id`      INT UNSIGNED      NOT NULL,
+  `user_id`           INT UNSIGNED      NOT NULL,
+  `comment_parent_id` INT UNSIGNED      DEFAULT NULL,
+  `contenu`           TEXT              NOT NULL,
+  `statut`            ENUM('en_attente','approuve','rejete','spam') NOT NULL DEFAULT 'en_attente',
+  `signales_count`    TINYINT UNSIGNED  NOT NULL DEFAULT 0,
+  `created_at`        TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`        TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_comments_actualite` (`actualite_id`),
+  KEY `fk_comments_user` (`user_id`),
+  KEY `fk_comments_parent` (`comment_parent_id`),
+  KEY `idx_comments_statut` (`statut`),
+  KEY `idx_comments_date` (`created_at`),
+  CONSTRAINT `fk_comments_actualite`
+    FOREIGN KEY (`actualite_id`) REFERENCES `actualites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comments_user`
+    FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_comments_parent`
+    FOREIGN KEY (`comment_parent_id`) REFERENCES `actualite_commentaires` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------
+-- VIEW: statistiques articles
+-- -----------------------------------------------------------
+CREATE OR REPLACE VIEW `vw_actualites_statistiques` AS
+SELECT 
+  a.id,
+  a.titre,
+  a.slug,
+  COUNT(DISTINCT l.user_id) AS total_likes,
+  COUNT(DISTINCT c.id) AS total_comments,
+  COUNT(DISTINCT s.user_id) AS total_saves,
+  a.vues,
+  a.published_at,
+  CONCAT(u.prenom, ' ', u.nom) AS auteur,
+  a.statut,
+  a.is_featured
+FROM `actualites` a
+LEFT JOIN `actualite_likes` l ON a.id = l.actualite_id
+LEFT JOIN `actualite_commentaires` c ON a.id = c.actualite_id AND c.statut = 'approuve'
+LEFT JOIN `actualite_saves` s ON a.id = s.actualite_id
+LEFT JOIN `utilisateurs` u ON u.id = a.auteur_id
+GROUP BY a.id
+ORDER BY a.published_at DESC;
+
+DELIMITER $$
+
+CREATE PROCEDURE IF NOT EXISTS `proc_publier_articles_programmes`()
+READS SQL DATA
+COMMENT 'À exécuter par cron toutes les heures'
+BEGIN
+  UPDATE `actualites`
+  SET `statut` = 'publie',
+      `published_at` = NOW(),
+      `notif_sent` = 0
+  WHERE `statut` = 'brouillon'
+    AND `scheduled_at` IS NOT NULL
+    AND `scheduled_at` <= NOW();
+END$$
+
+CREATE TRIGGER IF NOT EXISTS `trg_likes_insert` AFTER INSERT ON `actualite_likes`
+FOR EACH ROW
+BEGIN
+  UPDATE `actualites`
+  SET `likes_count` = `likes_count` + 1
+  WHERE `id` = NEW.actualite_id;
+END$$
+
+CREATE TRIGGER IF NOT EXISTS `trg_likes_delete` AFTER DELETE ON `actualite_likes`
+FOR EACH ROW
+BEGIN
+  UPDATE `actualites`
+  SET `likes_count` = GREATEST(0, `likes_count` - 1)
+  WHERE `id` = OLD.actualite_id;
+END$$
+
+CREATE TRIGGER IF NOT EXISTS `trg_comments_insert` AFTER INSERT ON `actualite_commentaires`
+FOR EACH ROW
+BEGIN
+  IF NEW.statut = 'approuve' THEN
+    UPDATE `actualites`
+    SET `comments_count` = `comments_count` + 1
+    WHERE `id` = NEW.actualite_id;
+  END IF;
+END$$
+
+CREATE TRIGGER IF NOT EXISTS `trg_comments_update` AFTER UPDATE ON `actualite_commentaires`
+FOR EACH ROW
+BEGIN
+  UPDATE `actualites`
+  SET `updated_at` = NOW()
+  WHERE `id` = NEW.actualite_id;
+END$$
+
+DELIMITER ;
 
 -- -----------------------------------------------------------
 -- TABLE: contacts (formulaire de contact)
