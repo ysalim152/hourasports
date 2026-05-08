@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualités — Association Sportive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/actualites.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="blog.html">Accueil</a></li>
+    <li><a href="actualites.html" class="active">Actualités</a></li>
+    <li><a href="apropos.html">À Propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="espace-membre.html">Mon Espace</a></li>
+    <li><a href="auth/login.html" class="nav-cta" id="navLoginBtn">Connexion</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <span class="hero-badge">🔥 Dernières actualités</span>
+  <h1>Nos <span class="text-primary">Actualités</span></h1>
+  <p>Découvrez les résultats, événements et nouvelles de votre association sportive</p>
+</div>
+
+<!-- SECTION PRINCIPAL -->
+<section class="section actualites-section">
+  
+  <!-- FILTRES & RECHERCHE -->
+  <div class="filter-container">
+    <div class="search-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher une actualité...">
+    </div>
+
+    <div class="filters-horizontal">
+      <button class="filter-btn active" data-filter="tous">Tous</button>
+      <button class="filter-btn" data-category="resultats">🏆 Résultats</button>
+      <button class="filter-btn" data-category="evenements">📅 Événements</button>
+      <button class="filter-btn" data-category="vie-du-club">🏢 Vie du Club</button>
+      <button class="filter-btn" data-category="honneurs">👥 Honneurs</button>
+    </div>
+
+    <div class="advanced-filters">
+      <select id="sportFilter" class="filter-select">
+        <option value="">Tous les sports</option>
+        <option value="football">⚽ Football</option>
+        <option value="basketball">🏀 Basketball</option>
+        <option value="volleyball">🏐 Volleyball</option>
+        <option value="natation">🏊 Natation</option>
+      </select>
+
+      <select id="ageFilter" class="filter-select">
+        <option value="">Tous les groupes</option>
+        <option value="seniors">Séniors</option>
+        <option value="juniors">Juniors</option>
+        <option value="enfants">Enfants</option>
+      </select>
+
+      <select id="sortBy" class="filter-select">
+        <option value="recent">⏱️ Plus récent</option>
+        <option value="trending">🔥 Tendance</option>
+        <option value="views">👁️ Populaire</option>
+        <option value="likes">❤️ Likes</option>
+      </select>
+    </div>
+
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="grid" title="Vue grille">
+        <i class="fas fa-th"></i>
+      </button>
+      <button class="view-btn" data-view="list" title="Vue liste">
+        <i class="fas fa-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS COMPTEUR -->
+  <div class="results-info">
+    <span id="resultsCount">Affichage de <strong>12</strong> articles</span>
+    <span id="loadingIndicator" class="loading-spinner" style="display:none;">
+      Chargement... <i class="fas fa-spinner fa-spin"></i>
+    </span>
+  </div>
+
+  <!-- GRILLE D'ARTICLES -->
+  <div class="articles-grid" id="articlesContainer">
+    <!-- Les articles seront injectés ici par JavaScript -->
+    
+    <!-- Template d'article (caché) -->
+    <template id="articleTemplate">
+      <article class="article-card" data-id="">
+        <!-- Image en vedette -->
+        <div class="article-image">
+          <img src="" alt="" class="article-thumbnail" loading="lazy">
+          <div class="article-badges">
+            <span class="category-badge"></span>
+            <span class="featured-badge" style="display:none;">📌 Épinglé</span>
+          </div>
+        </div>
+
+        <!-- Contenu article -->
+        <div class="article-content">
+          <h3 class="article-title"></h3>
+          
+          <p class="article-excerpt"></p>
+
+          <!-- Métadonnées -->
+          <div class="article-meta">
+            <div class="meta-left">
+              <img src="" alt="" class="author-avatar" loading="lazy">
+              <div class="meta-info">
+                <p class="author-name"></p>
+                <p class="article-date"></p>
+              </div>
+            </div>
+            <div class="meta-right">
+              <span class="reading-time">📖 <span></span> min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Engagement & Actions -->
+        <div class="article-footer">
+          <div class="engagement-stats">
+            <button class="engagement-btn like-btn" data-action="like">
+              <span class="engagement-icon">❤️</span>
+              <span class="engagement-count">0</span>
+            </button>
+            <button class="engagement-btn view-btn">
+              <span class="engagement-icon">👁️</span>
+              <span class="engagement-count">0</span>
+            </button>
+            <button class="engagement-btn share-btn" data-action="share">
+              <span class="engagement-icon">🔗</span>
+              <span class="engagement-count">0</span>
+            </button>
+          </div>
+          <a href="" class="article-link">Lire l'article →</a>
+        </div>
+      </article>
+    </template>
+
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="pagination" id="paginationContainer">
+    <button class="btn-pagination prev-btn" id="prevBtn" disabled>← Précédent</button>
+    <div class="page-numbers" id="pageNumbers"></div>
+    <button class="btn-pagination next-btn" id="nextBtn">Suivant →</button>
+  </div>
+
+  <!-- CHARGEMENT PLUS -->
+  <div class="load-more-container">
+    <button class="btn btn-primary" id="loadMoreBtn" style="display:none;">
+      Charger plus d'articles
+    </button>
+  </div>
+
+</section>
+
+<!-- MODAL PARTAGE -->
+<div class="modal" id="shareModal">
+  <div class="modal-content">
+    <button class="modal-close">&times;</button>
+    <h3>Partager cet article</h3>
+    
+    <div class="share-buttons">
+      <button class="share-option" data-share="whatsapp">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
+      <button class="share-option" data-share="facebook">
+        <i class="fab fa-facebook"></i> Facebook
+      </button>
+      <button class="share-option" data-share="twitter">
+        <i class="fab fa-twitter"></i> Twitter
+      </button>
+      <button class="share-option" data-share="email">
+        <i class="fas fa-envelope"></i> Email
+      </button>
+      <button class="share-option" data-share="copy">
+        <i class="fas fa-copy"></i> Copier le lien
+      </button>
+    </div>
+    
+    <div class="share-link-container">
+      <input type="text" id="shareLink" class="share-link-input" readonly>
+      <button id="copyLinkBtn" class="btn-copy">
+        <i class="fas fa-check"></i> Lien copié
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; 2025 Association Sportive. Tous droits réservés.</p>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/actualites.js"></script>
+
+</body>
+</html>
