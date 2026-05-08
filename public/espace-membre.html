@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Espace — Association Sportive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    body{padding-top:70px}
+    .member-layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 70px)}
+    @media(max-width:900px){.member-layout{grid-template-columns:1fr}}
+    .member-sidebar{background:var(--dark2);border-right:1px solid rgba(255,255,255,.07);padding:0;position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto}
+    @media(max-width:900px){.member-sidebar{display:none}}
+    .msb-profile{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,.07);text-align:center}
+    .msb-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:white;margin:0 auto .8rem;border:3px solid rgba(255,255,255,.1)}
+    .msb-name{font-family:var(--font-display);font-size:1.3rem;color:var(--white)}
+    .msb-role{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);margin:.2rem 0}
+    .msb-since{font-size:.75rem;color:var(--gray)}
+    .msb-nav{padding:.8rem 0}
+    .msb-link{display:flex;align-items:center;gap:.7rem;padding:.65rem 1.2rem;color:var(--gray);font-size:.88rem;font-weight:600;cursor:pointer;transition:var(--transition);border-left:3px solid transparent}
+    .msb-link:hover{color:var(--white);background:rgba(255,255,255,.04);border-left-color:rgba(230,57,70,.4)}
+    .msb-link.active{color:var(--primary);background:rgba(230,57,70,.07);border-left-color:var(--primary)}
+    .msb-link i{width:18px;text-align:center;font-size:.95rem}
+    .msb-section{padding:.4rem 1.2rem .2rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.25);margin-top:.4rem}
+    .member-main{padding:2rem;overflow-y:auto}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block;animation:fadeUp .3s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    /* Cards */
+    .info-card{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem}
+    .info-card-title{font-family:var(--font-display);font-size:1.1rem;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .info-card-title i{color:var(--primary)}
+    /* Licence card */
+    .licence-card{background:linear-gradient(135deg,#1a0812 0%,var(--dark2) 100%);border:1px solid rgba(230,57,70,.25);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;margin-bottom:1.2rem}
+    .licence-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(230,57,70,.12) 0%,transparent 60%)}
+    .lc-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(230,57,70,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(230,57,70,.04) 1px,transparent 1px);background-size:30px 30px}
+    .lc-content{position:relative;z-index:1}
+    .lc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem}
+    .lc-logo{font-family:var(--font-display);font-size:1.5rem;color:var(--white)}
+    .lc-logo span{color:var(--primary)}
+    .lc-chip{background:rgba(230,57,70,.2);border:1px solid rgba(230,57,70,.4);color:var(--primary);padding:.2rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+    .lc-name{font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:.3rem}
+    .lc-num{font-family:monospace;font-size:.9rem;color:rgba(255,255,255,.5);letter-spacing:.12em;margin-bottom:.8rem}
+    .lc-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+    .lc-field-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:.15rem}
+    .lc-field-val{font-size:.88rem;color:var(--light);font-weight:600}
+    /* Session cards */
+    .session-mini{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.9rem;display:flex;gap:.8rem;align-items:center;margin-bottom:.7rem;transition:var(--transition)}
+    .session-mini:hover{background:rgba(255,255,255,.05);border-color:rgba(230,57,70,.2)}
+    .sess-date-box{width:48px;text-align:center;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.2);border-radius:var(--radius);padding:.3rem;flex-shrink:0}
+    .sess-day{font-family:var(--font-display);font-size:1.5rem;color:var(--primary);line-height:1}
+    .sess-mon{font-size:.65rem;text-transform:uppercase;color:var(--gray);letter-spacing:.08em}
+    /* Presence history */
+    .presence-history{display:flex;flex-direction:column;gap:.5rem}
+    .ph-row{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;background:rgba(255,255,255,.02);border-radius:var(--radius)}
+    .ph-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    /* Achievement badges */
+    .achievement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.8rem}
+    .ach-card{text-align:center;padding:1rem .5rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);transition:var(--transition)}
+    .ach-card:hover{border-color:rgba(230,57,70,.25);transform:translateY(-2px)}
+    .ach-card.locked{opacity:.35;filter:grayscale(1)}
+    .ach-icon{font-size:2rem;margin-bottom:.4rem}
+    .ach-name{font-size:.7rem;font-weight:700;color:var(--light)}
+    .ach-desc{font-size:.62rem;color:var(--gray);margin-top:.15rem}
+    /* Progress */
+    .goal-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem}
+    .goal-label{min-width:120px;font-size:.82rem;color:var(--gray)}
+    .goal-track{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+    .goal-fill{height:100%;border-radius:4px;transition:width 1s ease}
+    .goal-val{min-width:45px;text-align:right;font-size:.8rem;font-weight:700;color:var(--white)}
+    /* Mobile nav */
+    .mobile-tab-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--dark2);border-top:1px solid rgba(255,255,255,.07);z-index:500;padding:.5rem 0}
+    @media(max-width:900px){.mobile-tab-nav{display:flex;justify-content:space-around}}
+    .mob-tab{display:flex;flex-direction:column;align-items:center;gap:.2rem;cursor:pointer;color:var(--gray);font-size:.62rem;font-weight:700;text-transform:uppercase;padding:.3rem .8rem;border-radius:var(--radius);transition:var(--transition)}
+    .mob-tab.active,.mob-tab:hover{color:var(--primary)}
+    .mob-tab i{font-size:1.1rem}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="blog.html">Accueil</a></li>
+    <li><a href="activites.html">Activités</a></li>
+    <li><a href="apropos.html">À Propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="espace-membre.html" class="active">Mon Espace</a></li>
+    <li><a href="auth/login.html" class="nav-cta" id="navLoginBtn">Connexion</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="member-layout">
+  <!-- SIDEBAR -->
+  <aside class="member-sidebar">
+    <div class="msb-profile">
+      <div class="msb-avatar">KB</div>
+      <div class="msb-name">Karim Benali</div>
+      <div class="msb-role">⚽ Participant · Football</div>
+      <div class="msb-since">Membre depuis Sept. 2024</div>
+    </div>
+    <nav class="msb-nav">
+      <div class="msb-section">Principal</div>
+      <div class="msb-link active" onclick="showTab('tableau',this)"><i class="fas fa-tachometer-alt"></i> Tableau de bord</div>
+      <div class="msb-link" onclick="showTab('sessions',this)"><i class="fas fa-calendar-check"></i> Mes Sessions</div>
+      <div class="msb-link" onclick="showTab('presences',this)"><i class="fas fa-clipboard-check"></i> Mes Présences</div>
+      <div class="msb-link" onclick="showTab('planning',this)"><i class="fas fa-calendar-alt"></i> Planning</div>
+      <div class="msb-section">Profil</div>
+      <div class="msb-link" onclick="showTab('profil',this)"><i class="fas fa-user-edit"></i> Modifier Profil</div>
+      <div class="msb-link" onclick="showTab('cotisation',this)"><i class="fas fa-credit-card"></i> Cotisation</div>
+      <div class="msb-link" onclick="showTab('badges',this)"><i class="fas fa-medal"></i> Badges & Succès</div>
+      <div class="msb-section">Compte</div>
+      <div class="msb-link" style="color:var(--danger)" onclick="window.location.href='auth/logout.php'"><i class="fas fa-sign-out-alt"></i> Déconnexion</div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="member-main">
+
+    <!-- ══ TABLEAU DE BORD ══ -->
+    <div id="tab-tableau" class="tab-panel active">
+      <!-- Licence Card -->
+      <div class="licence-card">
+        <div class="lc-grid"></div>
+        <div class="lc-content">
+          <div class="lc-top">
+            <div class="lc-logo">AS<span>Club</span></div>
+            <div class="lc-chip">CARTE MEMBRE</div>
+          </div>
+          <div class="lc-name">Karim Benali</div>
+          <div class="lc-num">LIC-2025-0003</div>
+          <div class="lc-bottom">
+            <div><div class="lc-field-label">Discipline</div><div class="lc-field-val">⚽ Football</div></div>
+            <div><div class="lc-field-label">Valable jusqu'au</div><div class="lc-field-val">31 Août 2025</div></div>
+            <div><div class="lc-field-label">Statut</div><div class="lc-field-val"><span class="badge badge-success">Actif</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+        <div class="kpi-card red"><div class="kpi-icon">✅</div><div><div class="kpi-value" data-counter="18">0</div><div class="kpi-label">Sessions</div></div></div>
+        <div class="kpi-card green"><div class="kpi-icon">📊</div><div><div class="kpi-value">86<span style="font-size:1rem">%</span></div><div class="kpi-label">Présence</div></div></div>
+        <div class="kpi-card blue"><div class="kpi-icon">🏅</div><div><div class="kpi-value" data-counter="5">0</div><div class="kpi-label">Badges</div></div></div>
+        <div class="kpi-card orange"><div class="kpi-icon">📅</div><div><div class="kpi-value" data-counter="3">0</div><div class="kpi-label">À venir</div></div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+        <!-- Prochaines sessions -->
+        <div class="info-card">
+          <div class="info-card-title"><i class="fas fa-calendar-alt"></i> Prochaines Sessions</div>
+          <div class="session-mini">
+            <div class="sess-date-box"><div class="sess-day">09</div><div class="sess-mon">Mai</div></div>
+            <div style="flex:1"><div style="font-weight:700;color:var(--white);font-size:.88rem">⚽ Entraînement Football</div><div style="font-size:.76rem;color:var(--gray)">Terrain Principal · 09h00–11h00</div></div>
+            <span class="badge badge-info">Planifié</span>
+          </div>
+          <div class="session-mini">
+            <div class="sess-date-box"><div class="sess-day">10</div><div class="sess-mon">Mai</div></div>
+            <div style="flex:1"><div style="font-weight:700;color:var(--white);font-size:.88rem">⚽ Match Amical U17</div><div style="font-size:.76rem;color:var(--gray)">Stade Municipal · 15h00–17h00</div></div>
+            <span class="badge badge-primary">Match</span>
+          </div>
+          <div class="session-mini">
+            <div class="sess-date-box"><div class="sess-day">12</div><div class="sess-mon">Mai</div></div>
+            <div style="flex:1"><div style="font-weight:700;color:var(--white);font-size:.88rem">⚽ Entraînement Football</div><div style="font-size:.76rem;color:var(--gray)">Terrain Principal · 09h00–11h00</div></div>
+            <span class="badge badge-info">Planifié</span>
+          </div>
+          <a href="#" onclick="showTab('sessions',null)" class="btn btn-outline btn-sm w-full mt-2">Voir toutes les sessions</a>
+        </div>
+
+        <!-- Objectifs du mois -->
+        <div class="info-card">
+          <div class="info-card-title"><i class="fas fa-bullseye"></i> Objectifs du Mois</div>
+          <div class="goal-row"><div class="goal-label">Sessions suivies</div><div class="goal-track"><div class="goal-fill" style="width:73%;background:var(--primary)"></div></div><div class="goal-val">11/15</div></div>
+          <div class="goal-row"><div class="goal-label">Taux présence</div><div class="goal-track"><div class="goal-fill" style="width:86%;background:var(--success)"></div></div><div class="goal-val">86%</div></div>
+          <div class="goal-row"><div class="goal-label">Km parcourus</div><div class="goal-track"><div class="goal-fill" style="width:60%;background:var(--info)"></div></div><div class="goal-val">48/80</div></div>
+          <div class="goal-row"><div class="goal-label">Ponctualité</div><div class="goal-track"><div class="goal-fill" style="width:92%;background:var(--success)"></div></div><div class="goal-val">92%</div></div>
+          <div style="margin-top:1rem;padding-top:.8rem;border-top:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:.78rem;color:var(--gray)">Prochain badge : <strong style="color:var(--primary)">🔥 Régulier</strong> — 2 sessions encore</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annonces -->
+      <div class="info-card" style="margin-top:0">
+        <div class="info-card-title"><i class="fas fa-bullhorn"></i> Annonces du Club</div>
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          <div style="padding:.8rem;background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.2);border-radius:var(--radius)"><div style="font-weight:700;font-size:.88rem;color:var(--white)">📣 Inscriptions Saison 2025-2026 ouvertes</div><div style="color:var(--gray);font-size:.78rem;margin-top:.2rem">Renouvelez votre adhésion avant le 31 Mai pour bénéficier du tarif préférentiel.</div></div>
+          <div style="padding:.8rem;background:rgba(52,152,219,.07);border:1px solid rgba(52,152,219,.2);border-radius:var(--radius)"><div style="font-weight:700;font-size:.88rem;color:var(--white)">🏆 Tournoi Inter-Quartier — 24 Mai</div><div style="color:var(--gray);font-size:.78rem;margin-top:.2rem">Confirmez votre participation auprès de votre coach avant le 15 Mai.</div></div>
+          <div style="padding:.8rem;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.2);border-radius:var(--radius)"><div style="font-weight:700;font-size:.88rem;color:var(--white)">✅ Certificat médical requis pour la session du 15/05</div><div style="color:var(--gray);font-size:.78rem;margin-top:.2rem">N'oubliez pas d'apporter un certificat de moins de 3 mois.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MES SESSIONS ══ -->
+    <div id="tab-sessions" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Mes <span style="color:var(--primary)">Sessions</span></h2>
+      <div style="display:flex;gap:.6rem;margin-bottom:1.2rem;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm">À venir</button>
+        <button class="btn btn-outline btn-sm">Passées</button>
+        <button class="btn btn-outline btn-sm">Toutes</button>
+      </div>
+      <div>
+        <div class="session-mini"><div class="sess-date-box"><div class="sess-day">09</div><div class="sess-mon">Mai</div></div><div style="flex:1"><div style="font-weight:700;color:var(--white)">⚽ Entraînement Football</div><div style="font-size:.78rem;color:var(--gray)">Coach: Sophie Martin · Terrain Principal · 09h–11h</div></div><span class="badge badge-info">À venir</span></div>
+        <div class="session-mini"><div class="sess-date-box"><div class="sess-day">10</div><div class="sess-mon">Mai</div></div><div style="flex:1"><div style="font-weight:700;color:var(--white)">⚽ Match Amical U17</div><div style="font-size:.78rem;color:var(--gray)">Stade Municipal · 15h–17h</div></div><span class="badge badge-primary">Match</span></div>
+        <div class="session-mini"><div class="sess-date-box"><div class="sess-day">05</div><div class="sess-mon">Mai</div></div><div style="flex:1"><div style="font-weight:700;color:var(--white)">⚽ Entraînement Football</div><div style="font-size:.78rem;color:var(--gray)">Coach: Sophie Martin · Terrain Principal · 09h–11h</div></div><span class="badge badge-success">✅ Présent</span></div>
+        <div class="session-mini"><div class="sess-date-box"><div class="sess-day">03</div><div class="sess-mon">Mai</div></div><div style="flex:1"><div style="font-weight:700;color:var(--white)">⚽ Entraînement Football</div><div style="font-size:.78rem;color:var(--gray)">Coach: Sophie Martin · Terrain Principal · 09h–11h</div></div><span class="badge badge-success">✅ Présent</span></div>
+        <div class="session-mini"><div class="sess-date-box"><div class="sess-day">30</div><div class="sess-mon">Avr</div></div><div style="flex:1"><div style="font-weight:700;color:var(--white)">⚽ Entraînement Football</div><div style="font-size:.78rem;color:var(--gray)">Coach: Sophie Martin · Terrain Principal · 09h–11h</div></div><span class="badge badge-danger">❌ Absent</span></div>
+      </div>
+    </div>
+
+    <!-- ══ PRÉSENCES ══ -->
+    <div id="tab-presences" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Mes <span style="color:var(--primary)">Présences</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.2rem;text-align:center"><div style="font-family:var(--font-display);font-size:2rem;color:var(--success)">86%</div><div style="font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Taux global</div></div>
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.2rem;text-align:center"><div style="font-family:var(--font-display);font-size:2rem;color:var(--primary)">15</div><div style="font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Présences</div></div>
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.2rem;text-align:center"><div style="font-family:var(--font-display);font-size:2rem;color:var(--danger)">3</div><div style="font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Absences</div></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title"><i class="fas fa-history"></i> Historique Détaillé</div>
+        <div class="presence-history">
+          <div class="ph-row"><div class="ph-dot" style="background:var(--success)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Entraînement Football — 05 Mai 2025</div><span class="badge badge-success">Présent</span></div>
+          <div class="ph-row"><div class="ph-dot" style="background:var(--success)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Entraînement Football — 03 Mai 2025</div><span class="badge badge-success">Présent</span></div>
+          <div class="ph-row"><div class="ph-dot" style="background:var(--danger)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Entraînement Football — 30 Avr 2025</div><span class="badge badge-danger">Absent</span></div>
+          <div class="ph-row"><div class="ph-dot" style="background:var(--warning)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Match Amical — 26 Avr 2025</div><span class="badge badge-warning">Excusé</span></div>
+          <div class="ph-row"><div class="ph-dot" style="background:var(--success)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Entraînement Football — 23 Avr 2025</div><span class="badge badge-success">Présent</span></div>
+          <div class="ph-row"><div class="ph-dot" style="background:var(--info)"></div><div style="flex:1;font-size:.86rem;color:var(--light)">Entraînement Football — 21 Avr 2025</div><span class="badge badge-info">Retard</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PLANNING SIMPLIFIÉ ══ -->
+    <div id="tab-planning" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Mon <span style="color:var(--primary)">Planning</span></h2>
+      <div class="info-card">
+        <div class="info-card-title"><i class="fas fa-calendar-week"></i> Semaine du 05 au 11 Mai 2025</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem">
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Lun</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Mar</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Mer</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Jeu</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Ven</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Sam</div>
+          <div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em">Dim</div>
+          <div style="background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.25);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--primary);font-weight:700">05</div><div style="color:var(--light);margin-top:.3rem">⚽ 09h</div></div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--gray)">06</div></div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--gray)">07</div></div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--gray)">08</div></div>
+          <div style="background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.25);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--primary);font-weight:700">09</div><div style="color:var(--light);margin-top:.3rem">⚽ 09h</div></div>
+          <div style="background:rgba(52,152,219,.09);border:1px solid rgba(52,152,219,.2);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--info);font-weight:700">10</div><div style="color:var(--light);margin-top:.3rem">⚽ Match 15h</div></div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:.5rem;font-size:.72rem;min-height:60px"><div style="color:var(--gray)">11</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROFIL ══ -->
+    <div id="tab-profil" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Mon <span style="color:var(--primary)">Profil</span></h2>
+      <div class="info-card">
+        <div class="info-card-title"><i class="fas fa-user"></i> Informations Personnelles</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nom</label><input class="form-control" value="Benali"></div>
+          <div class="form-group"><label class="form-label">Prénom</label><input class="form-control" value="Karim"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="karim@email.com"></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-control" value="+213 555 111 222"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date de naissance</label><input type="date" class="form-control" value="1998-06-15"></div>
+          <div class="form-group"><label class="form-label">Groupe sanguin</label><select class="form-control"><option>O+</option><option>A+</option><option>B+</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Contact d'urgence (Nom & Tél.)</label><div class="form-row"><input class="form-control" placeholder="Nom" value="Benali Omar"><input type="tel" class="form-control" placeholder="Téléphone" value="+213 555 999 888"></div></div>
+        <button class="btn btn-primary btn-sm mt-2" onclick="Toast.success('Profil mis à jour !')"><i class="fas fa-save"></i> Enregistrer</button>
+      </div>
+    </div>
+
+    <!-- ══ COTISATION ══ -->
+    <div id="tab-cotisation" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Ma <span style="color:var(--primary)">Cotisation</span></h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+        <div class="info-card">
+          <div class="info-card-title"><i class="fas fa-id-card"></i> Statut Actuel</div>
+          <div style="text-align:center;padding:1rem 0">
+            <div style="font-size:3rem;margin-bottom:.5rem">✅</div>
+            <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--success)">Cotisation à jour</div>
+            <div style="color:var(--gray);font-size:.85rem;margin:.5rem 0">Formule annuelle — 4 500 DA</div>
+            <div style="color:var(--gray);font-size:.82rem">Valable jusqu'au <strong style="color:var(--warning)">31 Août 2025</strong></div>
+          </div>
+          <div style="background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.2);border-radius:var(--radius);padding:.8rem;text-align:center;font-size:.82rem;color:var(--warning)"><i class="fas fa-clock"></i> Expire dans <strong>118 jours</strong></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title"><i class="fas fa-history"></i> Historique de Paiement</div>
+          <div style="display:flex;flex-direction:column;gap:.6rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(255,255,255,.03);border-radius:var(--radius)"><div><div style="font-size:.85rem;color:var(--white);font-weight:600">Cotisation Annuelle 2024-2025</div><div style="font-size:.72rem;color:var(--gray)">Sept. 2024</div></div><div style="text-align:right"><div style="font-weight:700;color:var(--success)">4 500 DA</div><span class="badge badge-success" style="font-size:.62rem">Payé</span></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(255,255,255,.03);border-radius:var(--radius)"><div><div style="font-size:.85rem;color:var(--white);font-weight:600">Cotisation Annuelle 2023-2024</div><div style="font-size:.72rem;color:var(--gray)">Sept. 2023</div></div><div style="text-align:right"><div style="font-weight:700;color:var(--success)">4 000 DA</div><span class="badge badge-success" style="font-size:.62rem">Payé</span></div></div>
+          </div>
+          <button class="btn btn-primary btn-sm w-full mt-3" onclick="fetch('../api/profil.php')
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.success) Toast.info('Votre cotisation expire le 31/08/2025. Contactez le secrétariat pour renouveler.');
+      else Toast.info('Renouvellement disponible à partir de Juin 2025');
+    })
+    .catch(()=>Toast.info('Renouvellement disponible à partir de Juin 2025'))"><i class="fas fa-redo"></i> Renouveler ma cotisation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BADGES ══ -->
+    <div id="tab-badges" class="tab-panel">
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:1.2rem">Badges & <span style="color:var(--primary)">Succès</span></h2>
+      <div class="info-card">
+        <div class="info-card-title"><i class="fas fa-trophy"></i> Obtenus <span class="badge badge-primary" style="margin-left:.4rem">5 / 12</span></div>
+        <div class="achievement-grid">
+          <div class="ach-card"><div class="ach-icon">🌟</div><div class="ach-name">Premier Pas</div><div class="ach-desc">Première session</div></div>
+          <div class="ach-card"><div class="ach-icon">🔥</div><div class="ach-name">Assidu</div><div class="ach-desc">10 sessions</div></div>
+          <div class="ach-card"><div class="ach-icon">⚡</div><div class="ach-name">Ponctuel</div><div class="ach-desc">0 retard</div></div>
+          <div class="ach-card"><div class="ach-icon">🏆</div><div class="ach-name">Compétiteur</div><div class="ach-desc">1er match</div></div>
+          <div class="ach-card"><div class="ach-icon">💎</div><div class="ach-name">Fidèle</div><div class="ach-desc">1 an de club</div></div>
+          <div class="ach-card locked"><div class="ach-icon">🚀</div><div class="ach-name">Régulier</div><div class="ach-desc">20 sessions</div></div>
+          <div class="ach-card locked"><div class="ach-icon">👑</div><div class="ach-name">Expert</div><div class="ach-desc">50 sessions</div></div>
+          <div class="ach-card locked"><div class="ach-icon">🎯</div><div class="ach-name">Sniper</div><div class="ach-desc">90% présence</div></div>
+          <div class="ach-card locked"><div class="ach-icon">🌍</div><div class="ach-name">Inter</div><div class="ach-desc">Tournoi régional</div></div>
+          <div class="ach-card locked"><div class="ach-icon">🤝</div><div class="ach-name">Ambassadeur</div><div class="ach-desc">5 parrainages</div></div>
+          <div class="ach-card locked"><div class="ach-icon">📸</div><div class="ach-name">Influencer</div><div class="ach-desc">Profil complet</div></div>
+          <div class="ach-card locked"><div class="ach-icon">⭐</div><div class="ach-name">Légende</div><div class="ach-desc">5 ans de club</div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-tab-nav">
+  <div class="mob-tab active" onclick="showTab('tableau',this)"><i class="fas fa-home"></i>Accueil</div>
+  <div class="mob-tab" onclick="showTab('sessions',this)"><i class="fas fa-calendar"></i>Sessions</div>
+  <div class="mob-tab" onclick="showTab('planning',this)"><i class="fas fa-calendar-alt"></i>Planning</div>
+  <div class="mob-tab" onclick="showTab('profil',this)"><i class="fas fa-user"></i>Profil</div>
+  <div class="mob-tab" onclick="showTab('badges',this)"><i class="fas fa-medal"></i>Badges</div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+function showTab(id, el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active');
+  document.querySelectorAll('.msb-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.mob-tab').forEach(l=>l.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+</script>
+
+<script>
+(async function loadMembreData() {
+  const userId = sessionStorage.getItem('user_id');
+  const role   = sessionStorage.getItem('user_role');
+  const prenom = sessionStorage.getItem('user_prenom') || 'Membre';
+  const nom    = sessionStorage.getItem('user_nom') || '';
+
+  // Update UI with stored user info
+  if (prenom || nom) {
+    const nameEl = document.querySelector('.msb-name');
+    if (nameEl) nameEl.textContent = prenom + ' ' + nom;
+    const initEl = document.querySelector('.msb-avatar');
+    if (initEl) initEl.textContent = (prenom[0]||'') + (nom[0]||'');
+    document.querySelector('.profil-name') && (document.querySelector('.profil-name').textContent = prenom + ' ' + nom);
+    const licBadge = document.querySelector('.lc-name');
+    if (licBadge) licBadge.textContent = prenom + ' ' + nom;
+  }
+
+  // Update role badge
+  const roleLabels = {adherent:'🏅 Adhérent', participant:'⚽ Participant', visiteur:'👁️ Visiteur', coach:'🎽 Coach', admin:'🛡️ Admin'};
+  const roleEl = document.querySelector('.msb-role');
+  if (roleEl && role) roleEl.textContent = roleLabels[role] || role;
+
+  // Load sessions for participant/adherent
+  if (userId && (role === 'participant' || role === 'adherent')) {
+    try {
+      const presRes = await fetch(`../api/presences.php?utilisateur_id=${userId}`);
+      const presJson = await presRes.json();
+      if (presJson.success && presJson.stats) {
+        const kpis = document.querySelectorAll('.kpi-value');
+        if (kpis[1]) kpis[1].textContent = presJson.stats.taux_pct + '%';
+      }
+    } catch(e) {}
+  }
+
+  // Redirect if not logged in
+  if (!userId && !sessionStorage.getItem('user_email')) {
+    // Allow demo mode without redirect
+    console.info('Demo mode: no session found');
+  }
+})();
+</script>
+
+</body>
+</html>

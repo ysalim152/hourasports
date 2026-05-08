@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activités — Association Sportive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .filters{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2rem}
+    .filter-btn{padding:.45rem 1.1rem;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--gray);font-size:.85rem;font-weight:600;cursor:pointer;transition:var(--transition);font-family:var(--font-body)}
+    .filter-btn.active,.filter-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
+    .page-hero{padding:140px 2rem 4rem;background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);border-bottom:1px solid rgba(255,255,255,.06);text-align:center}
+    .schedule-table-wrap{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem;margin-top:3rem}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="blog.html">Accueil</a></li>
+    <li><a href="activites.html" class="active">Activités</a></li>
+    <li><a href="apropos.html">À Propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="espace-membre.html">Mon Espace</a></li>
+    <li><a href="auth/login.html" class="nav-cta" id="navLoginBtn">Connexion</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <span class="hero-badge">🏅 8 Disciplines disponibles</span>
+  <h1 style="color:var(--white);margin-top:.8rem">Nos <span style="color:var(--primary)">Activités</span></h1>
+  <p style="color:var(--gray);max-width:550px;margin:1rem auto">Découvrez l'ensemble de nos disciplines sportives, horaires d'entraînement et tarifs d'inscription.</p>
+</div>
+
+<section class="section">
+  <!-- FILTRES -->
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <button class="filter-btn" data-filter="collectif">Sports Collectifs</button>
+    <button class="filter-btn" data-filter="individuel">Sports Individuels</button>
+    <button class="filter-btn" data-filter="martial">Arts Martiaux</button>
+    <button class="filter-btn" data-filter="aquatique">Aquatique</button>
+  </div>
+
+  <!-- CARTES ACTIVITÉS -->
+  <div class="grid-3" id="activitiesGrid">
+
+    <div class="activity-card" data-cat="collectif">
+      <div class="activity-header">
+        <div class="activity-icon">⚽</div>
+        <div>
+          <div class="activity-title">Football</div>
+          <div class="activity-level">Tous niveaux · Dès 8 ans</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Le football reste notre sport phare. Entraînements techniques, tactiques et matchs officiels toute la saison.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Lun, Mer, Ven 09h-11h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Terrain Principal</div>
+          <div class="activity-info-item"><span class="dot">●</span> Coach: Mme Martin</div>
+          <div class="activity-info-item"><span class="dot">●</span> 5 000 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">54/60 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:90%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="collectif">
+      <div class="activity-header">
+        <div class="activity-icon">🏀</div>
+        <div>
+          <div class="activity-title">Basketball</div>
+          <div class="activity-level">Intermédiaire · Dès 12 ans</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Salle omnisports équipée, entraîneur professionnel. Équipe masculine et féminine en championnat régional.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Mar, Jeu 14h-16h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Salle Omnisports</div>
+          <div class="activity-info-item"><span class="dot">●</span> Coach: M. Benali</div>
+          <div class="activity-info-item"><span class="dot">●</span> 4 500 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">18/24 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:75%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="individuel">
+      <div class="activity-header">
+        <div class="activity-icon">🎾</div>
+        <div>
+          <div class="activity-title">Tennis</div>
+          <div class="activity-level">Tous niveaux</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">4 courts couverts et 2 extérieurs. Cours particuliers et collectifs, tournois mensuels et ligues internes.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Tous les jours 07h-20h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Courts Couverts</div>
+          <div class="activity-info-item"><span class="dot">●</span> 6 000 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">22/30 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:73%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="aquatique">
+      <div class="activity-header">
+        <div class="activity-icon">🏊</div>
+        <div>
+          <div class="activity-title">Natation</div>
+          <div class="activity-level">Débutant à Expert</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Piscine 50m homologuée. Cours d'apprentissage, perfectionnement, natation synchronisée et water-polo.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Mer, Sam 07h-09h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Piscine Olympique</div>
+          <div class="activity-info-item"><span class="dot">●</span> 5 500 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">20/25 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:80%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="individuel">
+      <div class="activity-header">
+        <div class="activity-icon">🏃</div>
+        <div>
+          <div class="activity-title">Athlétisme</div>
+          <div class="activity-level">Tous niveaux · Dès 10 ans</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Piste synthétique 400m, salle de lancer, fosses de saut. Préparation aux compétitions régionales et nationales.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Lun, Mer, Ven 06h-08h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Stade Municipal</div>
+          <div class="activity-info-item"><span class="dot">●</span> 3 500 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">30/40 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:75%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="martial">
+      <div class="activity-header">
+        <div class="activity-icon">🥋</div>
+        <div>
+          <div class="activity-title">Arts Martiaux</div>
+          <div class="activity-level">Judo · Karaté · Taekwondo</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Dojo homologué, ceintures noires certifiées. Cours enfants (5+), adultes, compétiteurs. Stages vacances scolaires.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Mar, Jeu, Sam 17h-19h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Dojo du Club</div>
+          <div class="activity-info-item"><span class="dot">●</span> 4 000 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">35/50 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:70%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="individuel">
+      <div class="activity-header">
+        <div class="activity-icon">🚴</div>
+        <div>
+          <div class="activity-title">Cyclisme</div>
+          <div class="activity-level">VTT & Route</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Sorties collectives hebdomadaires, entraînements sur home-trainer, participation aux randonnées régionales.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Dimanche 07h30</div>
+          <div class="activity-info-item"><span class="dot">●</span> Parking Principal</div>
+          <div class="activity-info-item"><span class="dot">●</span> 2 500 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">12/20 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:60%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+
+    <div class="activity-card" data-cat="collectif">
+      <div class="activity-header">
+        <div class="activity-icon">🏐</div>
+        <div>
+          <div class="activity-title">Volleyball</div>
+          <div class="activity-level">Salle & Plage</div>
+        </div>
+      </div>
+      <div class="activity-body">
+        <p class="card-text">Volleyball en salle et beach-volley. Équipes mixtes bienvenues. Tournois mensuels internes et externes.</p>
+        <div class="activity-info">
+          <div class="activity-info-item"><span class="dot">●</span> Lun, Ven 18h-20h</div>
+          <div class="activity-info-item"><span class="dot">●</span> Salle + Terrain Extérieur</div>
+          <div class="activity-info-item"><span class="dot">●</span> 3 000 DA/an</div>
+        </div>
+      </div>
+      <div class="activity-footer">
+        <small style="color:var(--gray)">14/20 places</small>
+        <div class="spots-bar"><div class="spots-fill" style="width:70%"></div></div>
+        <a href="auth/inscrire.html" class="btn btn-primary btn-sm">S'inscrire</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLEAU HORAIRES -->
+  <div class="schedule-table-wrap">
+    <h3 style="color:var(--white);margin-bottom:1.5rem;font-family:var(--font-display)">📅 Horaires Hebdomadaires</h3>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Discipline</th>
+            <th>Lundi</th>
+            <th>Mardi</th>
+            <th>Mercredi</th>
+            <th>Jeudi</th>
+            <th>Vendredi</th>
+            <th>Samedi</th>
+            <th>Dimanche</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>⚽ Football</td><td>09h–11h</td><td>–</td><td>09h–11h</td><td>–</td><td>09h–11h</td><td>–</td><td>–</td></tr>
+          <tr><td>🏀 Basketball</td><td>–</td><td>14h–16h</td><td>–</td><td>14h–16h</td><td>–</td><td>–</td><td>–</td></tr>
+          <tr><td>🎾 Tennis</td><td colspan="7" style="color:var(--gray);font-size:.85rem">Ouvert tous les jours 07h–20h (réservation)</td></tr>
+          <tr><td>🏊 Natation</td><td>–</td><td>–</td><td>07h–09h</td><td>–</td><td>–</td><td>07h–09h</td><td>–</td></tr>
+          <tr><td>🏃 Athlétisme</td><td>06h–08h</td><td>–</td><td>06h–08h</td><td>–</td><td>06h–08h</td><td>–</td><td>–</td></tr>
+          <tr><td>🥋 Arts Martiaux</td><td>–</td><td>17h–19h</td><td>–</td><td>17h–19h</td><td>–</td><td>17h–19h</td><td>–</td></tr>
+          <tr><td>🚴 Cyclisme</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>07h30</td></tr>
+          <tr><td>🏐 Volleyball</td><td>18h–20h</td><td>–</td><td>–</td><td>–</td><td>18h–20h</td><td>–</td><td>–</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="blog.html" class="nav-logo" style="margin-bottom:1rem;display:inline-flex"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+      <p class="footer-desc">Club sportif multidisciplinaire fondé en 2010.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-x-twitter"></i></a>
+      </div>
+    </div>
+    <div class="footer-col"><h5>Pages</h5><ul class="footer-links"><li><a href="blog.html">Accueil</a></li><li><a href="activites.html">Activités</a></li><li><a href="apropos.html">À Propos</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div class="footer-col"><h5>Compte</h5><ul class="footer-links"><li><a href="auth/login.html">Connexion</a></li>
+        <li><a href="espace-membre.html">Mon Espace</a></li><li><a href="auth/inscrire.html">Inscription</a></li></ul></div>
+    <div class="footer-col"><h5>Contact</h5><ul class="footer-links"><li><a href="#">contact@association.dz</a></li><li><a href="#">+213 555 123 456</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 ASClub</span></div>
+</footer>
+
+<script src="../assets/js/app.js"></script>
+<script>
+// Filtres
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.activity-card').forEach(card => {
+      card.style.display = (f === 'all' || card.dataset.cat === f) ? '' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

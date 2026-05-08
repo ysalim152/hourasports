@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .settings-layout{display:grid;grid-template-columns:220px 1fr;gap:1.5rem}
+    @media(max-width:768px){.settings-layout{grid-template-columns:1fr}}
+    .settings-nav{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.8rem 0;height:fit-content;position:sticky;top:90px}
+    .snav-section{padding:.4rem 1rem .2rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.25);margin-top:.4rem}
+    .snav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;cursor:pointer;color:var(--gray);font-size:.88rem;font-weight:600;transition:var(--transition);border-left:3px solid transparent}
+    .snav-item:hover{color:var(--white);background:rgba(255,255,255,.04)}
+    .snav-item.active{color:var(--primary);background:rgba(230,57,70,.07);border-left-color:var(--primary)}
+    .snav-item i{width:16px;text-align:center}
+    .settings-panel{display:none}
+    .settings-panel.active{display:block;animation:fadeInUp .3s ease}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .settings-section{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem}
+    .settings-section-title{font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+    .settings-section-title i{color:var(--primary)}
+    .setting-row{display:flex;align-items:flex-start;justify-content:space-between;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05);gap:1.5rem}
+    .setting-row:last-child{border-bottom:none;padding-bottom:0}
+    .setting-info{flex:1}
+    .setting-label{font-weight:600;color:var(--light);font-size:.9rem;margin-bottom:.2rem}
+    .setting-desc{color:var(--gray);font-size:.78rem;line-height:1.5}
+    .setting-control{flex-shrink:0;min-width:180px}
+    .toggle{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+    .toggle.on{background:var(--success)}
+    .toggle.off{background:rgba(255,255,255,.15)}
+    .toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:white;top:2px;transition:left .3s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .toggle.on::after{left:22px}
+    .toggle.off::after{left:2px}
+    .color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,.15);transition:var(--transition)}
+    .color-swatch.active,.color-swatch:hover{border-color:white;transform:scale(1.15)}
+    .theme-preview{width:100%;height:60px;border-radius:var(--radius);overflow:hidden;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:var(--transition);display:flex;flex-direction:column}
+    .theme-preview:hover,.theme-preview.active{border-color:var(--primary)}
+    .theme-preview-nav{height:16px;background:currentColor;flex-shrink:0}
+    .theme-preview-body{flex:1;background:var(--c2,#1a2a3a)}
+    .lang-btn{padding:.4rem .9rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--transition);font-family:var(--font-body)}
+    .lang-btn.active,.lang-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
+    .backup-item{display:flex;align-items:center;justify-content:space-between;padding:.8rem;background:rgba(255,255,255,.03);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);margin-bottom:.6rem}
+    .backup-icon{width:36px;height:36px;border-radius:var(--radius);background:rgba(52,152,219,.15);display:flex;align-items:center;justify-content:center;font-size:1rem}
+    .progress-ring{display:flex;align-items:center;gap:.8rem}
+    .ring-track{width:50px;height:50px;position:relative;flex-shrink:0}
+    .ring-track svg{transform:rotate(-90deg)}
+    .ring-track circle{fill:none;stroke-width:4}
+    .ring-bg{stroke:rgba(255,255,255,.07)}
+    .ring-fill{transition:stroke-dashoffset 1s ease}
+    .ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--white)}
+    .danger-zone{background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);border-radius:var(--radius);padding:1.5rem}
+    .badge-new{background:var(--primary);color:white;font-size:.6rem;padding:.1rem .45rem;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:.3rem}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link active"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Paramètres</span></div>
+        <h1 class="page-title">Paramètres Système</h1>
+        <p class="page-subtitle">Configuration générale de l'application</p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveAll()"><i class="fas fa-save"></i> Tout Sauvegarder</button>
+    </div>
+
+    <div class="settings-layout">
+      <!-- NAV GAUCHE -->
+      <nav class="settings-nav">
+        <div class="snav-section">Général</div>
+        <div class="snav-item active" onclick="showPanel('association',this)"><i class="fas fa-building"></i> Association</div>
+        <div class="snav-item" onclick="showPanel('contact',this)"><i class="fas fa-address-card"></i> Contact & Réseaux</div>
+        <div class="snav-item" onclick="showPanel('inscription',this)"><i class="fas fa-user-plus"></i> Inscriptions</div>
+        <div class="snav-section">Apparence</div>
+        <div class="snav-item" onclick="showPanel('theme',this)"><i class="fas fa-palette"></i> Thème & Couleurs</div>
+        <div class="snav-item" onclick="showPanel('langue',this)"><i class="fas fa-globe"></i> Langue & Région</div>
+        <div class="snav-section">Système</div>
+        <div class="snav-item" onclick="showPanel('email',this)"><i class="fas fa-envelope-open-text"></i> Email & SMTP</div>
+        <div class="snav-item" onclick="showPanel('securite',this)"><i class="fas fa-shield-alt"></i> Sécurité</div>
+        <div class="snav-item" onclick="showPanel('backup',this)"><i class="fas fa-database"></i> Sauvegardes</div>
+        <div class="snav-item" onclick="showPanel('danger',this)"><i class="fas fa-exclamation-triangle" style="color:var(--danger)"></i> <span style="color:var(--danger)">Zone Danger</span></div>
+      </nav>
+
+      <!-- CONTENU -->
+      <div id="settingsContent">
+
+        <!-- ══ ASSOCIATION ══ -->
+        <div id="panel-association" class="settings-panel active">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-building"></i> Informations de l'Association</div>
+            <div class="form-group"><label class="form-label">Nom de l'association *</label><input class="form-control" id="sNom" value="Association Sportive Club"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Année de fondation</label><input type="number" class="form-control" id="sAnnee" value="2010" min="1900" max="2030"></div>
+              <div class="form-group"><label class="form-label">Numéro d'enregistrement</label><input class="form-control" id="sRegNum" placeholder="N° JO / Wilaya"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Description courte (affichée sur le site)</label><textarea class="form-control" id="sDesc" rows="3">Club sportif multidisciplinaire fondé en 2010. Excellence, passion et esprit d'équipe.</textarea></div>
+            <div class="form-group"><label class="form-label">Slogan</label><input class="form-control" id="sSlogan" value="L'Excellence Sportive Commence Ici" placeholder="Slogan affiché dans le hero"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Saison sportive en cours</label><input class="form-control" id="sSaison" value="2024-2025"></div>
+              <div class="form-group"><label class="form-label">Logo (URL ou upload)</label><input class="form-control" id="sLogo" placeholder="URL de l'image logo"></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-cogs"></i> Fonctionnalités du Site</div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Site en ligne</div><div class="setting-desc">Le site est accessible au public</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Mode maintenance</div><div class="setting-desc">Affiche une page de maintenance aux visiteurs</div></div>
+              <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Blog / Actualités activé</div><div class="setting-desc">Affiche la section actualités sur la page d'accueil</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Inscriptions en ligne ouvertes</div><div class="setting-desc">Autoriser les nouvelles inscriptions via le formulaire</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ CONTACT ══ -->
+        <div id="panel-contact" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-address-card"></i> Coordonnées</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Email principal *</label><input type="email" class="form-control" value="contact@association.dz"></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-control" value="+213 555 123 456"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Adresse physique</label><textarea class="form-control" rows="2">12 Rue du Sport, Blida 09000, Algérie</textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Horaires d'accueil</label><input class="form-control" value="Lun–Ven: 08h–18h · Sam: 08h–14h"></div>
+              <div class="form-group"><label class="form-label">Wilaya</label><select class="form-control"><option>Blida</option><option>Alger</option><option>Tizi Ouzou</option><option>Oran</option></select></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fab fa-instagram"></i> Réseaux Sociaux</div>
+            <div class="form-group"><label class="form-label"><i class="fab fa-facebook" style="color:#1877f2;margin-right:.4rem"></i>Facebook</label><input class="form-control" value="https://facebook.com/assoc" placeholder="https://facebook.com/..."></div>
+            <div class="form-group"><label class="form-label"><i class="fab fa-instagram" style="color:#e4405f;margin-right:.4rem"></i>Instagram</label><input class="form-control" value="https://instagram.com/assoc" placeholder="https://instagram.com/..."></div>
+            <div class="form-group"><label class="form-label"><i class="fab fa-x-twitter" style="margin-right:.4rem"></i>X / Twitter</label><input class="form-control" placeholder="https://x.com/..."></div>
+            <div class="form-group"><label class="form-label"><i class="fab fa-youtube" style="color:#ff0000;margin-right:.4rem"></i>YouTube</label><input class="form-control" placeholder="https://youtube.com/..."></div>
+          </div>
+        </div>
+
+        <!-- ══ INSCRIPTION ══ -->
+        <div id="panel-inscription" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-user-plus"></i> Paramètres d'Inscription</div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Validation manuelle des comptes</div><div class="setting-desc">Un admin doit approuver chaque inscription avant activation</div></div>
+              <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Email de confirmation requis</div><div class="setting-desc">Envoyer un email de vérification avant activation</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Certificat médical obligatoire</div><div class="setting-desc">Exiger l'upload du certificat lors de l'inscription</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Code requis pour Admin <span class="badge-new">SÉCURITÉ</span></div><div class="setting-desc">Un code secret est nécessaire pour créer un compte administrateur</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Code requis pour Coach</div><div class="setting-desc">Un code est nécessaire pour le rôle Coach</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-coins"></i> Cotisations</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Cotisation mensuelle (DA)</label><input type="number" class="form-control" value="500"></div>
+              <div class="form-group"><label class="form-label">Cotisation semestrielle (DA)</label><input type="number" class="form-control" value="2500"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Cotisation annuelle (DA)</label><input type="number" class="form-control" value="4500"></div>
+              <div class="form-group"><label class="form-label">Réduction famille (%)</label><input type="number" class="form-control" value="15" min="0" max="100"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Code Admin (secret)</label><div style="position:relative"><input type="password" class="form-control" id="adminSecret" value="ADMIN2025"><span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray)" onclick="const i=document.getElementById('adminSecret');i.type=i.type==='password'?'text':'password'"><i class="fas fa-eye"></i></span></div><small style="color:var(--gray);font-size:.75rem">Code requis lors de la création d'un compte Administrateur</small></div>
+            <div class="form-group"><label class="form-label">Code Coach (secret)</label><div style="position:relative"><input type="password" class="form-control" id="coachSecret" value="COACH2025"><span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray)" onclick="const i=document.getElementById('coachSecret');i.type=i.type==='password'?'text':'password'"><i class="fas fa-eye"></i></span></div></div>
+          </div>
+        </div>
+
+        <!-- ══ THÈME ══ -->
+        <div id="panel-theme" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-palette"></i> Couleur Principale</div>
+            <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem">
+              <div class="color-swatch active" style="background:#e63946" onclick="setColor('#e63946',this)" title="Rouge (défaut)"></div>
+              <div class="color-swatch" style="background:#3498db" onclick="setColor('#3498db',this)" title="Bleu"></div>
+              <div class="color-swatch" style="background:#2ecc71" onclick="setColor('#2ecc71',this)" title="Vert"></div>
+              <div class="color-swatch" style="background:#f39c12" onclick="setColor('#f39c12',this)" title="Orange"></div>
+              <div class="color-swatch" style="background:#9b59b6" onclick="setColor('#9b59b6',this)" title="Violet"></div>
+              <div class="color-swatch" style="background:#1abc9c" onclick="setColor('#1abc9c',this)" title="Turquoise"></div>
+              <div class="color-swatch" style="background:#e67e22" onclick="setColor('#e67e22',this)" title="Ambre"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Couleur personnalisée</label><input type="color" id="customColor" class="form-control" value="#e63946" style="height:40px;padding:.3rem" onchange="setColor(this.value,null)"></div>
+              <div class="form-group"><label class="form-label">Code HEX</label><input class="form-control" id="colorHex" value="#e63946" placeholder="#e63946" onchange="setColor(this.value,null)"></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-moon"></i> Apparence Générale</div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Mode sombre (défaut)</div><div class="setting-desc">Thème sombre utilisé sur tout le site</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Animations et transitions</div><div class="setting-desc">Activer les animations CSS sur l'interface</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info"><div class="setting-label">Effets de particules (hero)</div><div class="setting-desc">Grille animée sur la page d'accueil</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+            <div class="form-group mt-3"><label class="form-label">Police d'affichage</label><select class="form-control"><option>Bebas Neue (défaut)</option><option>Impact</option><option>Oswald</option><option>Anton</option></select></div>
+          </div>
+        </div>
+
+        <!-- ══ LANGUE ══ -->
+        <div id="panel-langue" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-globe"></i> Langue & Localisation</div>
+            <div class="form-group">
+              <label class="form-label">Langue principale du site</label>
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem">
+                <button class="lang-btn active">🇫🇷 Français</button>
+                <button class="lang-btn" onclick="Toast.info('Support arabe en cours de développement')">🇩🇿 العربية</button>
+                <button class="lang-btn" onclick="Toast.info('Support anglais en cours de développement')">🇬🇧 English</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Fuseau horaire</label><select class="form-control"><option selected>Africa/Algiers (UTC+1)</option><option>Europe/Paris (UTC+2)</option><option>UTC</option></select></div>
+              <div class="form-group"><label class="form-label">Format de date</label><select class="form-control"><option selected>DD/MM/YYYY</option><option>MM/DD/YYYY</option><option>YYYY-MM-DD</option></select></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Devise</label><select class="form-control"><option selected>Dinar Algérien (DA)</option><option>Euro (€)</option><option>Dollar ($)</option></select></div>
+              <div class="form-group"><label class="form-label">Format monétaire</label><input class="form-control" value="1 000 DA" placeholder="Ex: 1,000 DA"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ EMAIL ══ -->
+        <div id="panel-email" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-server"></i> Configuration SMTP</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Hôte SMTP *</label><input class="form-control" placeholder="smtp.gmail.com"></div>
+              <div class="form-group"><label class="form-label">Port</label><input type="number" class="form-control" value="587"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Utilisateur</label><input class="form-control" placeholder="email@domaine.dz"></div>
+              <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-control" placeholder="••••••••"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Email expéditeur</label><input class="form-control" value="no-reply@association.dz"></div>
+              <div class="form-group"><label class="form-label">Nom expéditeur</label><input class="form-control" value="ASClub"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Chiffrement</label><select class="form-control"><option value="tls" selected>TLS (recommandé)</option><option value="ssl">SSL</option><option value="none">Aucun</option></select></div>
+            <div style="display:flex;gap:.8rem;margin-top:.5rem">
+              <button class="btn btn-outline btn-sm" onclick="testEmail()"><i class="fas fa-paper-plane"></i> Envoyer un email de test</button>
+              <button class="btn btn-primary btn-sm" onclick="Toast.success('Configuration SMTP sauvegardée !')"><i class="fas fa-save"></i> Sauvegarder</button>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-envelope"></i> Modèles d'Emails</div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Email de bienvenue</div><div class="setting-desc">Envoyé lors de la création d'un nouveau compte</div></div><button class="btn btn-outline btn-sm" onclick="Toast.info('Éditeur de modèle disponible en V2')"><i class="fas fa-edit"></i> Modifier</button></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Rappel de cotisation</div><div class="setting-desc">Envoyé 30 jours avant l'échéance</div></div><button class="btn btn-outline btn-sm" onclick="Toast.info('Éditeur de modèle disponible en V2')"><i class="fas fa-edit"></i> Modifier</button></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Confirmation d'inscription</div><div class="setting-desc">Envoyé à chaque nouvelle inscription</div></div><button class="btn btn-outline btn-sm" onclick="Toast.info('Éditeur de modèle disponible en V2')"><i class="fas fa-edit"></i> Modifier</button></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Rappel session (24h)</div><div class="setting-desc">Envoyé automatiquement 24h avant une session</div></div><button class="btn btn-outline btn-sm" onclick="Toast.info('Éditeur de modèle disponible en V2')"><i class="fas fa-edit"></i> Modifier</button></div>
+          </div>
+        </div>
+
+        <!-- ══ SÉCURITÉ ══ -->
+        <div id="panel-securite" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-shield-alt"></i> Politique de Sécurité</div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Double authentification (2FA)</div><div class="setting-desc">Obliger la 2FA pour les administrateurs</div></div><div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Durée de session</div><div class="setting-desc">Déconnexion automatique après inactivité</div></div><div class="setting-control"><select class="form-control"><option value="30">30 minutes</option><option value="60" selected>1 heure</option><option value="240">4 heures</option><option value="0">Jamais</option></select></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Tentatives de connexion max</div><div class="setting-desc">Bloquer le compte après N tentatives échouées</div></div><div class="setting-control"><select class="form-control"><option value="3">3 tentatives</option><option value="5" selected>5 tentatives</option><option value="10">10 tentatives</option></select></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Protection CSRF</div><div class="setting-desc">Activer les tokens CSRF sur tous les formulaires</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Force du mot de passe</div><div class="setting-desc">Exiger majuscules, chiffres et caractères spéciaux</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Journal d'audit</div><div class="setting-desc">Enregistrer toutes les actions admin dans un log</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          </div>
+        </div>
+
+        <!-- ══ BACKUP ══ -->
+        <div id="panel-backup" class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-database"></i> Sauvegardes Automatiques</div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Sauvegardes automatiques</div><div class="setting-desc">Créer une sauvegarde à intervalles réguliers</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Fréquence</div></div><div class="setting-control"><select class="form-control"><option value="daily" selected>Quotidienne</option><option value="weekly">Hebdomadaire</option><option value="monthly">Mensuelle</option></select></div></div>
+            <div class="setting-row"><div class="setting-info"><div class="setting-label">Conservation des sauvegardes</div></div><div class="setting-control"><select class="form-control"><option value="7">7 jours</option><option value="30" selected>30 jours</option><option value="90">90 jours</option></select></div></div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-history"></i> Historique des Sauvegardes</div>
+            <div class="backup-item">
+              <div style="display:flex;align-items:center;gap:.8rem;flex:1">
+                <div class="backup-icon">🗄️</div>
+                <div><div style="font-weight:700;font-size:.88rem;color:var(--white)">backup_2025-05-05_09h00.sql.gz</div><div style="font-size:.75rem;color:var(--gray)">Aujourd'hui 09:00 · 2.4 Mo · Base de données</div></div>
+              </div>
+              <div style="display:flex;gap:.4rem">
+                <button class="btn btn-sm btn-outline" onclick="Toast.success('Téléchargement démarré...')"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="Toast.info('Sauvegarde supprimée')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="backup-item">
+              <div style="display:flex;align-items:center;gap:.8rem;flex:1">
+                <div class="backup-icon">🗄️</div>
+                <div><div style="font-weight:700;font-size:.88rem;color:var(--white)">backup_2025-05-04_09h00.sql.gz</div><div style="font-size:.75rem;color:var(--gray)">Hier 09:00 · 2.3 Mo · Base de données</div></div>
+              </div>
+              <div style="display:flex;gap:.4rem">
+                <button class="btn btn-sm btn-outline" onclick="Toast.success('Téléchargement démarré...')"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="Toast.info('Sauvegarde supprimée')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="backup-item">
+              <div style="display:flex;align-items:center;gap:.8rem;flex:1">
+                <div class="backup-icon">📦</div>
+                <div><div style="font-weight:700;font-size:.88rem;color:var(--white)">backup_2025-05-03_09h00.sql.gz</div><div style="font-size:.75rem;color:var(--gray)">03/05/2025 · 2.2 Mo · Base de données</div></div>
+              </div>
+              <div style="display:flex;gap:.4rem">
+                <button class="btn btn-sm btn-outline" onclick="Toast.success('Téléchargement démarré...')"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="Toast.info('Sauvegarde supprimée')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:.8rem">
+              <button class="btn btn-primary btn-sm" onclick="createBackup()"><i class="fas fa-plus"></i> Créer une sauvegarde maintenant</button>
+              <button class="btn btn-outline btn-sm" onclick="Toast.info('Restauration disponible en V2')"><i class="fas fa-undo"></i> Restaurer</button>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title"><i class="fas fa-chart-pie"></i> Utilisation Système</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem">
+              <div style="text-align:center">
+                <div class="progress-ring"><div class="ring-track"><svg viewBox="0 0 44 44" width="50" height="50"><circle class="ring-bg" cx="22" cy="22" r="18" /><circle class="ring-fill" cx="22" cy="22" r="18" stroke="var(--info)" stroke-dasharray="113" stroke-dashoffset="57" /><text x="22" y="26" text-anchor="middle" fill="white" font-size="8" font-weight="bold" transform="rotate(90,22,22)">50%</text></svg></div></div>
+                <div style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Base de données</div>
+              </div>
+              <div style="text-align:center">
+                <div class="progress-ring"><div class="ring-track"><svg viewBox="0 0 44 44" width="50" height="50"><circle class="ring-bg" cx="22" cy="22" r="18" /><circle class="ring-fill" cx="22" cy="22" r="18" stroke="var(--success)" stroke-dasharray="113" stroke-dashoffset="79" /><text x="22" y="26" text-anchor="middle" fill="white" font-size="8" font-weight="bold" transform="rotate(90,22,22)">30%</text></svg></div></div>
+                <div style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Fichiers</div>
+              </div>
+              <div style="text-align:center">
+                <div class="progress-ring"><div class="ring-track"><svg viewBox="0 0 44 44" width="50" height="50"><circle class="ring-bg" cx="22" cy="22" r="18" /><circle class="ring-fill" cx="22" cy="22" r="18" stroke="var(--warning)" stroke-dasharray="113" stroke-dashoffset="23" /><text x="22" y="26" text-anchor="middle" fill="white" font-size="8" font-weight="bold" transform="rotate(90,22,22)">80%</text></svg></div></div>
+                <div style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Cache</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ DANGER ZONE ══ -->
+        <div id="panel-danger" class="settings-panel">
+          <div class="danger-zone">
+            <h4 style="font-family:var(--font-display);font-size:1.3rem;color:var(--danger);margin-bottom:.5rem">⚠️ Zone Dangereuse</h4>
+            <p style="color:var(--gray);font-size:.88rem;margin-bottom:1.5rem;line-height:1.6">Ces actions sont irréversibles. Procédez avec la plus grande prudence.</p>
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:1rem;background:rgba(255,255,255,.03);border-radius:var(--radius);border:1px solid rgba(255,255,255,.07);gap:1rem">
+                <div><div style="font-weight:700;color:var(--white);margin-bottom:.3rem">Vider le cache système</div><div style="color:var(--gray);font-size:.82rem">Supprime tous les fichiers en cache. Le site peut être temporairement plus lent.</div></div>
+                <button class="btn btn-warning btn-sm" style="flex-shrink:0" onclick="Toast.success('Cache vidé !')"><i class="fas fa-broom"></i> Vider</button>
+              </div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:1rem;background:rgba(255,255,255,.03);border-radius:var(--radius);border:1px solid rgba(255,255,255,.07);gap:1rem">
+                <div><div style="font-weight:700;color:var(--white);margin-bottom:.3rem">Réinitialiser les statistiques</div><div style="color:var(--gray);font-size:.82rem">Remet à zéro tous les compteurs de vues et statistiques.</div></div>
+                <button class="btn btn-warning btn-sm" style="flex-shrink:0" onclick="confirmAction('Réinitialiser toutes les statistiques ?',()=>Toast.success('Statistiques réinitialisées.'))"><i class="fas fa-chart-line"></i> Reset</button>
+              </div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:1rem;background:rgba(231,76,60,.06);border-radius:var(--radius);border:1px solid rgba(231,76,60,.25);gap:1rem">
+                <div><div style="font-weight:700;color:var(--danger);margin-bottom:.3rem">Supprimer tous les membres inactifs</div><div style="color:var(--gray);font-size:.82rem">Supprime définitivement les comptes avec statut "inactif". Cette action est irréversible.</div></div>
+                <button class="btn btn-danger btn-sm" style="flex-shrink:0" onclick="confirmAction('ATTENTION ! Supprimer tous les membres inactifs ?',()=>Toast.success('Membres inactifs supprimés.'))"><i class="fas fa-user-times"></i> Supprimer</button>
+              </div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:1rem;background:rgba(231,76,60,.08);border-radius:var(--radius);border:1px solid rgba(231,76,60,.3);gap:1rem">
+                <div><div style="font-weight:700;color:var(--danger);margin-bottom:.3rem">Réinitialisation complète de la base de données</div><div style="color:var(--gray);font-size:.82rem">⚠️ Supprime TOUTES les données (membres, équipes, sessions, planning). Irréversible sans sauvegarde.</div></div>
+                <button class="btn btn-danger btn-sm" style="flex-shrink:0" onclick="confirmAction('⚠️ DANGER ! Réinitialiser toute la base de données ? Cette action est irréversible !',()=>Toast.error('Action annulée pour la démo.'))"><i class="fas fa-skull"></i> Reset Total</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settingsContent -->
+    </div><!-- /settings-layout -->
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+function showPanel(id, el){
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('panel-'+id)?.classList.add('active');
+  el?.classList.add('active');
+}
+function saveAll(){Toast.success('Tous les paramètres ont été sauvegardés !');}
+function setColor(hex, swatch){
+  document.documentElement.style.setProperty('--primary',hex);
+  document.getElementById('colorHex').value=hex;
+  document.getElementById('customColor').value=hex;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  if(swatch) swatch.classList.add('active');
+  Toast.success('Couleur appliquée !');
+}
+function testEmail(){
+  const btn=event.target;btn.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle"></span> Envoi...';btn.disabled=true;
+  setTimeout(()=>{btn.innerHTML='<i class="fas fa-paper-plane"></i> Envoyer un email de test';btn.disabled=false;Toast.success('Email de test envoyé à admin@association.dz !');},1800);
+}
+function createBackup(){
+  const btn=event.target;btn.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle"></span> En cours...';btn.disabled=true;
+  setTimeout(()=>{btn.innerHTML='<i class="fas fa-plus"></i> Créer une sauvegarde maintenant';btn.disabled=false;Toast.success('Sauvegarde créée avec succès !');},2000);
+}
+</script>
+
+<script>
+// Load settings from API
+(async function loadParametres() {
+  try {
+    const res = await fetch('../../api/parametres.php');
+    const json = await res.json();
+    if (!json.success) return;
+    const params = Object.fromEntries(json.data.map(p => [p.cle, p.valeur]));
+    // Fill inputs
+    const map = {
+      'sNom':    params.nom_association,
+      'sSlogan': params.slogan,
+      'sDesc':   params.description_courte,
+      'sSaison': params.saison_courante,
+      'sRegNum': params.numero_enregistrement,
+    };
+    Object.entries(map).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    });
+  } catch(e) { console.info('Parametres API offline.'); }
+})();
+
+// Override saveAll to use API
+window.saveAll = async function() {
+  const payload = {};
+  ['sNom','sSlogan','sDesc','sSaison'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const keyMap = { sNom:'nom_association', sSlogan:'slogan', sDesc:'description_courte', sSaison:'saison_courante' };
+      payload[keyMap[id]] = el.value;
+    }
+  });
+  try {
+    const res = await fetch('../../api/parametres.php', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    Toast.success(json.message || 'Paramètres sauvegardés !');
+  } catch(e) {
+    Toast.success('Paramètres sauvegardés ! (mode démo)');
+  }
+};
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

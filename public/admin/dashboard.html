@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .chart-bar-wrap{display:flex;flex-direction:column;gap:.5rem;padding:1.2rem 0}
+    .chart-bar-item{display:flex;align-items:center;gap:1rem;font-size:.88rem}
+    .chart-bar-label{width:90px;color:var(--gray);text-align:right;flex-shrink:0}
+    .chart-bar-track{flex:1;height:22px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+    .chart-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:.4rem;font-size:.72rem;font-weight:700;color:white}
+    .chart-bar-val{width:40px;color:var(--light);font-weight:700;flex-shrink:0}
+    .activity-list{display:flex;flex-direction:column;gap:.5rem}
+    .activity-item{display:flex;align-items:center;gap:.8rem;padding:.7rem .8rem;border-radius:var(--radius);background:rgba(255,255,255,.03);transition:var(--transition)}
+    .activity-item:hover{background:rgba(255,255,255,.06)}
+    .activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .activity-text{font-size:.88rem;color:var(--light);flex:1}
+    .activity-time{font-size:.78rem;color:var(--gray);flex-shrink:0}
+    .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin-top:1rem}
+    .quick-btn{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:var(--transition);color:var(--gray);font-size:.88rem;font-weight:600}
+    .quick-btn:hover{border-color:rgba(230,57,70,.3);color:var(--primary);transform:translateY(-2px)}
+    .quick-btn .q-icon{font-size:1.6rem;margin-bottom:.4rem}
+    .panel{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem}
+    .panel-title{font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+    .donut-chart{position:relative;width:140px;height:140px;margin:0 auto 1rem}
+    svg.donut circle{fill:none;stroke-width:18}
+    .donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    .donut-pct{font-family:var(--font-display);font-size:1.8rem;color:var(--white);line-height:1}
+    .donut-sub{font-size:.75rem;color:var(--gray)}
+    .legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:.4rem}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Dashboard</span></div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Vue d'ensemble de l'association — Saison 2024–2025</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="Toast.info('Rapport généré !')"><i class="fas fa-download"></i> Rapport</button>
+        <a href="membres.html" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Nouveau Membre</a>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-icon">👥</div>
+        <div>
+          <div class="kpi-value" data-counter="320">0</div>
+          <div class="kpi-label">Membres Actifs</div>
+          <div class="kpi-trend up">▲ +12 ce mois</div>
+        </div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">🏆</div>
+        <div>
+          <div class="kpi-value" data-counter="15">0</div>
+          <div class="kpi-label">Équipes</div>
+          <div class="kpi-trend up">▲ +2 nouvelles</div>
+        </div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">🎯</div>
+        <div>
+          <div class="kpi-value" data-counter="48">0</div>
+          <div class="kpi-label">Sessions / Mois</div>
+          <div class="kpi-trend up">▲ +8%</div>
+        </div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-icon">💰</div>
+        <div>
+          <div class="kpi-value">1.6M</div>
+          <div class="kpi-label">Cotisations DA</div>
+          <div class="kpi-trend up">▲ 78% collectées</div>
+        </div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">📬</div>
+        <div>
+          <div class="kpi-value" data-counter="5">0</div>
+          <div class="kpi-label">Messages Non Lus</div>
+          <div class="kpi-trend down">▼ à traiter</div>
+        </div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📅</div>
+        <div>
+          <div class="kpi-value" data-counter="3">0</div>
+          <div class="kpi-label">Événements à venir</div>
+          <div class="kpi-trend up">▲ cette semaine</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 1 -->
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+      <!-- Membres par discipline -->
+      <div class="panel">
+        <div class="panel-title">📊 Membres par Discipline <a href="membres.html" style="font-size:.8rem;color:var(--primary);font-family:var(--font-body)">Voir tout</a></div>
+        <div class="chart-bar-wrap" id="disciplineBars">
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Football</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:90%;background:var(--success)">54</div></div>
+            <div class="chart-bar-val">54</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Basketball</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:40%;background:var(--warning)">24</div></div>
+            <div class="chart-bar-val">24</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Tennis</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:37%;background:var(--info)">22</div></div>
+            <div class="chart-bar-val">22</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Natation</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:33%;background:#1abc9c)">20</div></div>
+            <div class="chart-bar-val">20</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Athlétisme</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:50%;background:var(--primary)">30</div></div>
+            <div class="chart-bar-val">30</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Arts Martiaux</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:58%;background:#9b59b6">35</div></div>
+            <div class="chart-bar-val">35</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Cyclisme</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:20%;background:#e67e22">12</div></div>
+            <div class="chart-bar-val">12</div>
+          </div>
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">Volleyball</div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:23%;background:#2980b9">14</div></div>
+            <div class="chart-bar-val">14</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cotisations donut -->
+      <div class="panel" style="display:flex;flex-direction:column;align-items:center">
+        <div class="panel-title" style="width:100%">💰 Cotisations</div>
+        <div class="donut-chart">
+          <svg viewBox="0 0 100 100" style="transform:rotate(-90deg);width:100%;height:100%">
+            <circle cx="50" cy="50" r="35" stroke="rgba(255,255,255,.07)" />
+            <circle cx="50" cy="50" r="35" stroke="var(--primary)" class="ring-fill-dyn" stroke-dasharray="154 66" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="35" stroke="rgba(255,255,255,.06)" stroke-dasharray="66 220" stroke-dashoffset="-154" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-pct">78%</div>
+            <div class="donut-sub">Collectées</div>
+          </div>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:.5rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.88rem">
+            <span><span class="legend-dot" style="background:var(--primary)"></span>Payées</span>
+            <strong style="color:var(--white)">250 / 320</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.88rem">
+            <span><span class="legend-dot" style="background:var(--success)"></span>En attente</span>
+            <strong style="color:var(--white)">70</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.88rem">
+            <span><span class="legend-dot" style="background:var(--warning)"></span>Partielles</span>
+            <strong style="color:var(--white)">15</strong>
+          </div>
+        </div>
+        <a href="membres.html" class="btn btn-outline btn-sm w-full mt-3">Gérer les cotisations</a>
+      </div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+      <!-- Activités récentes -->
+      <div class="panel">
+        <div class="panel-title">🔔 Activités Récentes</div>
+        <div class="activity-list">
+          <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text">Nouveau membre inscrit: <strong>Karim Benali</strong></div><div class="activity-time">Il y a 5 min</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--info)"></div><div class="activity-text">Session Football planifiée pour lundi</div><div class="activity-time">Il y a 1h</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--warning)"></div><div class="activity-text">Cotisation en attente: <strong>A. Meziane</strong></div><div class="activity-time">Il y a 2h</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--primary)"></div><div class="activity-text">Nouvelle actualité publiée sur le blog</div><div class="activity-time">Il y a 3h</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text">Équipe U17 qualifiée pour la demi-finale</div><div class="activity-time">Hier</div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:var(--info)"></div><div class="activity-text">Message reçu via le formulaire de contact</div><div class="activity-time">Hier</div></div>
+        </div>
+      </div>
+
+      <!-- Prochaines sessions -->
+      <div class="panel">
+        <div class="panel-title">📅 Prochaines Sessions <a href="sessions.html" style="font-size:.8rem;color:var(--primary);font-family:var(--font-body)">Voir tout</a></div>
+        <div style="display:flex;flex-direction:column;gap:.7rem">
+          <div style="background:rgba(255,255,255,.03);border-radius:var(--radius);padding:.8rem;border-left:3px solid var(--success)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--white)">⚽ Football Lundi</strong>
+              <span class="badge badge-success">Planifié</span>
+            </div>
+            <div style="color:var(--gray);font-size:.82rem;margin-top:.3rem">📍 Terrain Principal · 09h–11h · Lun 05/05</div>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border-radius:var(--radius);padding:.8rem;border-left:3px solid var(--info)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--white)">🏀 Basketball</strong>
+              <span class="badge badge-info">Planifié</span>
+            </div>
+            <div style="color:var(--gray);font-size:.82rem;margin-top:.3rem">📍 Salle Omnisports · 14h–16h · Mar 06/05</div>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border-radius:var(--radius);padding:.8rem;border-left:3px solid var(--warning)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--white)">🎾 Tournoi Tennis</strong>
+              <span class="badge badge-warning">Tournoi</span>
+            </div>
+            <div style="color:var(--gray);font-size:.82rem;margin-top:.3rem">📍 Courts Couverts · 08h–18h · Dim 12/05</div>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border-radius:var(--radius);padding:.8rem;border-left:3px solid var(--primary)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--white)">⚽ Match Amical U17</strong>
+              <span class="badge badge-primary">Match</span>
+            </div>
+            <div style="color:var(--gray);font-size:.82rem;margin-top:.3rem">📍 Stade Municipal · 15h–17h · Sam 10/05</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS RAPIDES -->
+    <div class="panel">
+      <div class="panel-title">⚡ Actions Rapides</div>
+      <div class="quick-actions">
+        <a href="membres.html" class="quick-btn"><div class="q-icon">👤</div>Ajouter Membre</a>
+        <a href="equipes.html" class="quick-btn"><div class="q-icon">🏆</div>Créer Équipe</a>
+        <a href="sessions.html" class="quick-btn"><div class="q-icon">🎯</div>Nouvelle Session</a>
+        <a href="planning.html" class="quick-btn"><div class="q-icon">📅</div>Ajouter Événement</a>
+        <a href="#" class="quick-btn"><div class="q-icon">📰</div>Publier Actu</div></a>
+        <a href="#" class="quick-btn"><div class="q-icon">💰</div>Cotisations</a>
+        <a href="#" class="quick-btn" onclick="Export.print('.admin-main');return false"><div class="q-icon">🖨️</div>Imprimer</a>
+        <a href="#" class="quick-btn"><div class="q-icon">⚙️</div>Paramètres</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+
+<script>
+// Load live KPIs from API
+(async function loadDashboardData() {
+  try {
+    const res = await fetch('../../api/dashboard.php?section=all');
+    const json = await res.json();
+    if (!json.success) return;
+    const { kpi, cotisations, disciplines } = json.data;
+
+    // Update KPI cards
+    if (kpi) {
+      const map = {
+        '[data-counter="320"]': kpi.membres_actifs,
+        '[data-counter="15"]':  kpi.equipes_actives,
+        '[data-counter="48"]':  kpi.sessions_mois,
+        '[data-counter="5"]':   kpi.messages_nouveaux,
+        '[data-counter="3"]':   kpi.sessions_planifiees,
+      };
+      Object.entries(map).forEach(([sel, val]) => {
+        const el = document.querySelector(sel);
+        if (el) { el.dataset.counter = val; animateCounter(el, val); }
+      });
+      // Badge messages
+      const badge = document.getElementById('msgBadge');
+      if (badge && kpi.messages_nouveaux > 0) {
+        badge.textContent = kpi.messages_nouveaux;
+        badge.style.display = '';
+      }
+      // Comptes en attente
+      if (kpi.comptes_en_attente > 0) {
+        Toast.warning(`${kpi.comptes_en_attente} compte(s) en attente de validation.`);
+      }
+    }
+
+    // Update cotisation donut
+    if (cotisations) {
+      const total = cotisations.total || 1;
+      const pct = cotisations.taux_pct;
+      document.querySelector('.donut-pct') && (document.querySelector('.donut-pct').textContent = pct + '%');
+      // Update donut arc
+      const arc = document.querySelector('.ring-fill-dyn');
+      if (arc) {
+        const dasharray = 220;
+        arc.setAttribute('stroke-dasharray', `${Math.round(pct/100*dasharray)} ${dasharray}`);
+      }
+    }
+
+    // Update disciplines bar chart
+    if (disciplines && disciplines.length) {
+      const maxInscrits = Math.max(...disciplines.map(d => d.inscrits), 1);
+      const barsContainer = document.getElementById('disciplineBars');
+      if (barsContainer) {
+        barsContainer.innerHTML = disciplines.map(d => `
+          <div class="chart-bar-item">
+            <div class="chart-bar-label">${d.icone} ${d.nom.substring(0,10)}</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:${Math.round(d.inscrits/maxInscrits*100)}%;background:${d.couleur||'var(--primary)'}">
+                ${d.inscrits}
+              </div>
+            </div>
+            <div class="chart-bar-val">${d.inscrits}</div>
+          </div>`).join('');
+      }
+    }
+  } catch(e) {
+    console.warn('Dashboard API offline, using demo data.');
+  }
+})();
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

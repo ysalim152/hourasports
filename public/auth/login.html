@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Association Sportive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .show-pwd{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:var(--gray);cursor:pointer;font-size:.9rem;transition:var(--transition)}
+    .show-pwd:hover{color:var(--primary)}
+    .pwd-wrap{position:relative}
+    .pwd-wrap .form-control{padding-right:2.5rem}
+    .divider-or{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:var(--gray);font-size:.82rem}
+    .divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+    .alert{padding:.85rem 1rem;border-radius:var(--radius);font-size:.9rem;margin-bottom:1rem}
+    .alert-danger{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:var(--danger)}
+    .alert-success{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3);color:var(--success)}
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <!-- Logo + retour -->
+    <div style="text-align:center;margin-bottom:.5rem">
+      <a href="../../public/blog.html" style="color:var(--gray);font-size:.85rem"><i class="fas fa-arrow-left"></i> Retour au site</a>
+    </div>
+
+    <div class="auth-header">
+      <div class="auth-logo">🏆</div>
+      <h2 class="auth-title">Connexion</h2>
+      <p class="auth-subtitle">Accédez à votre espace membre</p>
+    </div>
+
+    <!-- ALERT (affiché dynamiquement) -->
+    <div id="loginAlert" class="alert alert-danger hidden">
+      <i class="fas fa-exclamation-circle"></i> <span id="alertMsg"></span>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-envelope"></i> Adresse Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="votre@email.com"
+               data-rules="required|email" autocomplete="email" required>
+        <span class="form-error" data-error="email"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between">
+          <span><i class="fas fa-lock"></i> Mot de passe</span>
+          <a href="#" style="color:var(--primary);font-size:.8rem;text-transform:none;font-weight:600" onclick="showResetModal()">Mot de passe oublié ?</a>
+        </label>
+        <div class="pwd-wrap">
+          <input type="password" id="password" name="password" class="form-control" placeholder="••••••••"
+                 data-rules="required|minlen:6" autocomplete="current-password" required>
+          <span class="show-pwd" onclick="togglePwd('password',this)"><i class="fas fa-eye"></i></span>
+        </div>
+        <span class="form-error" data-error="password"></span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem">
+        <input type="checkbox" id="remember" name="remember" style="width:16px;height:16px;cursor:pointer">
+        <label for="remember" style="color:var(--gray);font-size:.88rem;cursor:pointer">Se souvenir de moi</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full btn-lg" id="loginBtn">
+        <i class="fas fa-sign-in-alt"></i> Se Connecter
+      </button>
+    </form>
+
+    <div class="divider-or">ou connectez-vous avec</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+      <button class="btn btn-outline" onclick="Toast.info('Connexion Google non disponible en démo')">
+        <i class="fab fa-google" style="color:#ea4335"></i> Google
+      </button>
+      <button class="btn btn-outline" onclick="Toast.info('Connexion Facebook non disponible en démo')">
+        <i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook
+      </button>
+    </div>
+
+    <div class="auth-footer-link">
+      Pas encore membre ? <a href="inscrire.html">S'inscrire gratuitement</a>
+    </div>
+
+    <!-- Comptes démo -->
+    <div style="margin-top:1.5rem;padding:1rem;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);border-radius:var(--radius);font-size:.82rem;color:var(--gray)">
+      <div style="font-weight:700;color:var(--light);margin-bottom:.5rem">🔑 Comptes de démonstration :</div>
+      <div>Admin: <code style="color:var(--primary)">admin@association.dz</code></div>
+      <div>Coach: <code style="color:var(--primary)">coach@association.dz</code></div>
+      <div>Mdp: <code style="color:var(--primary)">Admin@2024</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESET MDP -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">Réinitialiser le mot de passe</span>
+      <span class="modal-close" onclick="Modal.close('resetModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--gray);margin-bottom:1.5rem;font-size:.92rem">Entrez votre email. Vous recevrez un lien de réinitialisation.</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="resetEmail" class="form-control" placeholder="votre@email.com">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="Modal.close('resetModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="sendReset()"><i class="fas fa-paper-plane"></i> Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+function togglePwd(fieldId, icon) {
+  const input = document.getElementById(fieldId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  icon.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+}
+
+function showResetModal() { Modal.open('resetModal'); }
+
+function sendReset() {
+  const email = document.getElementById('resetEmail').value;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    Toast.error('Veuillez entrer un email valide.');
+    return;
+  }
+  Modal.close('resetModal');
+  Toast.success('Email de réinitialisation envoyé !');
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!Validator.validate(this)) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;vertical-align:middle"></span> Connexion...';
+  btn.disabled = true;
+
+  // Simulation (remplacer par appel API PHP réel)
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  // Appel API réel
+  try {
+    const res = await fetch('../../api/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Toast.success(data.message || 'Connexion réussie !');
+      // Sauvegarder les infos utilisateur
+      if (data.user) {
+        sessionStorage.setItem('user_id', data.user.id);
+        sessionStorage.setItem('user_nom', data.user.nom);
+        sessionStorage.setItem('user_prenom', data.user.prenom);
+        sessionStorage.setItem('user_email', data.user.email);
+        sessionStorage.setItem('user_role', data.user.role);
+        sessionStorage.setItem('user_niveau_acces', data.user.niveau_acces || 0);
+      }
+      setTimeout(() => {
+        window.location.href = data.redirect || '../blog.html';
+      }, 1000);
+    } else {
+      document.getElementById('loginAlert').classList.remove('hidden');
+      document.getElementById('alertMsg').textContent = data.message || 'Identifiants incorrects.';
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se Connecter';
+      btn.disabled = false;
+    }
+  } catch(err) {
+    // Mode démo (sans serveur PHP) - fallback
+    const demoUsers = {
+      'admin@association.dz': { id:1, nom:'Dupont', prenom:'Admin', role:'admin', niveau_acces:4, redirect:'../admin/dashboard.html' },
+      'coach@association.dz': { id:2, nom:'Martin', prenom:'Sophie', role:'coach', niveau_acces:3, redirect:'../admin/dashboard.html' },
+      'karim@email.com':      { id:3, nom:'Benali', prenom:'Karim', role:'participant', niveau_acces:1, redirect:'../espace-membre.html' },
+      'leila@email.com':      { id:4, nom:'Kaddour', prenom:'Leila', role:'adherent', niveau_acces:2, redirect:'../espace-membre.html' },
+    };
+    const demo = demoUsers[email];
+    if (demo && password === 'Admin@2024') {
+      Object.entries(demo).forEach(([k,v]) => sessionStorage.setItem('user_'+k, v));
+      sessionStorage.setItem('user_email', email);
+      Toast.success(`Bienvenue, ${demo.prenom} ! (mode démo)`);
+      setTimeout(() => window.location.href = demo.redirect, 1000);
+    } else {
+      document.getElementById('loginAlert').classList.remove('hidden');
+      document.getElementById('alertMsg').textContent = 'Identifiants incorrects.';
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se Connecter';
+      btn.disabled = false;
+    }
+  }
+});
+</script>
+</body>
+</html>

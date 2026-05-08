@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membres — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:white;flex-shrink:0}
+    .member-name{font-weight:600;color:var(--white)}
+    .member-email{font-size:.8rem;color:var(--gray)}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link active"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Membres</span></div>
+        <h1 class="page-title">Gestion des Membres</h1>
+        <p class="page-subtitle">CRUD — Membres inscrits à l'association</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="Export.csv(getTableData(),'membres.csv')"><i class="fas fa-file-csv"></i> Exporter</button>
+        <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="fas fa-user-plus"></i> Ajouter Membre</button>
+      </div>
+    </div>
+
+    <!-- FILTRES & RECHERCHE -->
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon"><i class="fas fa-search"></i></span>
+        <input type="text" id="membresTable-search" class="form-control" placeholder="Rechercher un membre...">
+      </div>
+      <select id="filterEquipe" class="form-control" style="max-width:180px" onchange="filterTable()">
+        <option value="">Toutes équipes</option>
+        <option value="Football">Football</option>
+        <option value="Basketball">Basketball</option>
+        <option value="Tennis">Tennis</option>
+        <option value="Natation">Natation</option>
+      </select>
+      <select id="filterStatut" class="form-control" style="max-width:160px" onchange="filterTable()">
+        <option value="">Tous statuts</option>
+        <option value="actif">Actif</option>
+        <option value="inactif">Inactif</option>
+        <option value="suspendu">Suspendu</option>
+      </select>
+      <select id="filterCotisation" class="form-control" style="max-width:160px" onchange="filterTable()">
+        <option value="">Cotisation</option>
+        <option value="oui">Payée</option>
+        <option value="non">Non payée</option>
+        <option value="partiel">Partielle</option>
+      </select>
+    </div>
+
+    <!-- INFO + TABLE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+      <span id="membresTable-info" style="color:var(--gray);font-size:.85rem"></span>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table" id="membresTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Membre</th>
+            <th>Téléphone</th>
+            <th>Équipe</th>
+            <th>Licence</th>
+            <th>Adhésion</th>
+            <th>Cotisation</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Lignes générées par JS -->
+        </tbody>
+      </table>
+    </div>
+    <div id="membresTable-pagination" class="pagination"></div>
+  </main>
+</div>
+
+<!-- MODAL AJOUTER/MODIFIER -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Ajouter un Membre</span>
+      <span class="modal-close" onclick="Modal.close('memberModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <form id="memberForm" novalidate>
+        <input type="hidden" id="memberId" name="id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nom *</label>
+            <input type="text" id="mNom" name="nom" class="form-control" placeholder="Dupont" data-rules="required" required>
+            <span class="form-error" data-error="nom"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prénom *</label>
+            <input type="text" id="mPrenom" name="prenom" class="form-control" placeholder="Jean" data-rules="required" required>
+            <span class="form-error" data-error="prenom"></span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" id="mEmail" name="email" class="form-control" placeholder="email@exemple.com" data-rules="required|email" required>
+            <span class="form-error" data-error="email"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Téléphone</label>
+            <input type="tel" id="mTel" name="telephone" class="form-control" placeholder="+213 555 000 000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date de naissance</label>
+            <input type="date" id="mDOB" name="date_naissance" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sexe</label>
+            <select id="mSexe" name="sexe" class="form-control">
+              <option value="">—</option>
+              <option value="M">Masculin</option>
+              <option value="F">Féminin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Équipe</label>
+            <select id="mEquipe" name="equipe_id" class="form-control">
+              <option value="">— Aucune —</option>
+              <option value="1">⚽ Équipe A Football</option>
+              <option value="2">⚽ Équipe U17 Football</option>
+              <option value="3">🏀 Team Basketball</option>
+              <option value="4">🎾 Club Tennis</option>
+              <option value="5">🏊 Natation Seniors</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">N° Licence</label>
+            <input type="text" id="mLicence" name="numero_licence" class="form-control" placeholder="LIC-2025-001">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date d'adhésion *</label>
+            <input type="date" id="mAdhesion" name="date_adhesion" class="form-control" data-rules="required" required>
+            <span class="form-error" data-error="date_adhesion"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cotisation</label>
+            <select id="mCotisation" name="cotisation_payee" class="form-control">
+              <option value="non">Non payée</option>
+              <option value="partiel">Partielle</option>
+              <option value="oui">Payée</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select id="mStatut" name="statut" class="form-control">
+              <option value="actif">Actif</option>
+              <option value="inactif">Inactif</option>
+              <option value="suspendu">Suspendu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Groupe Sanguin</label>
+            <select id="mSanguin" name="groupe_sanguin" class="form-control">
+              <option value="">—</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea id="mNotes" name="notes" class="form-control" rows="2" placeholder="Notes optionnelles..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="Modal.close('memberModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveMember()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+// ===== DATA =====
+let members = [
+  {id:1,nom:'Benali',prenom:'Karim',email:'karim@email.com',telephone:'+213 555 111 222',equipe:'Football',equipe_id:'1',licence:'LIC-2025-001',adhesion:'2024-09-01',cotisation:'oui',statut:'actif',sexe:'M',notes:''},
+  {id:2,nom:'Martin',prenom:'Sophie',email:'sophie@email.com',telephone:'+213 555 222 333',equipe:'Basketball',equipe_id:'3',licence:'LIC-2025-002',adhesion:'2024-09-01',cotisation:'oui',statut:'actif',sexe:'F',notes:'Coach'},
+  {id:3,nom:'Meziane',prenom:'Youssef',email:'youssef@email.com',telephone:'+213 555 333 444',equipe:'Tennis',equipe_id:'4',licence:'LIC-2025-003',adhesion:'2024-10-15',cotisation:'non',statut:'actif',sexe:'M',notes:''},
+  {id:4,nom:'Kaddour',prenom:'Leila',email:'leila@email.com',telephone:'+213 555 444 555',equipe:'Natation',equipe_id:'5',licence:'LIC-2025-004',adhesion:'2024-11-01',cotisation:'partiel',statut:'actif',sexe:'F',notes:''},
+  {id:5,nom:'Hamidi',prenom:'Omar',email:'omar@email.com',telephone:'+213 555 555 666',equipe:'Football',equipe_id:'1',licence:'LIC-2025-005',adhesion:'2025-01-10',cotisation:'oui',statut:'suspendu',sexe:'M',notes:'Blessure'},
+  {id:6,nom:'Bouzid',prenom:'Sara',email:'sara@email.com',telephone:'+213 555 666 777',equipe:'Basketball',equipe_id:'3',licence:'LIC-2025-006',adhesion:'2025-02-01',cotisation:'non',statut:'actif',sexe:'F',notes:''},
+  {id:7,nom:'Rahmani',prenom:'Ali',email:'ali@email.com',telephone:'+213 555 777 888',equipe:'Football',equipe_id:'2',licence:'LIC-2025-007',adhesion:'2024-09-15',cotisation:'oui',statut:'actif',sexe:'M',notes:'Capitaine U17'},
+];
+let nextId = 8;
+let dt;
+
+const equipeNames = {'1':'⚽ Équipe A Football','2':'⚽ Équipe U17','3':'🏀 Basketball','4':'🎾 Tennis','5':'🏊 Natation'};
+
+function badgeStatut(s){ return s==='actif'?'badge-success':s==='inactif'?'badge-warning':'badge-danger'; }
+function badgeCot(c){ return c==='oui'?'badge-success':c==='non'?'badge-danger':'badge-warning'; }
+function cotLabel(c){ return c==='oui'?'Payée':c==='non'?'Non payée':'Partielle'; }
+
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = data.length ? '' : '<tr><td colspan="9" style="text-align:center;color:var(--gray);padding:2rem">Aucun membre trouvé</td></tr>';
+  data.forEach(m => {
+    const initials = (m.prenom[0]||'') + (m.nom[0]||'');
+    tbody.innerHTML += `
+    <tr data-id="${m.id}">
+      <td style="color:var(--gray);font-size:.85rem">${m.id}</td>
+      <td><div style="display:flex;align-items:center;gap:.7rem">
+        <div class="avatar">${initials}</div>
+        <div><div class="member-name">${m.prenom} ${m.nom}</div><div class="member-email">${m.email}</div></div>
+      </div></td>
+      <td style="color:var(--gray);font-size:.88rem">${m.telephone||'—'}</td>
+      <td>${m.equipe||'<span style="color:var(--gray)">—</span>'}</td>
+      <td><code style="font-size:.8rem;color:var(--accent)">${m.licence||'—'}</code></td>
+      <td style="color:var(--gray);font-size:.85rem">${m.adhesion}</td>
+      <td><span class="badge ${badgeCot(m.cotisation)}">${cotLabel(m.cotisation)}</span></td>
+      <td><span class="badge ${badgeStatut(m.statut)}">${m.statut}</span></td>
+      <td>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn btn-sm btn-outline" onclick="openEdit(${m.id})" title="Modifier"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteMember(${m.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('membresTable-info').textContent = `${data.length} membre(s) affiché(s)`;
+}
+
+function getFiltered() {
+  const q = document.getElementById('membresTable-search').value.toLowerCase();
+  const eq = document.getElementById('filterEquipe').value;
+  const st = document.getElementById('filterStatut').value;
+  const ct = document.getElementById('filterCotisation').value;
+  return members.filter(m => {
+    const txt = `${m.nom} ${m.prenom} ${m.email} ${m.licence}`.toLowerCase();
+    return (!q || txt.includes(q))
+      && (!eq || m.equipe === eq)
+      && (!st || m.statut === st)
+      && (!ct || m.cotisation === ct);
+  });
+}
+
+function filterTable() { renderTable(getFiltered()); }
+
+document.getElementById('membresTable-search').addEventListener('input', filterTable);
+
+function openAdd() {
+  document.getElementById('modalTitle').textContent = 'Ajouter un Membre';
+  document.getElementById('memberForm').reset();
+  document.getElementById('memberId').value = '';
+  document.getElementById('mAdhesion').value = new Date().toISOString().split('T')[0];
+  Modal.open('memberModal');
+}
+
+function openEdit(id) {
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('modalTitle').textContent = 'Modifier le Membre';
+  document.getElementById('memberId').value = m.id;
+  document.getElementById('mNom').value = m.nom;
+  document.getElementById('mPrenom').value = m.prenom;
+  document.getElementById('mEmail').value = m.email;
+  document.getElementById('mTel').value = m.telephone || '';
+  document.getElementById('mEquipe').value = m.equipe_id || '';
+  document.getElementById('mLicence').value = m.licence || '';
+  document.getElementById('mAdhesion').value = m.adhesion;
+  document.getElementById('mCotisation').value = m.cotisation;
+  document.getElementById('mStatut').value = m.statut;
+  document.getElementById('mNotes').value = m.notes || '';
+  Modal.open('memberModal');
+}
+
+function saveMember() {
+  const form = document.getElementById('memberForm');
+  if (!Validator.validate(form)) return;
+  const id = document.getElementById('memberId').value;
+  const equipeId = document.getElementById('mEquipe').value;
+  const equipeNom = equipeId ? equipeNames[equipeId].replace(/^[^ ]+ /,'') : '';
+  const data = {
+    id: id ? +id : nextId++,
+    nom: document.getElementById('mNom').value,
+    prenom: document.getElementById('mPrenom').value,
+    email: document.getElementById('mEmail').value,
+    telephone: document.getElementById('mTel').value,
+    equipe: equipeNom,
+    equipe_id: equipeId,
+    licence: document.getElementById('mLicence').value,
+    adhesion: document.getElementById('mAdhesion').value,
+    cotisation: document.getElementById('mCotisation').value,
+    statut: document.getElementById('mStatut').value,
+    notes: document.getElementById('mNotes').value,
+  };
+  if (id) {
+    const idx = members.findIndex(m => m.id === +id);
+    if (idx >= 0) members[idx] = data;
+    apiSaveMember(data,false).then(r=>Toast.success(r.message||'Membre mis à jour !'));
+  } else {
+    members.push(data);
+    apiSaveMember(data,true).then(r=>Toast.success(r.message||'Membre ajouté !'));
+  }
+  Modal.close('memberModal');
+  filterTable();
+}
+
+function deleteMember(id) {
+  confirmAction('Supprimer ce membre définitivement ?', () => {
+    members = members.filter(m => m.id !== id);
+    Toast.success('Membre supprimé.');
+    filterTable();
+  });
+}
+
+function getTableData() {
+  return members.map(m => ({
+    'ID': m.id, 'Nom': m.nom, 'Prénom': m.prenom,
+    'Email': m.email, 'Téléphone': m.telephone||'',
+    'Équipe': m.equipe||'', 'Licence': m.licence||'',
+    'Adhésion': m.adhesion, 'Cotisation': m.cotisation, 'Statut': m.statut
+  }));
+}
+
+// Init
+renderTable(members);
+</script>
+
+<script>
+// Load members from API on page load, fallback to demo data
+(async function loadMembresFromAPI() {
+  try {
+    const res = await fetch('../../api/membres.php?per_page=100');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    // Replace demo members with API data
+    members = json.data.map(m => ({
+      id: m.id,
+      nom: m.nom,
+      prenom: m.prenom,
+      email: m.email,
+      telephone: m.telephone || '',
+      equipe: m.equipe || '',
+      equipe_id: '',
+      licence: m.numero_licence || '',
+      adhesion: m.date_adhesion || '',
+      cotisation: m.cotisation_payee || 'non',
+      statut: m.statut || 'actif',
+      sexe: '',
+      notes: '',
+      role: m.role || 'participant',
+    }));
+    filterTable();
+  } catch(e) {
+    console.info('Members API offline, using demo data.');
+  }
+})();
+
+// Save member to API
+async function apiSaveMember(data, isNew) {
+  try {
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '../../api/membres.php' : `../../api/membres.php?id=${data.id}`;
+    const res = await fetch(url, {
+      method,
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch(e) {
+    return { success: true, message: '(mode démo)' };
+  }
+}
+
+// Delete member via API
+async function apiDeleteMember(id) {
+  try {
+    const res = await fetch(`../../api/membres.php?id=${id}`, { method: 'DELETE' });
+    return await res.json();
+  } catch(e) {
+    return { success: true };
+  }
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

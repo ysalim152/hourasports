@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sessions — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link active"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Sessions</span></div>
+        <h1 class="page-title">Sessions d'Entraînement</h1>
+        <p class="page-subtitle">Planifier et gérer toutes les sessions du club</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="Export.csv(getSessData(),'sessions.csv')"><i class="fas fa-file-csv"></i> Exporter</button>
+        <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="fas fa-plus"></i> Nouvelle Session</button>
+      </div>
+    </div>
+
+    <!-- KPI mini -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card blue"><div class="kpi-icon" style="font-size:1.4rem">🗓️</div><div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-label">Total</div></div></div>
+      <div class="kpi-card green"><div class="kpi-icon" style="font-size:1.4rem">✅</div><div><div class="kpi-value" id="kpiPlanifie">0</div><div class="kpi-label">Planifiées</div></div></div>
+      <div class="kpi-card orange"><div class="kpi-icon" style="font-size:1.4rem">⚽</div><div><div class="kpi-value" id="kpiMatch">0</div><div class="kpi-label">Matchs</div></div></div>
+      <div class="kpi-card red"><div class="kpi-icon" style="font-size:1.4rem">❌</div><div><div class="kpi-value" id="kpiAnnule">0</div><div class="kpi-label">Annulées</div></div></div>
+    </div>
+
+    <!-- FILTRES -->
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon"><i class="fas fa-search"></i></span>
+        <input type="text" id="sessSearch" class="form-control" placeholder="Rechercher..." oninput="renderSessions()">
+      </div>
+      <select id="sessType" class="form-control" style="max-width:160px" onchange="renderSessions()">
+        <option value="">Tous types</option>
+        <option value="entrainement">Entraînement</option>
+        <option value="match">Match</option>
+        <option value="tournoi">Tournoi</option>
+        <option value="competition">Compétition</option>
+      </select>
+      <select id="sessStatut" class="form-control" style="max-width:160px" onchange="renderSessions()">
+        <option value="">Tous statuts</option>
+        <option value="planifie">Planifié</option>
+        <option value="en_cours">En cours</option>
+        <option value="termine">Terminé</option>
+        <option value="annule">Annulé</option>
+      </select>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr><th>#</th><th>Titre</th><th>Type</th><th>Équipe</th><th>Coach</th><th>Date</th><th>Lieu</th><th>Statut</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="sessTbody"></tbody>
+      </table>
+    </div>
+    <div id="sessInfo" style="color:var(--gray);font-size:.85rem;margin-top:.6rem;text-align:right"></div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="sessModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title" id="sessModalTitle">Nouvelle Session</span>
+      <span class="modal-close" onclick="Modal.close('sessModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <form id="sessForm" novalidate>
+        <input type="hidden" id="sessId">
+        <div class="form-group">
+          <label class="form-label">Titre *</label>
+          <input type="text" id="ssTitre" class="form-control" placeholder="Ex: Entraînement Football Lundi" data-rules="required" required>
+          <span class="form-error" data-error="titre"></span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type *</label>
+            <select id="ssType" class="form-control" data-rules="required" required>
+              <option value="">— Choisir —</option>
+              <option value="entrainement">🏋️ Entraînement</option>
+              <option value="match">⚽ Match</option>
+              <option value="tournoi">🏆 Tournoi</option>
+              <option value="competition">🥇 Compétition</option>
+              <option value="autre">📌 Autre</option>
+            </select>
+            <span class="form-error" data-error="type"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Équipe</label>
+            <select id="ssEquipe" class="form-control">
+              <option value="">— Aucune —</option>
+              <option value="Équipe A Football">⚽ Équipe A Football</option>
+              <option value="Équipe U17">⚽ Équipe U17</option>
+              <option value="Team Basketball">🏀 Basketball</option>
+              <option value="Club Tennis">🎾 Tennis</option>
+              <option value="Natation Seniors">🏊 Natation</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date & Heure début *</label>
+            <input type="datetime-local" id="ssDebut" class="form-control" data-rules="required" required>
+            <span class="form-error" data-error="date_debut"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date & Heure fin *</label>
+            <input type="datetime-local" id="ssFin" class="form-control" data-rules="required" required>
+            <span class="form-error" data-error="date_fin"></span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Lieu</label>
+            <input type="text" id="ssLieu" class="form-control" placeholder="Terrain Principal">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coach</label>
+            <select id="ssCoach" class="form-control">
+              <option value="">— Aucun —</option>
+              <option value="Sophie Martin">Sophie Martin</option>
+              <option value="Karim Benali">Karim Benali</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Capacité</label>
+            <input type="number" id="ssCapacite" class="form-control" placeholder="20" min="1" max="200">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select id="ssStatut" class="form-control">
+              <option value="planifie">Planifié</option>
+              <option value="en_cours">En cours</option>
+              <option value="termine">Terminé</option>
+              <option value="annule">Annulé</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="ssDesc" class="form-control" rows="3" placeholder="Objectifs, consignes..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="Modal.close('sessModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSess()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+const typeLabels = {entrainement:'🏋️ Entraînement',match:'⚽ Match',tournoi:'🏆 Tournoi',competition:'🥇 Compétition',autre:'📌 Autre'};
+const statutBadge = {planifie:'badge-info',en_cours:'badge-warning',termine:'badge-success',annule:'badge-danger'};
+
+let sessions = [
+  {id:1,titre:'Entraînement Football Lundi',type:'entrainement',equipe:'Équipe A Football',coach:'Sophie Martin',debut:'2025-05-05T09:00',fin:'2025-05-05T11:00',lieu:'Terrain Principal',capacite:20,statut:'planifie',desc:''},
+  {id:2,titre:'Match Amical U17',type:'match',equipe:'Équipe U17',coach:'Sophie Martin',debut:'2025-05-10T15:00',fin:'2025-05-10T17:00',lieu:'Stade Municipal',capacite:null,statut:'planifie',desc:'Match contre équipe voisine'},
+  {id:3,titre:'Entraînement Basketball',type:'entrainement',equipe:'Team Basketball',coach:'Karim Benali',debut:'2025-05-06T14:00',fin:'2025-05-06T16:00',lieu:'Salle Omnisports',capacite:15,statut:'planifie',desc:''},
+  {id:4,titre:'Tournoi Tennis Printemps',type:'tournoi',equipe:'Club Tennis',coach:'',debut:'2025-05-12T08:00',fin:'2025-05-12T18:00',lieu:'Courts Couverts',capacite:32,statut:'planifie',desc:'Tournoi interne'},
+  {id:5,titre:'Natation Seniors Mercredi',type:'entrainement',equipe:'Natation Seniors',coach:'',debut:'2025-05-07T07:00',fin:'2025-05-07T09:00',lieu:'Piscine Olympique',capacite:20,statut:'termine',desc:''},
+  {id:6,titre:'Compétition Athlétisme',type:'competition',equipe:'',coach:'',debut:'2025-04-20T09:00',fin:'2025-04-20T17:00',lieu:'Stade Régional',capacite:null,statut:'termine',desc:'Championnat wilaya'},
+];
+let nextSessId = 7;
+
+function formatDT(s){if(!s)return'—';const d=new Date(s);return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+
+function updateKPIs(data) {
+  document.getElementById('kpiTotal').textContent = data.length;
+  document.getElementById('kpiPlanifie').textContent = data.filter(s=>s.statut==='planifie').length;
+  document.getElementById('kpiMatch').textContent = data.filter(s=>s.type==='match').length;
+  document.getElementById('kpiAnnule').textContent = data.filter(s=>s.statut==='annule').length;
+}
+
+function getFiltered() {
+  const q = document.getElementById('sessSearch').value.toLowerCase();
+  const t = document.getElementById('sessType').value;
+  const st = document.getElementById('sessStatut').value;
+  return sessions.filter(s =>
+    (!q || s.titre.toLowerCase().includes(q) || (s.equipe||'').toLowerCase().includes(q))
+    && (!t || s.type === t)
+    && (!st || s.statut === st)
+  );
+}
+
+function renderSessions() {
+  const data = getFiltered();
+  updateKPIs(data);
+  document.getElementById('sessInfo').textContent = `${data.length} session(s)`;
+  const tbody = document.getElementById('sessTbody');
+  tbody.innerHTML = data.length ? '' : '<tr><td colspan="9" style="text-align:center;color:var(--gray);padding:2rem">Aucune session trouvée</td></tr>';
+  data.forEach(s => {
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--gray)">${s.id}</td>
+      <td><strong style="color:var(--white)">${s.titre}</strong>${s.desc?`<div style="font-size:.78rem;color:var(--gray)">${s.desc.substring(0,40)}</div>`:''}</td>
+      <td>${typeLabels[s.type]||s.type}</td>
+      <td style="color:var(--gray);font-size:.85rem">${s.equipe||'—'}</td>
+      <td style="color:var(--gray);font-size:.85rem">${s.coach||'—'}</td>
+      <td style="font-size:.82rem;color:var(--light)">${formatDT(s.debut)}</td>
+      <td style="color:var(--gray);font-size:.85rem">${s.lieu||'—'}</td>
+      <td><span class="badge ${statutBadge[s.statut]||'badge-info'}">${s.statut.replace('_',' ')}</span></td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="btn btn-sm btn-outline" onclick="openEdit(${s.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-warning" onclick="changeStatut(${s.id})" title="Changer statut"><i class="fas fa-sync"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSess(${s.id})"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+}
+
+function openAdd() {
+  document.getElementById('sessModalTitle').textContent = 'Nouvelle Session';
+  document.getElementById('sessForm').reset();
+  document.getElementById('sessId').value = '';
+  // default dates
+  const now = new Date();
+  now.setMinutes(0,0,0);
+  document.getElementById('ssDebut').value = now.toISOString().slice(0,16);
+  const end = new Date(now.getTime() + 2*3600000);
+  document.getElementById('ssFin').value = end.toISOString().slice(0,16);
+  Modal.open('sessModal');
+}
+
+function openEdit(id) {
+  const s = sessions.find(x=>x.id===id);
+  if(!s) return;
+  document.getElementById('sessModalTitle').textContent = 'Modifier la Session';
+  document.getElementById('sessId').value = s.id;
+  document.getElementById('ssTitre').value = s.titre;
+  document.getElementById('ssType').value = s.type;
+  document.getElementById('ssEquipe').value = s.equipe||'';
+  document.getElementById('ssDebut').value = s.debut;
+  document.getElementById('ssFin').value = s.fin;
+  document.getElementById('ssLieu').value = s.lieu||'';
+  document.getElementById('ssCoach').value = s.coach||'';
+  document.getElementById('ssCapacite').value = s.capacite||'';
+  document.getElementById('ssStatut').value = s.statut;
+  document.getElementById('ssDesc').value = s.desc||'';
+  Modal.open('sessModal');
+}
+
+function saveSess() {
+  const titre = document.getElementById('ssTitre').value.trim();
+  const type = document.getElementById('ssType').value;
+  if (!titre || !type) { Toast.error('Titre et type sont obligatoires.'); return; }
+  const id = document.getElementById('sessId').value;
+  const data = {
+    id: id ? +id : nextSessId++,
+    titre, type,
+    equipe: document.getElementById('ssEquipe').value,
+    debut: document.getElementById('ssDebut').value,
+    fin: document.getElementById('ssFin').value,
+    lieu: document.getElementById('ssLieu').value,
+    coach: document.getElementById('ssCoach').value,
+    capacite: +document.getElementById('ssCapacite').value||null,
+    statut: document.getElementById('ssStatut').value,
+    desc: document.getElementById('ssDesc').value,
+  };
+  if (id) {
+    const idx = sessions.findIndex(s=>s.id===+id);
+    if(idx>=0) sessions[idx]=data;
+    Toast.success('Session mise à jour !');
+  } else {
+    sessions.push(data);
+    Toast.success('Session créée !');
+  }
+  Modal.close('sessModal');
+  renderSessions();
+}
+
+function changeStatut(id) {
+  const s = sessions.find(x=>x.id===id);
+  if(!s) return;
+  const order = ['planifie','en_cours','termine','annule'];
+  const next = order[(order.indexOf(s.statut)+1)%order.length];
+  s.statut = next;
+  Toast.info(`Statut → ${next.replace('_',' ')}`);
+  renderSessions();
+}
+
+function deleteSess(id) {
+  confirmAction('Supprimer cette session ?', () => {
+    sessions = sessions.filter(s=>s.id!==id);
+    Toast.success('Session supprimée.');
+    renderSessions();
+  });
+}
+
+function getSessData() {
+  return sessions.map(s=>({'ID':s.id,'Titre':s.titre,'Type':s.type,'Équipe':s.equipe,'Début':s.debut,'Fin':s.fin,'Lieu':s.lieu,'Statut':s.statut}));
+}
+
+renderSessions();
+</script>
+
+<script>
+(async function loadSessionsFromAPI() {
+  try {
+    const res = await fetch('../../api/sessions.php');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    sessions = json.data.map(s => ({
+      id: s.id, titre: s.titre, type: s.type,
+      equipe: s.equipe || '', debut: (s.date_debut||'').replace(' ','T').substring(0,16),
+      fin: (s.date_fin||'').replace(' ','T').substring(0,16),
+      lieu: s.lieu || '', coach: s.coach || '',
+      capacite: s.capacite || null, statut: s.statut, desc: '',
+    }));
+    renderSessions();
+  } catch(e) { console.info('Sessions API offline, using demo data.'); }
+})();
+
+async function apiSaveSession(data, isNew) {
+  try {
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '../../api/sessions.php' : `../../api/sessions.php?id=${data.id}`;
+    const payload = {
+      titre: data.titre, type: data.type, lieu: data.lieu,
+      date_debut: data.debut, date_fin: data.fin,
+      description: data.desc, capacite: data.capacite,
+      statut: data.statut,
+    };
+    const res = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+
+async function apiDeleteSession(id) {
+  try {
+    const res = await fetch(`../../api/sessions.php?id=${id}`, {method:'DELETE'});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

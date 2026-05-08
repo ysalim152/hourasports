@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualités — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .news-thumb{width:48px;height:48px;border-radius:var(--radius);background:linear-gradient(135deg,var(--secondary),var(--dark));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+    .editor-toolbar{display:flex;flex-wrap:wrap;gap:.3rem;padding:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0}
+    .editor-btn{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray);font-size:.82rem;transition:var(--transition);border:1px solid transparent;background:none}
+    .editor-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .editor-btn.active{background:rgba(230,57,70,.15);color:var(--primary);border-color:rgba(230,57,70,.3)}
+    .editor-sep{width:1px;background:rgba(255,255,255,.1);margin:.2rem .15rem}
+    #editorContent{min-height:200px;padding:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:0 0 var(--radius) var(--radius);color:var(--light);font-family:var(--font-body);font-size:.95rem;line-height:1.8;outline:none}
+    #editorContent:focus{border-color:var(--primary)}
+    #editorContent h2{font-family:var(--font-display);font-size:1.6rem;color:var(--white);margin:.8rem 0 .4rem}
+    #editorContent h3{font-family:var(--font-display);font-size:1.3rem;color:var(--white);margin:.6rem 0 .3rem}
+    #editorContent p{margin:.4rem 0}
+    #editorContent ul,#editorContent ol{padding-left:1.5rem;margin:.4rem 0}
+    #editorContent a{color:var(--primary)}
+    #editorContent blockquote{border-left:3px solid var(--primary);padding:.3rem .8rem;margin:.4rem 0;color:var(--gray);font-style:italic}
+    .char-count{font-size:.75rem;color:var(--gray);text-align:right;margin-top:.3rem}
+    .img-preview{width:100%;height:140px;border-radius:var(--radius);object-fit:cover;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:var(--gray);cursor:pointer;transition:var(--transition);font-size:.85rem}
+    .img-preview:hover{border-color:var(--primary);color:var(--primary)}
+    .tag-input-wrap{display:flex;flex-wrap:wrap;gap:.4rem;padding:.5rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:var(--radius);cursor:text}
+    .tag-chip{background:rgba(230,57,70,.15);color:var(--primary);border:1px solid rgba(230,57,70,.3);padding:.15rem .6rem;border-radius:20px;font-size:.75rem;font-weight:700;display:flex;align-items:center;gap:.3rem}
+    .tag-chip i{cursor:pointer;font-size:.65rem}
+    .tag-chip i:hover{color:var(--danger)}
+    .tag-input{background:none;border:none;color:var(--light);font-size:.85rem;min-width:80px;outline:none}
+    .views-sparkline{display:flex;align-items:flex-end;gap:2px;height:24px}
+    .spark-bar{width:6px;border-radius:2px 2px 0 0;background:rgba(230,57,70,.4);transition:background .2s}
+    .spark-bar:hover{background:var(--primary)}
+    .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.35rem}
+    .modal.wide{max-width:860px}
+    .editor-cols{display:grid;grid-template-columns:1fr 280px;gap:1.5rem}
+    @media(max-width:760px){.editor-cols{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link active"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Actualités</span></div>
+        <h1 class="page-title">Gestion des Actualités</h1>
+        <p class="page-subtitle">Créer et publier des articles sur le blog de l'association</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="filterBy('all')"><i class="fas fa-list"></i> Tous</button>
+        <button class="btn btn-primary btn-sm" onclick="openNewArticle()"><i class="fas fa-plus"></i> Nouvel Article</button>
+      </div>
+    </div>
+
+    <!-- KPI mini -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card blue"><div class="kpi-icon" style="font-size:1.3rem">📰</div><div><div class="kpi-value" id="kTotal">0</div><div class="kpi-label">Total</div></div></div>
+      <div class="kpi-card green"><div class="kpi-icon" style="font-size:1.3rem">✅</div><div><div class="kpi-value" id="kPublie">0</div><div class="kpi-label">Publiés</div></div></div>
+      <div class="kpi-card orange"><div class="kpi-icon" style="font-size:1.3rem">📝</div><div><div class="kpi-value" id="kBrouillon">0</div><div class="kpi-label">Brouillons</div></div></div>
+      <div class="kpi-card red"><div class="kpi-icon" style="font-size:1.3rem">👁️</div><div><div class="kpi-value" id="kVues">0</div><div class="kpi-label">Vues totales</div></div></div>
+    </div>
+
+    <!-- TABS + SEARCH -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem">
+      <div style="display:flex;gap:.4rem;background:rgba(255,255,255,.04);padding:.3rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,.07)">
+        <button class="filter-tab active" onclick="filterBy('all',this)">Tous</button>
+        <button class="filter-tab" onclick="filterBy('publie',this)">Publiés</button>
+        <button class="filter-tab" onclick="filterBy('brouillon',this)">Brouillons</button>
+        <button class="filter-tab" onclick="filterBy('archive',this)">Archivés</button>
+      </div>
+      <div style="display:flex;gap:.7rem;align-items:center">
+        <div class="search-input-wrap" style="min-width:0">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input type="text" id="newsSearch" class="form-control" placeholder="Rechercher..." oninput="renderNews()" style="padding-left:2.3rem;width:200px">
+        </div>
+        <select id="catFilter" class="form-control" style="max-width:150px" onchange="renderNews()">
+          <option value="">Catégorie</option>
+          <option>Football</option><option>Basketball</option><option>Tennis</option>
+          <option>Natation</option><option>Association</option><option>Événement</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <thead><tr><th>Article</th><th>Catégorie</th><th>Auteur</th><th>Statut</th><th>Vues</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="newsTbody"></tbody>
+      </table>
+    </div>
+    <div id="newsInfo" style="color:var(--gray);font-size:.82rem;margin-top:.6rem;text-align:right"></div>
+  </main>
+</div>
+
+<!-- MODAL ÉDITEUR -->
+<div class="modal-overlay" id="editorModal">
+  <div class="modal wide">
+    <div class="modal-header">
+      <span class="modal-title" id="editorTitle">Nouvel Article</span>
+      <span class="modal-close" onclick="Modal.close('editorModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="editor-cols">
+        <!-- COLONNE PRINCIPALE -->
+        <div>
+          <div class="form-group">
+            <label class="form-label">Titre *</label>
+            <input type="text" id="aTitre" class="form-control" placeholder="Titre accrocheur de l'article..." oninput="genSlug(this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slug (URL)</label>
+            <input type="text" id="aSlug" class="form-control" placeholder="titre-de-l-article" style="font-family:monospace;font-size:.85rem">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Extrait</label>
+            <textarea id="aExtrait" class="form-control" rows="2" placeholder="Résumé court affiché en aperçu..." oninput="updateCharCount(this)"></textarea>
+            <div class="char-count" id="extraitCount">0 / 200 caractères</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contenu *</label>
+            <div class="editor-toolbar">
+              <button class="editor-btn" onclick="fmt('bold')" title="Gras"><i class="fas fa-bold"></i></button>
+              <button class="editor-btn" onclick="fmt('italic')" title="Italique"><i class="fas fa-italic"></i></button>
+              <button class="editor-btn" onclick="fmt('underline')" title="Souligné"><i class="fas fa-underline"></i></button>
+              <div class="editor-sep"></div>
+              <button class="editor-btn" onclick="fmtBlock('h2')" title="Titre 2">H2</button>
+              <button class="editor-btn" onclick="fmtBlock('h3')" title="Titre 3">H3</button>
+              <div class="editor-sep"></div>
+              <button class="editor-btn" onclick="fmt('insertUnorderedList')" title="Liste"><i class="fas fa-list-ul"></i></button>
+              <button class="editor-btn" onclick="fmt('insertOrderedList')" title="Liste numérotée"><i class="fas fa-list-ol"></i></button>
+              <div class="editor-sep"></div>
+              <button class="editor-btn" onclick="fmtBlock('blockquote')" title="Citation"><i class="fas fa-quote-left"></i></button>
+              <button class="editor-btn" onclick="insertLink()" title="Lien"><i class="fas fa-link"></i></button>
+              <div class="editor-sep"></div>
+              <button class="editor-btn" onclick="fmt('justifyLeft')" title="Gauche"><i class="fas fa-align-left"></i></button>
+              <button class="editor-btn" onclick="fmt('justifyCenter')" title="Centre"><i class="fas fa-align-center"></i></button>
+              <button class="editor-btn" onclick="fmt('justifyRight')" title="Droite"><i class="fas fa-align-right"></i></button>
+              <div class="editor-sep"></div>
+              <button class="editor-btn" onclick="fmt('removeFormat')" title="Effacer formatage"><i class="fas fa-eraser"></i></button>
+              <button class="editor-btn" onclick="fmt('undo')" title="Annuler"><i class="fas fa-undo"></i></button>
+              <button class="editor-btn" onclick="fmt('redo')" title="Rétablir"><i class="fas fa-redo"></i></button>
+            </div>
+            <div id="editorContent" contenteditable="true" oninput="updateWordCount()"></div>
+            <div class="char-count" id="wordCount">0 mots</div>
+          </div>
+        </div>
+
+        <!-- COLONNE LATÉRALE -->
+        <div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select id="aStatut" class="form-control">
+              <option value="brouillon">📝 Brouillon</option>
+              <option value="publie">✅ Publié</option>
+              <option value="archive">🗃️ Archivé</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Catégorie</label>
+            <select id="aCat" class="form-control">
+              <option value="">— Choisir —</option>
+              <option>Football</option><option>Basketball</option><option>Tennis</option>
+              <option>Natation</option><option>Association</option><option>Événement</option><option>Résultats</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Image à la une</label>
+            <div class="img-preview" id="imgPreview" onclick="document.getElementById('imgInput').click()">
+              <span><i class="fas fa-cloud-upload-alt" style="margin-right:.4rem"></i>Choisir une image</span>
+            </div>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="previewImg(this)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tags</label>
+            <div class="tag-input-wrap" id="tagWrap" onclick="document.getElementById('tagInput').focus()">
+              <input id="tagInput" class="tag-input" placeholder="Ajouter un tag..." onkeydown="addTag(event)">
+            </div>
+            <small style="color:var(--gray);font-size:.73rem">Appuyez sur Entrée ou virgule pour ajouter</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de publication</label>
+            <input type="datetime-local" id="aPubDate" class="form-control">
+          </div>
+          <!-- Aperçu -->
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1rem;margin-top:.5rem">
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.8rem">Aperçu</div>
+            <div id="previewCard" style="font-size:.82rem">
+              <div style="color:var(--primary);font-size:.73rem;font-weight:700;text-transform:uppercase;margin-bottom:.3rem" id="pvCat">—</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--white);line-height:1.2;margin-bottom:.4rem" id="pvTitle">Titre de l'article</div>
+              <div style="color:var(--gray);font-size:.78rem;line-height:1.5" id="pvExtrait">L'extrait apparaîtra ici...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="aId">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="Modal.close('editorModal')">Annuler</button>
+      <button class="btn btn-warning btn-sm" onclick="saveArticle('brouillon')"><i class="fas fa-save"></i> Brouillon</button>
+      <button class="btn btn-primary btn-sm" onclick="saveArticle('publie')"><i class="fas fa-paper-plane"></i> Publier</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PREVIEW ARTICLE -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header"><span class="modal-title">Aperçu Article</span><span class="modal-close" onclick="Modal.close('previewModal')">✕</span></div>
+    <div class="modal-body" id="previewBody" style="max-height:70vh;overflow-y:auto"></div>
+    <div class="modal-footer"><button class="btn btn-outline btn-sm" onclick="Modal.close('previewModal')">Fermer</button></div>
+  </div>
+</div>
+
+<style>
+.filter-tab{padding:.35rem .9rem;border-radius:4px;border:none;background:transparent;color:var(--gray);font-size:.8rem;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font-body);text-transform:uppercase;letter-spacing:.06em}
+.filter-tab.active,.filter-tab:hover{background:var(--primary);color:white}
+</style>
+<script src="../../assets/js/app.js"></script>
+<script>
+let articles = [
+  {id:1,titre:'Victoire Éclatante en Finale Régionale',slug:'victoire-finale-regionale',extrait:'Notre équipe première a remporté la finale régionale de football avec un score de 3-1.',categorie:'Football',auteur:'Admin Dupont',statut:'publie',vues:342,date:'2025-05-05',tags:['football','victoire','finale'],contenu:'<p>Notre équipe première a remporté la finale régionale...</p>'},
+  {id:2,titre:'Inscriptions Ouvertes Saison 2025-2026',slug:'inscriptions-ouvertes-2025',extrait:'Les inscriptions pour la nouvelle saison sont officiellement ouvertes.',categorie:'Association',auteur:'Admin Dupont',statut:'publie',vues:215,date:'2025-05-01',tags:['inscription','saison'],contenu:'<p>Les inscriptions pour la nouvelle saison...</p>'},
+  {id:3,titre:'Nouveau Coach pour le Basketball',slug:'nouveau-coach-basketball',extrait:'Nous accueillons notre nouveau coach professionnel de basketball.',categorie:'Basketball',auteur:'Admin Dupont',statut:'publie',vues:178,date:'2025-04-28',tags:['basketball','coach'],contenu:'<p>Nous avons le plaisir d\'accueillir...</p>'},
+  {id:4,titre:'Programme des Stages de Vacances',slug:'stages-vacances-2025',extrait:'Découvrez notre programme de stages sportifs pour les vacances d\'été.',categorie:'Événement',auteur:'Coach Martin',statut:'brouillon',vues:0,date:'2025-04-20',tags:['stages','vacances'],contenu:''},
+  {id:5,titre:'Résultats Tournoi Tennis Printemps',slug:'resultats-tournoi-tennis',extrait:'Palmarès complet du tournoi de tennis du printemps 2025.',categorie:'Tennis',auteur:'Admin Dupont',statut:'publie',vues:94,date:'2025-04-15',tags:['tennis','tournoi','résultats'],contenu:'<p>Voici les résultats...</p>'},
+  {id:6,titre:'Rapport Financier 2024',slug:'rapport-financier-2024',extrait:'Bilan financier de l\'exercice 2024.',categorie:'Association',auteur:'Admin Dupont',statut:'archive',vues:56,date:'2025-01-10',tags:['finances','bilan'],contenu:'<p>Le rapport financier...</p>'},
+];
+let nextId=7, currentFilter='all', tags=[];
+
+const statColors={publie:'badge-success',brouillon:'badge-warning',archive:'badge-info'};
+const statIcons={publie:'✅',brouillon:'📝',archive:'🗃️'};
+
+function updateKPIs(data){
+  document.getElementById('kTotal').textContent=data.length;
+  document.getElementById('kPublie').textContent=data.filter(a=>a.statut==='publie').length;
+  document.getElementById('kBrouillon').textContent=data.filter(a=>a.statut==='brouillon').length;
+  document.getElementById('kVues').textContent=data.reduce((s,a)=>s+a.vues,0);
+}
+
+function getFiltered(){
+  const q=document.getElementById('newsSearch').value.toLowerCase();
+  const cat=document.getElementById('catFilter').value;
+  return articles.filter(a=>
+    (currentFilter==='all'||a.statut===currentFilter)
+    &&(!q||a.titre.toLowerCase().includes(q)||a.extrait.toLowerCase().includes(q))
+    &&(!cat||a.categorie===cat)
+  );
+}
+
+function filterBy(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderNews();
+}
+
+function renderNews(){
+  const data=getFiltered();
+  updateKPIs(articles);
+  document.getElementById('newsInfo').textContent=`${data.length} article(s)`;
+  const tbody=document.getElementById('newsTbody');
+  tbody.innerHTML=data.length?'':'<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun article trouvé</td></tr>';
+  data.forEach(a=>{
+    const sparkBars=Array.from({length:7},(_,i)=>`<div class="spark-bar" style="height:${8+Math.random()*14}px"></div>`).join('');
+    tbody.innerHTML+=`<tr>
+      <td><div style="display:flex;align-items:center;gap:.7rem">
+        <div class="news-thumb">${a.categorie==='Football'?'⚽':a.categorie==='Basketball'?'🏀':a.categorie==='Tennis'?'🎾':'📰'}</div>
+        <div><div style="font-weight:700;color:var(--white);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.titre}</div>
+        <div style="font-size:.75rem;color:var(--gray)">${(a.tags||[]).map(t=>`<span style="background:rgba(255,255,255,.06);padding:.08rem .4rem;border-radius:3px;margin-right:.2rem">${t}</span>`).join('')}</div></div>
+      </div></td>
+      <td><span class="badge badge-info" style="font-size:.68rem">${a.categorie}</span></td>
+      <td style="color:var(--gray);font-size:.82rem">${a.auteur}</td>
+      <td><span class="badge ${statColors[a.statut]}">${statIcons[a.statut]} ${a.statut}</span></td>
+      <td><div style="display:flex;align-items:center;gap:.5rem"><div class="views-sparkline">${sparkBars}</div><span style="color:var(--light);font-size:.82rem;font-weight:600">${a.vues}</span></div></td>
+      <td style="color:var(--gray);font-size:.82rem">${a.date}</td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="btn btn-sm btn-outline" onclick="previewArticle(${a.id})" title="Aperçu"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-sm btn-outline" onclick="editArticle(${a.id})" title="Modifier"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-warning" onclick="togglePublish(${a.id})" title="Publier/Dépublier"><i class="fas fa-toggle-${a.statut==='publie'?'on':'off'}"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteArticle(${a.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+}
+
+function openNewArticle(){
+  document.getElementById('editorTitle').textContent='Nouvel Article';
+  document.getElementById('aId').value='';
+  document.getElementById('aTitre').value='';
+  document.getElementById('aSlug').value='';
+  document.getElementById('aExtrait').value='';
+  document.getElementById('editorContent').innerHTML='<p>Commencez à écrire votre article...</p>';
+  document.getElementById('aStatut').value='brouillon';
+  document.getElementById('aCat').value='';
+  document.getElementById('aPubDate').value=new Date().toISOString().slice(0,16);
+  document.getElementById('imgPreview').innerHTML='<span><i class="fas fa-cloud-upload-alt" style="margin-right:.4rem"></i>Choisir une image</span>';
+  tags=[];
+  renderTags();
+  updatePreview();
+  Modal.open('editorModal');
+}
+
+function editArticle(id){
+  const a=articles.find(x=>x.id===id); if(!a) return;
+  document.getElementById('editorTitle').textContent='Modifier l\'Article';
+  document.getElementById('aId').value=a.id;
+  document.getElementById('aTitre').value=a.titre;
+  document.getElementById('aSlug').value=a.slug;
+  document.getElementById('aExtrait').value=a.extrait;
+  document.getElementById('editorContent').innerHTML=a.contenu||'';
+  document.getElementById('aStatut').value=a.statut;
+  document.getElementById('aCat').value=a.categorie||'';
+  tags=[...(a.tags||[])];
+  renderTags();
+  updatePreview();
+  Modal.open('editorModal');
+}
+
+function saveArticle(statut){
+  const titre=document.getElementById('aTitre').value.trim();
+  if(!titre){Toast.error('Le titre est obligatoire.');return;}
+  const id=document.getElementById('aId').value;
+  const data={
+    id:id?+id:nextId++,
+    titre,slug:document.getElementById('aSlug').value,
+    extrait:document.getElementById('aExtrait').value,
+    contenu:document.getElementById('editorContent').innerHTML,
+    statut,
+    categorie:document.getElementById('aCat').value,
+    auteur:'Admin Dupont',
+    vues:0,
+    date:new Date().toISOString().split('T')[0],
+    tags:[...tags],
+  };
+  if(id){const idx=articles.findIndex(a=>a.id===+id);if(idx>=0){data.vues=articles[idx].vues;articles[idx]=data;}Toast.success('Article mis à jour !');}
+  else{articles.push(data);Toast.success(statut==='publie'?'Article publié !':'Brouillon sauvegardé !');}
+  Modal.close('editorModal');
+  renderNews();
+}
+
+function togglePublish(id){
+  const a=articles.find(x=>x.id===id);if(!a) return;
+  a.statut=a.statut==='publie'?'brouillon':'publie';
+  Toast.info(`Article ${a.statut==='publie'?'publié':'dépublié'}.`);
+  renderNews();
+}
+
+function deleteArticle(id){
+  confirmAction('Supprimer cet article définitivement ?',()=>{
+    articles=articles.filter(a=>a.id!==id);Toast.success('Article supprimé.');renderNews();
+  });
+}
+
+function previewArticle(id){
+  const a=articles.find(x=>x.id===id);if(!a) return;
+  document.getElementById('previewBody').innerHTML=`
+    <div style="padding:.5rem 0">
+      <span class="badge badge-info" style="margin-bottom:1rem">${a.categorie}</span>
+      <h2 style="font-family:var(--font-display);font-size:2rem;color:var(--white);margin-bottom:.8rem">${a.titre}</h2>
+      <div style="color:var(--gray);font-size:.82rem;margin-bottom:1.5rem">Par ${a.auteur} · ${a.date} · 👁️ ${a.vues} vues</div>
+      <div style="color:var(--gray);font-style:italic;border-left:3px solid var(--primary);padding:.5rem 1rem;margin-bottom:1.5rem">${a.extrait}</div>
+      <div style="color:var(--light);line-height:1.9">${a.contenu||'<p style="color:var(--gray)">[Contenu vide]</p>'}</div>
+    </div>`;
+  Modal.open('previewModal');
+}
+
+// Editor helpers
+function fmt(cmd){document.execCommand(cmd,false,null);document.getElementById('editorContent').focus();}
+function fmtBlock(tag){document.execCommand('formatBlock',false,tag);}
+function insertLink(){const url=prompt('URL du lien :');if(url)document.execCommand('createLink',false,url);}
+function genSlug(v){document.getElementById('aSlug').value=v.toLowerCase().replace(/[àáâäãåā]/g,'a').replace(/[éèêëē]/g,'e').replace(/[ìíîïī]/g,'i').replace(/[òóôöõøō]/g,'o').replace(/[ùúûüū]/g,'u').replace(/ç/g,'c').replace(/ñ/g,'n').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim('-');updatePreview();}
+function updateCharCount(el){document.getElementById('extraitCount').textContent=`${el.value.length} / 200 caractères`;updatePreview();}
+function updateWordCount(){const txt=document.getElementById('editorContent').innerText||'';document.getElementById('wordCount').textContent=`${txt.trim().split(/\s+/).filter(w=>w).length} mots`;}
+function updatePreview(){
+  document.getElementById('pvTitle').textContent=document.getElementById('aTitre').value||'Titre de l\'article';
+  document.getElementById('pvCat').textContent=document.getElementById('aCat').value||'—';
+  document.getElementById('pvExtrait').textContent=document.getElementById('aExtrait').value||'L\'extrait apparaîtra ici...';
+}
+function previewImg(input){
+  if(!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{document.getElementById('imgPreview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius)">`;}
+  reader.readAsDataURL(input.files[0]);
+}
+function addTag(e){
+  if((e.key==='Enter'||e.key===',')&&e.target.value.trim()){
+    e.preventDefault();const t=e.target.value.trim().replace(',','');
+    if(!tags.includes(t)){tags.push(t);renderTags();}e.target.value='';
+  }
+}
+function removeTag(t){tags=tags.filter(x=>x!==t);renderTags();}
+function renderTags(){
+  const wrap=document.getElementById('tagWrap');
+  const input=document.getElementById('tagInput');
+  wrap.innerHTML='';
+  tags.forEach(t=>{const chip=document.createElement('span');chip.className='tag-chip';chip.innerHTML=`${t}<i class="fas fa-times" onclick="removeTag('${t}')"></i>`;wrap.appendChild(chip);});
+  wrap.appendChild(input);
+}
+document.getElementById('aTitre')?.addEventListener('input',updatePreview);
+document.getElementById('aCat')?.addEventListener('change',updatePreview);
+document.getElementById('aExtrait')?.addEventListener('input',()=>updatePreview());
+renderNews();
+</script>
+
+<script>
+(async function loadArticlesFromAPI() {
+  try {
+    const res = await fetch('../../api/actualites.php');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    articles = json.data.map(a => ({
+      id: a.id, titre: a.titre, slug: a.slug,
+      extrait: a.extrait || '', contenu: a.contenu || '',
+      statut: a.statut, categorie: a.categorie || '',
+      auteur: a.auteur || 'Admin', vues: a.vues || 0,
+      date: (a.published_at||a.created_at||'').substring(0,10),
+      tags: Array.isArray(a.tags) ? a.tags : [],
+    }));
+    renderNews();
+  } catch(e) { console.info('Actualites API offline, using demo data.'); }
+})();
+
+async function apiSaveArticle(data, isNew) {
+  try {
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '../../api/actualites.php' : `../../api/actualites.php?id=${data.id}`;
+    const payload = {
+      titre: data.titre, slug: data.slug, extrait: data.extrait,
+      contenu: data.contenu, statut: data.statut,
+      categorie: data.categorie, tags: data.tags,
+    };
+    const res = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+
+async function apiDeleteArticle(id) {
+  try {
+    const res = await fetch(`../../api/actualites.php?id=${id}`, {method:'DELETE'});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+
+async function apiTogglePublish(id) {
+  try {
+    const res = await fetch(`../../api/actualites.php?action=publish&id=${id}`, {method:'PUT'});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Profil — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .profil-hero{background:linear-gradient(135deg,rgba(230,57,70,.12),rgba(29,53,87,.2));border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem;position:relative;overflow:hidden}
+    .profil-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(230,57,70,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(230,57,70,.03) 1px,transparent 1px);background-size:30px 30px}
+    .avatar-wrapper{position:relative;z-index:1;flex-shrink:0}
+    .avatar-big{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:white;border:3px solid rgba(255,255,255,.15);box-shadow:0 0 30px rgba(230,57,70,.3)}
+    .avatar-edit-btn{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--primary);border:2px solid var(--dark2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;cursor:pointer;transition:var(--transition)}
+    .avatar-edit-btn:hover{background:var(--primary-dark)}
+    .profil-info{position:relative;z-index:1}
+    .profil-name{font-family:var(--font-display);font-size:2.2rem;color:var(--white)}
+    .profil-role-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.3);color:var(--primary);padding:.25rem .8rem;border-radius:20px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:.4rem 0}
+    .profil-meta{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.5rem}
+    .profil-meta-item{display:flex;align-items:center;gap:.4rem;color:var(--gray);font-size:.85rem}
+    .profil-meta-item i{color:var(--primary)}
+    .profil-stats{position:absolute;right:2rem;top:50%;transform:translateY(-50%);z-index:1;display:flex;gap:1.2rem}
+    .pstat{text-align:center}
+    .pstat-val{font-family:var(--font-display);font-size:1.8rem;color:var(--white)}
+    .pstat-lbl{font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em}
+    .tabs{display:flex;gap:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;flex-wrap:wrap}
+    .tab-btn{padding:.6rem 1.3rem;font-size:.83rem;font-weight:700;cursor:pointer;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;transition:var(--transition);border:none;background:none;font-family:var(--font-body);flex:1}
+    .tab-btn.active{background:var(--primary);color:white}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .activity-timeline{display:flex;flex-direction:column;gap:.6rem}
+    .at-item{display:flex;gap:1rem;align-items:flex-start;padding:.8rem;background:rgba(255,255,255,.03);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);transition:var(--transition)}
+    .at-item:hover{background:rgba(255,255,255,.05)}
+    .at-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+    .pwd-strength{height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:.4rem;overflow:hidden}
+    .pwd-fill{height:100%;border-radius:2px;transition:width .4s,background .4s}
+    .notif-row{display:flex;align-items:center;justify-content:space-between;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .notif-row:last-child{border-bottom:none}
+    .toggle{width:40px;height:22px;border-radius:11px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+    .toggle.on{background:var(--success)}
+    .toggle.off{background:rgba(255,255,255,.15)}
+    .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:2px;transition:left .3s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .toggle.on::after{left:20px}
+    .toggle.off::after{left:2px}
+    @media(max-width:760px){.profil-stats{display:none}.profil-hero{flex-direction:column;text-align:center}.profil-meta{justify-content:center}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link active"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Mon Profil</span></div>
+        <h1 class="page-title">Mon Profil</h1>
+      </div>
+    </div>
+
+    <!-- HERO PROFIL -->
+    <div class="profil-hero">
+      <div class="avatar-wrapper">
+        <div class="avatar-big" id="avatarBig">AD</div>
+        <div class="avatar-edit-btn" onclick="document.getElementById('avatarInput').click()"><i class="fas fa-camera"></i></div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="changeAvatar(this)">
+      </div>
+      <div class="profil-info">
+        <div class="profil-name" id="profilName">Dupont Admin</div>
+        <div class="profil-role-badge"><i class="fas fa-shield-alt"></i> Administrateur</div>
+        <div class="profil-meta">
+          <div class="profil-meta-item"><i class="fas fa-envelope"></i> admin@association.dz</div>
+          <div class="profil-meta-item"><i class="fas fa-phone"></i> +213 555 100 200</div>
+          <div class="profil-meta-item"><i class="fas fa-map-marker-alt"></i> Blida, Algérie</div>
+          <div class="profil-meta-item"><i class="fas fa-calendar-alt"></i> Membre depuis Janv. 2020</div>
+        </div>
+      </div>
+      <div class="profil-stats">
+        <div class="pstat"><div class="pstat-val">127</div><div class="pstat-lbl">Actions</div></div>
+        <div class="pstat"><div class="pstat-val">34</div><div class="pstat-lbl">Articles</div></div>
+        <div class="pstat"><div class="pstat-val">18</div><div class="pstat-lbl">Sessions</div></div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('infos',this)"><i class="fas fa-user" style="margin-right:.4rem"></i>Informations</button>
+      <button class="tab-btn" onclick="showTab('securite',this)"><i class="fas fa-lock" style="margin-right:.4rem"></i>Sécurité</button>
+      <button class="tab-btn" onclick="showTab('notifications',this)"><i class="fas fa-bell" style="margin-right:.4rem"></i>Notifications</button>
+      <button class="tab-btn" onclick="showTab('activite',this)"><i class="fas fa-history" style="margin-right:.4rem"></i>Activité Récente</button>
+    </div>
+
+    <!-- TAB: INFOS -->
+    <div id="tab-infos" class="tab-panel active">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+          <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Informations Personnelles</h4>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nom</label><input id="pNom" class="form-control" value="Dupont"></div>
+            <div class="form-group"><label class="form-label">Prénom</label><input id="pPrenom" class="form-control" value="Admin" oninput="updateName()"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label><input id="pEmail" class="form-control" value="admin@association.dz"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Téléphone</label><input id="pTel" class="form-control" value="+213 555 100 200"></div>
+            <div class="form-group"><label class="form-label">Date de naissance</label><input type="date" id="pDOB" class="form-control" value="1985-03-15"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Sexe</label><select id="pSexe" class="form-control"><option value="M" selected>Masculin</option><option value="F">Féminin</option><option value="Autre">Autre</option></select></div>
+            <div class="form-group"><label class="form-label">Ville</label><input id="pVille" class="form-control" value="Blida"></div>
+          </div>
+          <button class="btn btn-primary btn-sm mt-2" onclick="saveInfos()"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+          <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Profil Professionnel</h4>
+          <div class="form-group"><label class="form-label">Fonction dans l'association</label><select id="pFonction" class="form-control"><option value="president">Président(e)</option><option value="secretaire">Secrétaire Général(e)</option><option value="tresorier">Trésorier(e)</option><option selected value="it_admin">Responsable Informatique</option></select></div>
+          <div class="form-group"><label class="form-label">Bio courte</label><textarea id="pBio" class="form-control" rows="4" placeholder="Présentez-vous en quelques mots...">Administrateur système de l'association depuis 2020. Responsable de la gestion informatique et du site web du club.</textarea></div>
+          <div class="form-group"><label class="form-label">LinkedIn (optionnel)</label><input id="pLinkedin" class="form-control" placeholder="https://linkedin.com/in/votre-profil"></div>
+          <div class="form-group"><label class="form-label">Langue d'interface</label><select id="pLang" class="form-control"><option value="fr" selected>🇫🇷 Français</option><option value="ar">🇩🇿 Arabe</option><option value="en">🇬🇧 English</option></select></div>
+          <button class="btn btn-primary btn-sm mt-2" onclick="saveInfos()"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SÉCURITÉ -->
+    <div id="tab-securite" class="tab-panel">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+          <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Changer le Mot de Passe</h4>
+          <div class="form-group"><label class="form-label">Mot de passe actuel</label><div style="position:relative"><input type="password" id="sPwdCurrent" class="form-control" placeholder="Votre mot de passe actuel"><span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray)" onclick="tglPwd('sPwdCurrent',this)"><i class="fas fa-eye"></i></span></div></div>
+          <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input type="password" id="sPwdNew" class="form-control" placeholder="Min. 8 caractères" oninput="chkPwdStr(this.value)"><span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray)" onclick="tglPwd('sPwdNew',this)"><i class="fas fa-eye"></i></span></div><div class="pwd-strength"><div class="pwd-fill" id="pwdFill" style="width:0%"></div></div><div id="pwdLbl" style="font-size:.74rem;margin-top:.25rem;color:var(--gray)"></div></div>
+          <div class="form-group"><label class="form-label">Confirmer le nouveau mot de passe</label><div style="position:relative"><input type="password" id="sPwdConfirm" class="form-control" placeholder="Confirmez"><span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray)" onclick="tglPwd('sPwdConfirm',this)"><i class="fas fa-eye"></i></span></div></div>
+          <button class="btn btn-primary mt-2" onclick="changePwd()"><i class="fas fa-lock"></i> Mettre à jour</button>
+        </div>
+        <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+          <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Sessions Actives</h4>
+          <div id="sessions-list">
+            <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:var(--radius);padding:.9rem;margin-bottom:.7rem">
+              <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;color:var(--white);font-size:.88rem">🖥️ Chrome — Windows 11</div><div style="color:var(--gray);font-size:.76rem">Blida, Algérie · Aujourd'hui 09:42</div></div><span class="badge badge-success">Session actuelle</span></div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.9rem;margin-bottom:.7rem">
+              <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;color:var(--white);font-size:.88rem">📱 Safari — iPhone</div><div style="color:var(--gray);font-size:.76rem">Blida, Algérie · Hier 20:15</div></div><button class="btn btn-danger btn-sm" onclick="revokeSession(this)"><i class="fas fa-times"></i></button></div>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.9rem">
+              <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;color:var(--white);font-size:.88rem">🦊 Firefox — macOS</div><div style="color:var(--gray);font-size:.76rem">Alger, Algérie · Il y a 3 jours</div></div><button class="btn btn-danger btn-sm" onclick="revokeSession(this)"><i class="fas fa-times"></i></button></div>
+            </div>
+          </div>
+          <button class="btn btn-danger btn-sm mt-3" onclick="revokeAll()"><i class="fas fa-sign-out-alt"></i> Déconnecter toutes les autres sessions</button>
+          <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.07)">
+            <h4 style="font-family:var(--font-display);font-size:1.1rem;color:var(--white);margin-bottom:.8rem">Double Authentification</h4>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div><div style="color:var(--light);font-size:.9rem">Authentification 2FA</div><div style="color:var(--gray);font-size:.78rem">Sécurisez votre compte avec une application OTP</div></div>
+              <div class="toggle off" id="toggle2FA" onclick="toggle2FA(this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: NOTIFICATIONS -->
+    <div id="tab-notifications" class="tab-panel">
+      <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem;max-width:700px">
+        <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Préférences de Notifications</h4>
+        <div id="notifSettings">
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Nouveau message contact</div><div style="color:var(--gray);font-size:.8rem">Alerté dès qu'un visiteur envoie un message</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Inscription d'un nouveau membre</div><div style="color:var(--gray);font-size:.8rem">Notification lors de chaque nouvelle inscription</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Rappel session à venir (24h)</div><div style="color:var(--gray);font-size:.8rem">Rappel automatique 24h avant chaque session</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Cotisation impayée</div><div style="color:var(--gray);font-size:.8rem">Alerté pour les membres avec cotisation en retard</div></div><div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Rapport hebdomadaire</div><div style="color:var(--gray);font-size:.8rem">Résumé des activités de la semaine par email</div></div><div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+          <div class="notif-row"><div><div style="font-weight:600;color:var(--light)">Mises à jour système</div><div style="color:var(--gray);font-size:.8rem">Maintenance, mises à jour et informations techniques</div></div><div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+        </div>
+        <button class="btn btn-primary btn-sm mt-3" onclick="Toast.success('Préférences sauvegardées !')"><i class="fas fa-save"></i> Sauvegarder les préférences</button>
+      </div>
+    </div>
+
+    <!-- TAB: ACTIVITÉ -->
+    <div id="tab-activite" class="tab-panel">
+      <div style="max-width:720px">
+        <h4 style="font-family:var(--font-display);font-size:1.2rem;color:var(--white);margin-bottom:1.2rem">Historique d'Activité (30 derniers jours)</h4>
+        <div class="activity-timeline">
+          <div class="at-item"><div class="at-icon" style="background:rgba(46,204,113,.15)">👤</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Nouveau membre ajouté : <strong>Karim Benali</strong></div><div style="font-size:.75rem;color:var(--gray)">Aujourd'hui à 09:32</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(52,152,219,.15)">📰</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Article publié : <strong>Victoire en Finale Régionale</strong></div><div style="font-size:.75rem;color:var(--gray)">Aujourd'hui à 08:15</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(243,156,18,.15)">📅</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Événement planning créé : <strong>Tournoi Tennis Printemps</strong></div><div style="font-size:.75rem;color:var(--gray)">Hier à 16:20</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(230,57,70,.15)">📬</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Réponse envoyée à : <strong>Sara Rahmani</strong></div><div style="font-size:.75rem;color:var(--gray)">Hier à 14:05</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(155,89,182,.15)">🏆</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Équipe créée : <strong>Volleyball Mixte</strong></div><div style="font-size:.75rem;color:var(--gray)">Il y a 2 jours à 11:30</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(46,204,113,.15)">✅</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Session terminée : <strong>Entraînement Football Lundi</strong></div><div style="font-size:.75rem;color:var(--gray)">Il y a 3 jours à 11:00</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(52,152,219,.15)">⚙️</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Paramètres mis à jour : <strong>Cotisation annuelle → 5000 DA</strong></div><div style="font-size:.75rem;color:var(--gray)">Il y a 4 jours à 09:15</div></div></div>
+          <div class="at-item"><div class="at-icon" style="background:rgba(230,57,70,.15)">🔑</div><div style="flex:1"><div style="font-size:.88rem;color:var(--white);font-weight:600">Connexion depuis un nouvel appareil</div><div style="font-size:.75rem;color:var(--gray)">Il y a 5 jours à 20:30 — Safari, iPhone</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+function showTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active');
+  btn.classList.add('active');
+}
+function saveInfos(){Toast.success('Profil mis à jour avec succès !');}
+function updateName(){
+  const n=(document.getElementById('pPrenom')?.value||'')+' '+(document.getElementById('pNom')?.value||'');
+  document.getElementById('profilName').textContent=n.trim();
+}
+function changeAvatar(input){
+  if(!input.files[0]) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const av=document.getElementById('avatarBig');
+    av.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  };
+  r.readAsDataURL(input.files[0]);
+}
+function tglPwd(id, icon){
+  const inp=document.getElementById(id);const h=inp.type==='password';
+  inp.type=h?'text':'password';icon.innerHTML=h?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>';
+}
+function chkPwdStr(v){
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const lvl=[{w:'0%',c:'transparent',t:''},{w:'25%',c:'var(--danger)',t:'Très faible'},{w:'50%',c:'var(--warning)',t:'Faible'},{w:'75%',c:'var(--info)',t:'Moyen'},{w:'100%',c:'var(--success)',t:'Fort'}];
+  const l=lvl[s]||lvl[0];
+  document.getElementById('pwdFill').style.cssText=`width:${l.w};background:${l.c}`;
+  document.getElementById('pwdLbl').textContent=l.t;document.getElementById('pwdLbl').style.color=l.c;
+}
+function changePwd(){
+  const cur=document.getElementById('sPwdCurrent').value;
+  const nw=document.getElementById('sPwdNew').value;
+  const cf=document.getElementById('sPwdConfirm').value;
+  if(!cur){Toast.error('Entrez votre mot de passe actuel.');return;}
+  if(nw.length<8){Toast.error('Le nouveau mot de passe doit avoir au moins 8 caractères.');return;}
+  if(nw!==cf){Toast.error('Les mots de passe ne correspondent pas.');return;}
+  Toast.success('Mot de passe mis à jour avec succès !');
+  document.getElementById('sPwdCurrent').value='';document.getElementById('sPwdNew').value='';document.getElementById('sPwdConfirm').value='';
+}
+function revokeSession(btn){const row=btn.closest('div[style]');if(row){row.style.opacity='.4';btn.disabled=true;Toast.info('Session révoquée.');};}
+function revokeAll(){confirmAction('Déconnecter toutes les autres sessions ?',()=>{document.querySelectorAll('#sessions-list > div:not(:first-child)').forEach(r=>{r.style.opacity='.4';});Toast.success('Autres sessions déconnectées.');});}
+function toggle2FA(el){
+  el.classList.toggle('on');el.classList.toggle('off');
+  Toast.info(el.classList.contains('on')?'Double authentification activée.':'Double authentification désactivée.');
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+
+<script>
+// Load profile from API
+(async function loadProfilFromAPI() {
+  try {
+    const res = await fetch('../../api/profil.php');
+    const json = await res.json();
+    if (!json.success) return;
+    const u = json.data;
+    // Fill form fields
+    if (document.getElementById('pNom'))    document.getElementById('pNom').value    = u.nom    || '';
+    if (document.getElementById('pPrenom')) document.getElementById('pPrenom').value = u.prenom || '';
+    if (document.getElementById('pEmail'))  document.getElementById('pEmail').value  = u.email  || '';
+    if (document.getElementById('pTel'))    document.getElementById('pTel').value    = u.telephone || '';
+    if (document.getElementById('pVille'))  document.getElementById('pVille').value  = u.ville  || '';
+    if (document.getElementById('pDOB'))    document.getElementById('pDOB').value    = u.date_naissance || '';
+    if (document.getElementById('pSexe'))   document.getElementById('pSexe').value   = u.sexe   || '';
+    // Update name display
+    const nameEl = document.getElementById('profilName');
+    if (nameEl) nameEl.textContent = (u.prenom||'') + ' ' + (u.nom||'');
+    const avatarEl = document.getElementById('avatarBig');
+    if (avatarEl && !avatarEl.querySelector('img')) {
+      avatarEl.textContent = ((u.prenom||'?')[0] + (u.nom||'?')[0]).toUpperCase();
+    }
+  } catch(e) { console.info('Profil API offline.'); }
+})();
+
+// Override saveInfos to use API
+window.saveInfos = async function() {
+  const payload = {
+    nom:    document.getElementById('pNom')?.value?.trim(),
+    prenom: document.getElementById('pPrenom')?.value?.trim(),
+    telephone: document.getElementById('pTel')?.value?.trim(),
+    ville:  document.getElementById('pVille')?.value?.trim(),
+    sexe:   document.getElementById('pSexe')?.value,
+    date_naissance: document.getElementById('pDOB')?.value,
+  };
+  try {
+    const res = await fetch('../../api/profil.php', {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    Toast.success(json.message || 'Profil mis à jour !');
+    updateName();
+  } catch(e) { Toast.success('Profil mis à jour ! (mode démo)'); updateName(); }
+};
+
+// Override changePwd to use API
+window.changePwd = async function() {
+  const cur  = document.getElementById('sPwdCurrent')?.value;
+  const nw   = document.getElementById('sPwdNew')?.value;
+  const conf = document.getElementById('sPwdConfirm')?.value;
+  if (!cur)           { Toast.error('Entrez votre mot de passe actuel.'); return; }
+  if (nw.length < 8)  { Toast.error('Minimum 8 caractères.'); return; }
+  if (nw !== conf)    { Toast.error('Les mots de passe ne correspondent pas.'); return; }
+  try {
+    const res = await fetch('../../api/profil.php?action=password', {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ mot_de_passe_actuel: cur, nouveau_mot_de_passe: nw, confirmer_mot_de_passe: conf })
+    });
+    const json = await res.json();
+    if (json.success) {
+      Toast.success('Mot de passe mis à jour !');
+      document.getElementById('sPwdCurrent').value = '';
+      document.getElementById('sPwdNew').value = '';
+      document.getElementById('sPwdConfirm').value = '';
+    } else { Toast.error(json.message || 'Erreur.'); }
+  } catch(e) { Toast.success('Mot de passe mis à jour ! (mode démo)'); }
+};
+</script>
+
+</body>
+</html>

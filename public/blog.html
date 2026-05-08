@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil — Association Sportive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="blog.html" class="active">Accueil</a></li>
+    <li><a href="activites.html">Activités</a></li>
+    <li><a href="apropos.html">À Propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="espace-membre.html">Mon Espace</a></li>
+    <li><a href="auth/login.html" class="nav-cta" id="navLoginBtn">Connexion</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <span class="hero-badge">⚡ Saison 2024–2025 en cours</span>
+      <h1>L'<span>Excellence</span> Sportive<br>Commence Ici</h1>
+      <p class="hero-subtitle">Rejoignez notre association multidisciplinaire. Football, basketball, tennis, natation et bien plus. Pour tous les niveaux, tous les âges.</p>
+      <div class="hero-actions">
+        <a href="auth/inscrire.html" class="btn btn-primary btn-lg"><i class="fas fa-user-plus"></i> Rejoindre le Club</a>
+        <a href="activites.html" class="btn btn-outline btn-lg"><i class="fas fa-play"></i> Découvrir</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-number" data-counter="320">0</div>
+        <div class="stat-label">Membres Actifs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-counter="8">0</div>
+        <div class="stat-label">Sports</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-counter="15">0</div>
+        <div class="stat-label">Équipes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-counter="42">0</div>
+        <div class="stat-label">Trophées</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-counter="12">0</div>
+        <div class="stat-label">Coachs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-counter="2010">0</div>
+        <div class="stat-label">Fondé en</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACTUALITÉS -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-tag">📰 Actualités</span>
+    <h2 class="section-title">Dernières <span>Nouvelles</span></h2>
+    <p class="section-desc">Restez informés des résultats, événements et annonces du club.</p>
+    <div class="divider"></div>
+  </div>
+  <div class="grid-3" id="newsGrid">
+    <div class="news-card">
+      <div class="news-img">⚽</div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-cat">Football</span>
+          <span>•</span>
+          <span>5 mai 2025</span>
+        </div>
+        <h3 class="news-title">Victoire Éclatante en Finale Régionale</h3>
+        <p class="news-excerpt">Notre équipe première a remporté la finale régionale de football avec un score impressionnant de 3-1 contre les champions sortants.</p>
+      </div>
+      <div class="news-footer">
+        <div class="news-author">
+          <div class="avatar-sm">AD</div>
+          <span>Admin</span>
+        </div>
+        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img">📋</div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-cat">Association</span>
+          <span>•</span>
+          <span>1 mai 2025</span>
+        </div>
+        <h3 class="news-title">Inscriptions Ouvertes Saison 2025-2026</h3>
+        <p class="news-excerpt">Les inscriptions pour la nouvelle saison sportive sont officiellement ouvertes. Nouveaux membres bienvenus dans toutes les disciplines.</p>
+      </div>
+      <div class="news-footer">
+        <div class="news-author"><div class="avatar-sm">AD</div><span>Admin</span></div>
+        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="news-img">🏀</div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-cat">Basketball</span>
+          <span>•</span>
+          <span>28 avr. 2025</span>
+        </div>
+        <h3 class="news-title">Nouveau Coach pour l'Équipe Basketball</h3>
+        <p class="news-excerpt">Nous avons le plaisir d'accueillir notre nouveau coach professionnel. Bienvenue dans la grande famille du club!</p>
+      </div>
+      <div class="news-footer">
+        <div class="news-author"><div class="avatar-sm">AD</div><span>Admin</span></div>
+        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPORTS APERÇU -->
+<div class="section-bg">
+  <section class="section">
+    <div class="section-header">
+      <span class="section-tag">🏅 Disciplines</span>
+      <h2 class="section-title">Nos <span>Sports</span></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="grid-4">
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">⚽</div>
+        <h4 class="card-title">Football</h4>
+        <p class="card-text">3 équipes, 54 joueurs</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🏀</div>
+        <h4 class="card-title">Basketball</h4>
+        <p class="card-text">2 équipes, 24 joueurs</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🎾</div>
+        <h4 class="card-title">Tennis</h4>
+        <p class="card-text">Courts couverts, tournois</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🏊</div>
+        <h4 class="card-title">Natation</h4>
+        <p class="card-text">Piscine olympique, tous niveaux</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🏃</div>
+        <h4 class="card-title">Athlétisme</h4>
+        <p class="card-text">Piste synthétique, stade</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🥋</div>
+        <h4 class="card-title">Arts Martiaux</h4>
+        <p class="card-text">Judo, Karaté, Taekwondo</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🚴</div>
+        <h4 class="card-title">Cyclisme</h4>
+        <p class="card-text">VTT et route, sorties club</p>
+      </div>
+      <div class="card" style="text-align:center;padding:2rem 1rem">
+        <div style="font-size:3rem;margin-bottom:.8rem">🏐</div>
+        <h4 class="card-title">Volleyball</h4>
+        <p class="card-text">Salle et beach-volley</p>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <a href="activites.html" class="btn btn-primary">Voir toutes les activités <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </section>
+</div>
+
+<!-- CTA -->
+<section class="section text-center">
+  <div style="max-width:600px;margin:0 auto">
+    <span class="section-tag">🚀 Rejoignez-nous</span>
+    <h2 class="section-title" style="margin-top:1rem">Prêt à faire partie de<br><span>l'aventure</span>?</h2>
+    <p class="section-desc" style="margin:1.5rem 0">Inscrivez-vous aujourd'hui et bénéficiez d'un accès à toutes nos installations, entraîneurs professionnels et événements exclusifs.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="auth/inscrire.html" class="btn btn-primary btn-lg"><i class="fas fa-user-plus"></i> S'inscrire Maintenant</a>
+      <a href="contact.html" class="btn btn-outline btn-lg"><i class="fas fa-envelope"></i> Nous Contacter</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="blog.html" class="nav-logo" style="margin-bottom:1rem;display:inline-flex"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+      <p class="footer-desc">Club sportif multidisciplinaire fondé en 2010. Excellence, passion, esprit d'équipe.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-x-twitter"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+    <div class="footer-col"><h5>Pages</h5><ul class="footer-links"><li><a href="blog.html">Accueil</a></li><li><a href="activites.html">Activités</a></li><li><a href="apropos.html">À Propos</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div class="footer-col"><h5>Compte</h5><ul class="footer-links"><li><a href="auth/login.html">Connexion</a></li>
+        <li><a href="espace-membre.html">Mon Espace</a></li><li><a href="auth/inscrire.html">Inscription</a></li><li><a href="admin/dashboard.html">Admin</a></li></ul></div>
+    <div class="footer-col"><h5>Contact</h5><ul class="footer-links"><li><a href="mailto:contact@association.dz">contact@association.dz</a></li><li><a href="#">+213 555 123 456</a></li><li><a href="#">12 Rue du Sport, Blida</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 ASClub — Tous droits réservés</span>
+    <span>PHP 8 + MariaDB</span>
+  </div>
+</footer>
+
+<script src="../assets/js/app.js"></script>
+
+<script>
+(async function loadBlogNews() {
+  try {
+    const res = await fetch('../api/actualites.php?statut=publie&per_page=3');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    const grid = document.getElementById('newsGrid');
+    if (!grid) return;
+    const catIcons = {Football:'⚽',Basketball:'🏀',Tennis:'🎾',Natation:'🏊',Association:'📋',Événement:'🏆'};
+    grid.innerHTML = json.data.map(a => `
+      <div class="news-card">
+        <div class="news-img">${catIcons[a.categorie]||'📰'}</div>
+        <div class="news-body">
+          <div class="news-meta">
+            <span class="news-cat">${a.categorie||'Actualité'}</span>
+            <span>•</span>
+            <span>${(a.published_at||a.created_at||'').substring(0,10)}</span>
+          </div>
+          <h3 class="news-title">${a.titre}</h3>
+          <p class="news-excerpt">${a.extrait||''}</p>
+        </div>
+        <div class="news-footer">
+          <div class="news-author">
+            <div class="avatar-sm">${(a.auteur||'?').split(' ').map(w=>w[0]).join('').substring(0,2)}</div>
+            <span>${a.auteur||'Admin'}</span>
+          </div>
+          <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>`).join('');
+  } catch(e) { /* fallback: conserver les articles demo */ }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Présences — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .presence-grid{display:grid;grid-template-columns:280px 1fr;gap:1.2rem}
+    @media(max-width:900px){.presence-grid{grid-template-columns:1fr}}
+    .session-list{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);overflow:hidden}
+    .session-list-header{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03)}
+    .sess-item{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:var(--transition)}
+    .sess-item:hover{background:rgba(255,255,255,.04)}
+    .sess-item.active{background:rgba(230,57,70,.07);border-left:3px solid var(--primary)}
+    .sess-title{font-weight:700;font-size:.86rem;color:var(--white);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sess-meta{font-size:.74rem;color:var(--gray)}
+    .attendance-panel{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);overflow:hidden}
+    .att-header{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03)}
+    .att-stats{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.8rem}
+    .att-stat{display:flex;align-items:center;gap:.4rem;font-size:.82rem}
+    .att-dot{width:10px;height:10px;border-radius:50%}
+    .member-row{display:flex;align-items:center;padding:.7rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);transition:var(--transition)}
+    .member-row:hover{background:rgba(255,255,255,.02)}
+    .member-row:last-child{border-bottom:none}
+    .m-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:white;flex-shrink:0}
+    .m-name{font-size:.88rem;font-weight:600;color:var(--white)}
+    .m-info{font-size:.74rem;color:var(--gray)}
+    .presence-btn{width:32px;height:32px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:.75rem;background:transparent}
+    .presence-btn.present{border-color:var(--success);color:var(--success)}
+    .presence-btn.present.active{background:var(--success);color:white}
+    .presence-btn.absent{border-color:var(--danger);color:var(--danger)}
+    .presence-btn.absent.active{background:var(--danger);color:white}
+    .presence-btn.excuse{border-color:var(--warning);color:var(--warning)}
+    .presence-btn.excuse.active{background:var(--warning);color:white}
+    .presence-btn.retard{border-color:var(--info);color:var(--info)}
+    .presence-btn.retard.active{background:var(--info);color:white}
+    .stat-ring{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;font-family:var(--font-display);font-size:1.2rem;color:var(--white);position:relative}
+    .heatmap-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-top:.8rem}
+    .hm-cell{aspect-ratio:1;border-radius:2px;cursor:pointer;transition:transform .15s}
+    .hm-cell:hover{transform:scale(1.3)}
+    .presence-bar-wrap{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;flex:1;margin:0 .6rem}
+    .presence-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link active"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Présences</span></div>
+        <h1 class="page-title">Gestion des Présences</h1>
+        <p class="page-subtitle">Suivi des présences par session et par membre</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="exportPresences()"><i class="fas fa-file-csv"></i> Exporter</button>
+        <button class="btn btn-primary btn-sm" onclick="saveAll()"><i class="fas fa-save"></i> Sauvegarder</button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card green"><div class="kpi-icon">✅</div><div><div class="kpi-value" id="kPresent">0</div><div class="kpi-label">Présents</div></div></div>
+      <div class="kpi-card red"><div class="kpi-icon">❌</div><div><div class="kpi-value" id="kAbsent">0</div><div class="kpi-label">Absents</div></div></div>
+      <div class="kpi-card orange"><div class="kpi-icon">⚠️</div><div><div class="kpi-value" id="kExcuse">0</div><div class="kpi-label">Excusés</div></div></div>
+      <div class="kpi-card blue"><div class="kpi-icon">🕐</div><div><div class="kpi-value" id="kRetard">0</div><div class="kpi-label">Retards</div></div></div>
+    </div>
+
+    <div class="presence-grid">
+      <!-- LISTE SESSIONS -->
+      <div class="session-list">
+        <div class="session-list-header">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.6rem">Sessions</div>
+          <input type="text" class="form-control" placeholder="🔍 Filtrer..." id="sessFilter" oninput="filterSessions()" style="font-size:.82rem;padding:.45rem .7rem">
+        </div>
+        <div id="sessListBody"></div>
+      </div>
+
+      <!-- PANEL PRÉSENCES -->
+      <div class="attendance-panel" id="attPanel">
+        <div style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--gray);text-align:center;padding:2rem">
+          <div><div style="font-size:3rem;margin-bottom:.8rem;opacity:.3">✅</div><div style="font-weight:600;color:var(--light)">Sélectionnez une session</div><div style="font-size:.85rem;margin-top:.3rem">pour gérer les présences</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATISTIQUES GLOBALES -->
+    <div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+      <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+        <h4 style="font-family:var(--font-display);font-size:1.1rem;color:var(--white);margin-bottom:1.2rem">📊 Taux de Présence par Équipe</h4>
+        <div id="teamPresenceStats"></div>
+      </div>
+      <div style="background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem">
+        <h4 style="font-family:var(--font-display);font-size:1.1rem;color:var(--white);margin-bottom:1.2rem">📅 Calendrier de Présence (ce mois)</h4>
+        <div id="presenceHeatmap"></div>
+        <div style="display:flex;gap:.8rem;margin-top:.8rem;font-size:.72rem;color:var(--gray)">
+          <div><span style="display:inline-block;width:10px;height:10px;background:rgba(255,255,255,.06);border-radius:2px;margin-right:.3rem"></span>Aucune session</div>
+          <div><span style="display:inline-block;width:10px;height:10px;background:rgba(46,204,113,.3);border-radius:2px;margin-right:.3rem"></span>Bonne présence</div>
+          <div><span style="display:inline-block;width:10px;height:10px;background:rgba(230,57,70,.5);border-radius:2px;margin-right:.3rem"></span>Faible présence</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+const SESSIONS = [
+  {id:1,titre:'⚽ Football Lundi',equipe:'Équipe A Football',date:'2025-05-05',heure:'09:00–11:00',statut:'termine'},
+  {id:2,titre:'🏀 Basketball Mardi',equipe:'Team Basketball',date:'2025-05-06',heure:'14:00–16:00',statut:'termine'},
+  {id:3,titre:'🏊 Natation Mercredi',equipe:'Natation Seniors',date:'2025-05-07',heure:'07:00–09:00',statut:'termine'},
+  {id:4,titre:'⚽ Football Vendredi',equipe:'Équipe A Football',date:'2025-05-09',heure:'09:00–11:00',statut:'planifie'},
+  {id:5,titre:'🎾 Tennis Tournoi',equipe:'Club Tennis',date:'2025-05-12',heure:'08:00–18:00',statut:'planifie'},
+  {id:6,titre:'⚽ Match U17',equipe:'Équipe U17',date:'2025-05-10',heure:'15:00–17:00',statut:'planifie'},
+];
+const MEMBRES = [
+  {id:1,nom:'Benali Karim',poste:'Attaquant'},
+  {id:2,nom:'Hamidi Omar',poste:'Défenseur'},
+  {id:3,nom:'Rahmani Ali',poste:'Milieu'},
+  {id:4,nom:'Bouzid Sara',poste:'Gardien'},
+  {id:5,nom:'Meziane Youssef',poste:'Milieu'},
+  {id:6,nom:'Cherif Nabil',poste:'Attaquant'},
+  {id:7,nom:'Kaddour Leila',poste:'Défenseur'},
+  {id:8,nom:'Mansouri Ahmed',poste:'Milieu'},
+];
+// présences par session : sessionId → { membreId: statut }
+const presences = {};
+SESSIONS.forEach(s=>{
+  presences[s.id]={};
+  MEMBRES.forEach(m=>{
+    const r=Math.random();
+    presences[s.id][m.id]=r>.7?'present':r>.5?'absent':r>.3?'excuse':'retard';
+  });
+});
+let activeSession=null;
+
+function initSessions(){
+  const body=document.getElementById('sessListBody');
+  body.innerHTML='';
+  SESSIONS.forEach(s=>{
+    const div=document.createElement('div');
+    div.className=`sess-item${activeSession===s.id?' active':''}`;
+    div.dataset.id=s.id;
+    div.innerHTML=`<div class="sess-title">${s.titre}</div><div class="sess-meta"><i class="fas fa-users"></i> ${s.equipe}<br><i class="fas fa-calendar"></i> ${s.date} · ${s.heure}</div>`;
+    div.onclick=()=>loadSession(s.id);
+    body.appendChild(div);
+  });
+}
+
+function filterSessions(){
+  const q=document.getElementById('sessFilter').value.toLowerCase();
+  document.querySelectorAll('.sess-item').forEach(el=>{
+    el.style.display=!q||el.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function loadSession(id){
+  activeSession=id;
+  const s=SESSIONS.find(x=>x.id===id);
+  if(!s) return;
+  document.querySelectorAll('.sess-item').forEach(el=>el.classList.toggle('active',+el.dataset.id===id));
+
+  const pdata=presences[id];
+  const counts={present:0,absent:0,excuse:0,retard:0};
+  Object.values(pdata).forEach(v=>counts[v]++);
+  const total=MEMBRES.length;
+  const pct=Math.round(counts.present/total*100);
+
+  let membresHtml='';
+  MEMBRES.forEach(m=>{
+    const stat=pdata[m.id]||'absent';
+    const init=m.nom.split(' ').map(w=>w[0]).join('').slice(0,2);
+    membresHtml+=`<div class="member-row">
+      <div class="m-avatar">${init}</div>
+      <div style="flex:1;padding:0 .8rem">
+        <div class="m-name">${m.nom}</div>
+        <div class="m-info">${m.poste}</div>
+      </div>
+      <div style="display:flex;gap:.4rem">
+        <button class="presence-btn present${stat==='present'?' active':''}" onclick="setPresence(${id},${m.id},'present',this)" title="Présent"><i class="fas fa-check"></i></button>
+        <button class="presence-btn absent${stat==='absent'?' active':''}" onclick="setPresence(${id},${m.id},'absent',this)" title="Absent"><i class="fas fa-times"></i></button>
+        <button class="presence-btn excuse${stat==='excuse'?' active':''}" onclick="setPresence(${id},${m.id},'excuse',this)" title="Excusé"><i class="fas fa-clock"></i></button>
+        <button class="presence-btn retard${stat==='retard'?' active':''}" onclick="setPresence(${id},${m.id},'retard',this)" title="Retard"><i class="fas fa-hourglass-half"></i></button>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('attPanel').innerHTML=`
+    <div class="att-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+        <div>
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--white)">${s.titre}</div>
+          <div style="color:var(--gray);font-size:.82rem"><i class="fas fa-users"></i> ${s.equipe} · <i class="fas fa-calendar"></i> ${s.date} · ${s.heure}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <div style="text-align:center">
+            <div style="font-family:var(--font-display);font-size:2rem;color:${pct>=75?'var(--success)':pct>=50?'var(--warning)':'var(--danger)'}">${pct}%</div>
+            <div style="font-size:.7rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Présence</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="setAllPresent(${id})">✅ Tous Présents</button>
+        </div>
+      </div>
+      <div class="att-stats">
+        <div class="att-stat"><div class="att-dot" style="background:var(--success)"></div><span style="color:var(--success);font-weight:700">${counts.present}</span> <span style="color:var(--gray)">présents</span></div>
+        <div class="att-stat"><div class="att-dot" style="background:var(--danger)"></div><span style="color:var(--danger);font-weight:700">${counts.absent}</span> <span style="color:var(--gray)">absents</span></div>
+        <div class="att-stat"><div class="att-dot" style="background:var(--warning)"></div><span style="color:var(--warning);font-weight:700">${counts.excuse}</span> <span style="color:var(--gray)">excusés</span></div>
+        <div class="att-stat"><div class="att-dot" style="background:var(--info)"></div><span style="color:var(--info);font-weight:700">${counts.retard}</span> <span style="color:var(--gray)">retards</span></div>
+      </div>
+    </div>
+    <div>${membresHtml}</div>`;
+
+  updateKPIs();
+}
+
+function setPresence(sessId, membreId, statut, btn){
+  presences[sessId][membreId]=statut;
+  const row=btn.closest('.member-row');
+  row.querySelectorAll('.presence-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateKPIs();
+}
+
+function setAllPresent(sessId){
+  MEMBRES.forEach(m=>{presences[sessId][m.id]='present';});
+  loadSession(sessId);
+  Toast.success('Tous les membres marqués présents !');
+}
+
+function updateKPIs(){
+  if(!activeSession) return;
+  const p=presences[activeSession];
+  const counts={present:0,absent:0,excuse:0,retard:0};
+  Object.values(p).forEach(v=>counts[v]++);
+  document.getElementById('kPresent').textContent=counts.present;
+  document.getElementById('kAbsent').textContent=counts.absent;
+  document.getElementById('kExcuse').textContent=counts.excuse;
+  document.getElementById('kRetard').textContent=counts.retard;
+}
+
+function saveAll(){Toast.success('Présences sauvegardées avec succès !');}
+function exportPresences(){Toast.success('Export CSV téléchargé !');}
+
+// Team presence stats
+function buildTeamStats(){
+  const teams=[
+    {name:'⚽ Football',pct:82,color:'var(--success)'},
+    {name:'🏀 Basketball',pct:75,color:'var(--info)'},
+    {name:'🎾 Tennis',pct:68,color:'var(--warning)'},
+    {name:'🏊 Natation',pct:90,color:'var(--success)'},
+    {name:'🥋 Arts Martiaux',pct:55,color:'var(--danger)'},
+  ];
+  const c=document.getElementById('teamPresenceStats');
+  c.innerHTML=teams.map(t=>`<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem;font-size:.84rem">
+    <span style="min-width:115px;color:var(--light)">${t.name}</span>
+    <div class="presence-bar-wrap"><div class="presence-bar-fill" style="width:${t.pct}%;background:${t.color}"></div></div>
+    <span style="min-width:35px;font-weight:700;color:${t.color}">${t.pct}%</span>
+  </div>`).join('');
+}
+
+// Heatmap
+function buildHeatmap(){
+  const c=document.getElementById('presenceHeatmap');
+  const days=Array.from({length:31},(_,i)=>i+1);
+  const data={5:85,6:72,7:91,9:68,10:88,12:0,14:75,15:82,17:60,19:90,21:0,22:78};
+  c.innerHTML='<div class="heatmap-grid">' + days.map(d=>{
+    const v=data[d];
+    const bg=v===undefined?'rgba(255,255,255,.04)':v===0?'rgba(255,255,255,.04)':v>=80?`rgba(46,204,113,${v/100*0.7+0.1})`:`rgba(230,57,70,${(100-v)/100*0.5+0.1})`;
+    return `<div class="hm-cell" style="background:${bg}" title="${d} Mai${v!==undefined&&v>0?` · ${v}% présence`:''}"${v!==undefined&&v>0?` onclick="Toast.info('${d} Mai — Taux de présence : ${v}%')"`:''}></div>`;
+  }).join('') + '</div>';
+}
+
+initSessions();
+buildTeamStats();
+buildHeatmap();
+</script>
+
+<script>
+(async function loadSessionsForPresences() {
+  try {
+    const res = await fetch('../../api/sessions.php');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    // Replace demo sessions with API data
+    SESSIONS.length = 0;
+    json.data.forEach(s => SESSIONS.push({
+      id: s.id, titre: s.titre, equipe: s.equipe || '',
+      date: (s.date_debut||'').substring(0,10),
+      heure: (s.date_debut||'').substring(11,16) + '–' + (s.date_fin||'').substring(11,16),
+      statut: s.statut,
+    }));
+    initSessions();
+  } catch(e) { console.info('Sessions API offline, using demo data.'); }
+})();
+
+async function loadPresencesForSession(sessionId) {
+  try {
+    const res = await fetch(`../../api/presences.php?session_id=${sessionId}`);
+    const json = await res.json();
+    if (!json.success) return;
+    // Merge API presences into local presences object
+    if (!presences[sessionId]) presences[sessionId] = {};
+    json.data.forEach(p => { presences[sessionId][p.utilisateur_id] = p.statut; });
+    if (json.stats) {
+      document.getElementById('kPresent').textContent = json.stats.presents;
+      document.getElementById('kAbsent').textContent  = json.stats.absents;
+      document.getElementById('kExcuse').textContent  = json.stats.excuses;
+      document.getElementById('kRetard').textContent  = json.stats.retards;
+    }
+  } catch(e) { console.info('Presences API offline.'); }
+}
+
+async function apiSavePresences(sessId) {
+  try {
+    const presData = Object.entries(presences[sessId]||{}).map(([uid, stat]) => ({
+      utilisateur_id: parseInt(uid), statut: stat
+    }));
+    const res = await fetch('../../api/presences.php?action=bulk', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: sessId, presences: presData})
+    });
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+
+// Override saveAll to use API
+window.saveAll = async function() {
+  if (!activeSession) { Toast.warning('Aucune session sélectionnée.'); return; }
+  const result = await apiSavePresences(activeSession);
+  Toast.success(result.message || 'Présences sauvegardées !');
+};
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

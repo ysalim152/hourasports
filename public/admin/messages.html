@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .msg-layout{display:grid;grid-template-columns:320px 1fr;gap:0;min-height:calc(100vh - 140px);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);overflow:hidden}
+    .msg-list{background:var(--dark2);border-right:1px solid rgba(255,255,255,.07);overflow-y:auto}
+    .msg-list-header{padding:1rem;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:var(--dark2);z-index:1}
+    .msg-item{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:var(--transition);position:relative}
+    .msg-item:hover{background:rgba(255,255,255,.04)}
+    .msg-item.active{background:rgba(230,57,70,.07);border-right:3px solid var(--primary)}
+    .msg-item.unread .msg-sender{color:var(--white);font-weight:700}
+    .msg-item.unread::before{content:'';position:absolute;left:.5rem;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--primary)}
+    .msg-sender{color:var(--light);font-size:.88rem;font-weight:600;display:flex;justify-content:space-between;margin-bottom:.2rem}
+    .msg-time{font-size:.72rem;color:var(--gray);font-weight:400}
+    .msg-subject{color:var(--gray);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem}
+    .msg-preview{color:rgba(255,255,255,.35);font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .msg-content{padding:0;display:flex;flex-direction:column}
+    .msg-content-header{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,.07)}
+    .msg-content-body{padding:1.5rem;flex:1;overflow-y:auto}
+    .msg-content-reply{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.07);background:var(--dark2)}
+    .msg-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:white;flex-shrink:0}
+    .msg-bubble{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:1.2rem;line-height:1.8;color:var(--light);font-size:.92rem;position:relative}
+    .msg-bubble::before{content:'';position:absolute;left:1rem;top:-.5rem;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:6px solid rgba(255,255,255,.07)}
+    .reply-bubble{background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.18);border-radius:8px;padding:1.2rem;margin-top:1rem}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:3rem;text-align:center;color:var(--gray)}
+    .empty-state .icon{font-size:3.5rem;margin-bottom:1rem;opacity:.4}
+    @media(max-width:760px){.msg-layout{grid-template-columns:1fr}.msg-list{display:block}.msg-content{display:none}.msg-content.show{display:flex}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link active"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Messages</span></div>
+        <h1 class="page-title">Messages & Contacts</h1>
+        <p class="page-subtitle">Gérez les messages reçus via le formulaire de contact</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="markAllRead()"><i class="fas fa-check-double"></i> Tout marquer lu</button>
+        <button class="btn btn-outline btn-sm" onclick="Export.csv(getMsgData(),'messages.csv')"><i class="fas fa-file-csv"></i> Exporter</button>
+      </div>
+    </div>
+
+    <!-- KPI mini -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card red"><div class="kpi-icon" style="font-size:1.3rem">📬</div><div><div class="kpi-value" id="kNouveaux">0</div><div class="kpi-label">Nouveaux</div></div></div>
+      <div class="kpi-card blue"><div class="kpi-icon" style="font-size:1.3rem">👁️</div><div><div class="kpi-value" id="kLus">0</div><div class="kpi-label">Lus</div></div></div>
+      <div class="kpi-card green"><div class="kpi-icon" style="font-size:1.3rem">↩️</div><div><div class="kpi-value" id="kRepondus">0</div><div class="kpi-label">Répondus</div></div></div>
+      <div class="kpi-card orange"><div class="kpi-icon" style="font-size:1.3rem">📁</div><div><div class="kpi-value" id="kTotal">0</div><div class="kpi-label">Total</div></div></div>
+    </div>
+
+    <div class="msg-layout">
+      <!-- LISTE MESSAGES -->
+      <div class="msg-list">
+        <div class="msg-list-header">
+          <input type="text" class="form-control" placeholder="🔍 Rechercher..." id="msgSearch" oninput="renderList()" style="font-size:.83rem;padding:.55rem .8rem">
+          <div style="display:flex;gap:.3rem;margin-top:.6rem">
+            <button class="btn btn-sm" style="flex:1;font-size:.72rem" id="fAll" onclick="setFilter('all',this)">Tous</button>
+            <button class="btn btn-sm" style="flex:1;font-size:.72rem;background:rgba(230,57,70,.15);color:var(--primary);border-color:rgba(230,57,70,.3)" id="fNew" onclick="setFilter('nouveau',this)">Nouveaux</button>
+            <button class="btn btn-sm" style="flex:1;font-size:.72rem" id="fRep" onclick="setFilter('repondu',this)">Répondus</button>
+          </div>
+        </div>
+        <div id="msgListBody"></div>
+      </div>
+
+      <!-- CONTENU MESSAGE -->
+      <div class="msg-content" id="msgContent">
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <div style="font-weight:700;color:var(--light);margin-bottom:.4rem">Aucun message sélectionné</div>
+          <div style="font-size:.85rem">Cliquez sur un message pour le lire</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+let messages = [
+  {id:1,nom:'Benali Karim',email:'karim@email.com',sujet:'Inscription Basketball',message:'Bonjour, je souhaite inscrire mon fils de 12 ans à l\'équipe de basketball. Quels sont les créneaux disponibles et le tarif ?',statut:'nouveau',date:'2025-05-05 14:32',reponse:''},
+  {id:2,nom:'Hamidi Fatima',email:'fatima.h@gmail.com',sujet:'Renouvellement Cotisation',message:'Bonjour, ma cotisation annuelle arrive à terme le 31 mai. Comment procéder pour le renouvellement ? Puis-je le faire en ligne ?',statut:'nouveau',date:'2025-05-05 11:15',reponse:''},
+  {id:3,nom:'Meziane Omar',email:'omar.mez@outlook.com',sujet:'Demande de Partenariat',message:'Représentant d\'une marque de sport locale, je souhaite discuter d\'un partenariat avec votre association pour la prochaine saison.',statut:'lu',date:'2025-05-04 09:22',reponse:''},
+  {id:4,nom:'Rahmani Sara',email:'sara.r@email.dz',sujet:'Certificat Médical',message:'J\'ai perdu mon certificat médical. Pouvez-vous me dire comment en obtenir un nouveau et si je dois arrêter les entraînements en attendant ?',statut:'repondu',date:'2025-05-03 16:45',reponse:'Bonjour Sara, vous pouvez continuer à vous entraîner. Veuillez apporter un nouveau certificat dès que possible au secrétariat.'},
+  {id:5,nom:'Bouzid Ahmed',email:'ahmed.b@gmail.com',sujet:'Informations Tennis',message:'Je débute au tennis à 35 ans et cherche un club accueillant. Proposez-vous des cours pour adultes débutants ? Y a-t-il un essai gratuit ?',statut:'nouveau',date:'2025-05-03 10:08',reponse:''},
+  {id:6,nom:'Kaddour Leila',email:'leila.k@email.com',sujet:'Tournoi Régional',message:'Notre club est intéressé par une participation au prochain tournoi régional de football. Quelles sont les conditions d\'inscription pour les équipes extérieures ?',statut:'lu',date:'2025-05-02 15:30',reponse:''},
+  {id:7,nom:'Cherif Nabil',email:'nabil.c@email.dz',sujet:'Problème Connexion',message:'Je n\'arrive pas à me connecter à mon espace membre depuis hier. Mon email est bien karim_nabil@email.dz. Pouvez-vous débloquer mon compte ?',statut:'repondu',date:'2025-05-01 08:20',reponse:'Bonjour Nabil, votre compte a été débloqué. Essayez de vous reconnecter, si le problème persiste contactez-nous.'},
+];
+let activeMsg=null, msgFilter='all';
+
+function setFilter(f, btn){
+  msgFilter=f;
+  document.querySelectorAll('#msgListBody').forEach(()=>{});
+  ['fAll','fNew','fRep'].forEach(id=>{ const b=document.getElementById(id); if(b){b.style.background='transparent';b.style.color='var(--gray)';b.style.borderColor='rgba(255,255,255,.1)';}});
+  if(btn){btn.style.background='var(--primary)';btn.style.color='white';btn.style.borderColor='var(--primary)';}
+  renderList();
+}
+
+function updateKPIs(){
+  document.getElementById('kNouveaux').textContent=messages.filter(m=>m.statut==='nouveau').length;
+  document.getElementById('kLus').textContent=messages.filter(m=>m.statut==='lu').length;
+  document.getElementById('kRepondus').textContent=messages.filter(m=>m.statut==='repondu').length;
+  document.getElementById('kTotal').textContent=messages.length;
+  const unread=messages.filter(m=>m.statut==='nouveau').length;
+  const badge=document.getElementById('unreadBadge');
+  if(badge) badge.textContent=unread;
+}
+
+function renderList(){
+  const q=document.getElementById('msgSearch').value.toLowerCase();
+  const filtered=messages.filter(m=>{
+    const match=!q||(m.nom+m.sujet+m.message).toLowerCase().includes(q);
+    const filt=msgFilter==='all'||m.statut===msgFilter;
+    return match&&filt;
+  });
+  updateKPIs();
+  const body=document.getElementById('msgListBody');
+  body.innerHTML='';
+  if(!filtered.length){body.innerHTML='<div style="padding:2rem;text-align:center;color:var(--gray);font-size:.85rem">Aucun message</div>';return;}
+  filtered.forEach(m=>{
+    const div=document.createElement('div');
+    div.className=`msg-item${m.statut==='nouveau'?' unread':''}${activeMsg===m.id?' active':''}`;
+    div.dataset.id=m.id;
+    const init=(m.nom||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const statBadge={nouveau:`<span style="background:rgba(230,57,70,.15);color:var(--primary);padding:.1rem .45rem;border-radius:10px;font-size:.65rem;font-weight:700">Nouveau</span>`,lu:'',repondu:`<span style="background:rgba(46,204,113,.12);color:var(--success);padding:.1rem .45rem;border-radius:10px;font-size:.65rem;font-weight:700">Répondu</span>`};
+    div.innerHTML=`<div class="msg-sender">${m.nom} <span class="msg-time">${m.date.split(' ')[1]||m.date}</span></div>
+      <div class="msg-subject">${m.sujet} ${statBadge[m.statut]||''}</div>
+      <div class="msg-preview">${m.message.substring(0,60)}...</div>`;
+    div.onclick=()=>openMsg(m.id);
+    body.appendChild(div);
+  });
+}
+
+function openMsg(id){
+  const m=messages.find(x=>x.id===id);if(!m) return;
+  activeMsg=id;
+  if(m.statut==='nouveau'){m.statut='lu';updateKPIs();}
+  document.querySelectorAll('.msg-item').forEach(el=>el.classList.toggle('active',+el.dataset.id===id));
+  const init=m.nom.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const replySection=m.reponse?`
+    <div style="margin-top:1.5rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--success);margin-bottom:.6rem">↩ Réponse envoyée</div>
+      <div class="reply-bubble"><div style="font-size:.8rem;color:var(--success);margin-bottom:.5rem"><strong>Admin Dupont</strong></div><p style="color:var(--light);line-height:1.8">${m.reponse}</p></div>
+    </div>` : '';
+
+  document.getElementById('msgContent').innerHTML=`
+    <div class="msg-content-header">
+      <div style="display:flex;align-items:flex-start;gap:1rem;justify-content:space-between;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:.9rem">
+          <div class="msg-avatar">${init}</div>
+          <div><div style="font-weight:700;font-size:1rem;color:var(--white)">${m.nom}</div><div style="color:var(--gray);font-size:.82rem"><a href="mailto:${m.email}" style="color:var(--primary)">${m.email}</a></div></div>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <span style="color:var(--gray);font-size:.78rem">${m.date}</span>
+          <button class="btn btn-sm btn-outline" onclick="archiveMsg(${id})" title="Archiver"><i class="fas fa-archive"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteMsg(${id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--white)">${m.sujet}</div>
+      </div>
+    </div>
+    <div class="msg-content-body" style="overflow-y:auto;flex:1">
+      <div class="msg-bubble"><p>${m.message}</p></div>
+      ${replySection}
+    </div>
+    <div class="msg-content-reply">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.6rem">Répondre à ${m.nom}</div>
+      <textarea id="replyText" class="form-control" rows="3" placeholder="Écrivez votre réponse..." style="margin-bottom:.7rem;resize:none;font-size:.88rem">${m.reponse||''}</textarea>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="quickReply(${id},'Bonjour, merci pour votre message. Nous avons bien reçu votre demande et reviendrons vers vous rapidement.')">Réponse rapide</button>
+        <button class="btn btn-primary btn-sm" onclick="sendReply(${id})"><i class="fas fa-paper-plane"></i> Envoyer</button>
+      </div>
+    </div>`;
+}
+
+function sendReply(id){
+  const m=messages.find(x=>x.id===id);if(!m) return;
+  const text=document.getElementById('replyText')?.value.trim();
+  if(!text){Toast.warning('Le message de réponse est vide.');return;}
+  m.reponse=text;m.statut='repondu';
+  apiReply(id,text).then(()=>Toast.success('Réponse envoyée !'));
+  openMsg(id);renderList();updateKPIs();
+}
+function quickReply(id,text){const el=document.getElementById('replyText');if(el)el.value=text;}
+function archiveMsg(id){
+  const m=messages.find(x=>x.id===id);if(!m) return;
+  m.statut='archive';
+  Toast.info('Message archivé.');
+  activeMsg=null;
+  document.getElementById('msgContent').innerHTML='<div class="empty-state"><div class="icon">📭</div><div style="font-weight:700;color:var(--light)">Aucun message sélectionné</div></div>';
+  renderList();
+}
+function deleteMsg(id){
+  confirmAction('Supprimer ce message définitivement ?',()=>{
+    messages=messages.filter(m=>m.id!==id);
+    activeMsg=null;
+    document.getElementById('msgContent').innerHTML='<div class="empty-state"><div class="icon">📭</div><div style="font-weight:700;color:var(--light)">Aucun message sélectionné</div></div>';
+    renderList();Toast.success('Message supprimé.');
+  });
+}
+function markAllRead(){messages.forEach(m=>{if(m.statut==='nouveau')m.statut='lu';});renderList();Toast.success('Tous les messages marqués comme lus.');}
+function getMsgData(){return messages.map(m=>({'ID':m.id,'Nom':m.nom,'Email':m.email,'Sujet':m.sujet,'Statut':m.statut,'Date':m.date}));}
+
+document.getElementById('fAll').style.background='var(--primary)';
+document.getElementById('fAll').style.color='white';
+document.getElementById('fAll').style.borderColor='var(--primary)';
+renderList();updateKPIs();
+</script>
+
+<script>
+(async function loadMessages() {
+  try {
+    const res = await fetch('../../api/contact.php');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    messages = json.data.map(m => ({
+      id: m.id, nom: m.nom, email: m.email,
+      sujet: m.sujet || 'Sans sujet',
+      message: m.message,
+      statut: m.statut,
+      date: m.created_at?.substring(0,16) || '',
+      reponse: m.reponse || '',
+    }));
+    renderList(); updateKPIs();
+  } catch(e) { console.info('Messages API offline, using demo data.'); }
+})();
+
+async function apiReply(id, text) {
+  try {
+    const res = await fetch(`../../api/contact.php?action=reponse&id=${id}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({reponse: text})
+    });
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

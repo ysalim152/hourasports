@@ -1,0 +1,74 @@
+# ============================================================
+# AppAss/.htaccess — Configuration Apache v2
+# ============================================================
+
+Options -Indexes
+ServerSignature Off
+
+# ---- Page d'erreur personnalisée ----
+ErrorDocument 404 /AppAss/public/404.html
+ErrorDocument 403 /AppAss/public/404.html
+
+# ---- Redirection racine → public/blog.html ----
+RewriteEngine On
+RewriteRule ^$ public/blog.html [L,R=302]
+RewriteRule ^index\.html?$ public/blog.html [L,R=301]
+
+# ---- Protéger les dossiers sensibles ----
+<FilesMatch "\.(env|sql|log|bak|sh|git|md)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ---- Bloquer accès direct à config/ et includes/ ----
+<DirectoryMatch "^.*(config|includes)$">
+    Order Allow,Deny
+    Deny from all
+</DirectoryMatch>
+
+# ---- Headers sécurité ----
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # CORS pour les APIs
+    <FilesMatch "\.php$">
+        Header always set Access-Control-Allow-Origin "same-origin"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "Content-Type, X-Requested-With"
+    </FilesMatch>
+</IfModule>
+
+# ---- Compression GZIP ----
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# ---- Cache navigateur ----
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css               "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/png              "access plus 1 month"
+    ExpiresByType image/jpeg             "access plus 1 month"
+    ExpiresByType image/svg+xml          "access plus 1 month"
+    ExpiresByType image/x-icon           "access plus 1 year"
+    ExpiresByType application/json       "access plus 0 seconds"
+</IfModule>
+
+# ---- UTF-8 par défaut ----
+AddDefaultCharset UTF-8
+
+# ---- PHP settings ----
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+    php_value error_log logs/php_errors.log
+    php_value session.cookie_httponly 1
+    php_value session.cookie_samesite Lax
+    php_flag session.use_strict_mode 1
+    php_value upload_max_filesize 5M
+    php_value post_max_size 6M
+</IfModule>

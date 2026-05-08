@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Équipes — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .team-card-admin{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);overflow:hidden;transition:var(--transition)}
+    .team-card-admin:hover{border-color:rgba(230,57,70,.3);transform:translateY(-3px);box-shadow:var(--shadow-red)}
+    .team-card-header{padding:1.2rem;background:linear-gradient(135deg,rgba(230,57,70,.12),rgba(29,53,87,.2));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+    .team-card-body{padding:1.2rem}
+    .team-card-footer{padding:.8rem 1.2rem;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:.5rem;justify-content:flex-end}
+    .team-icon-big{width:48px;height:48px;border-radius:var(--radius);background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+    .info-row{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--gray);margin-bottom:.4rem}
+    .info-row i{color:var(--primary);width:14px}
+    .view-toggle{display:flex;gap:.4rem}
+    .view-btn{padding:.4rem .7rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);cursor:pointer;transition:var(--transition);font-size:.85rem}
+    .view-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+        <div style="padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+          <a href="messages.html" style="color:var(--primary);font-size:.8rem">Voir tous les messages</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+      <span style="color:var(--gray);font-size:.82rem;display:none" id="adminName">Admin</span>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link active"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Équipes</span></div>
+        <h1 class="page-title">Gestion des Équipes</h1>
+        <p class="page-subtitle">Créer et gérer les équipes de l'association</p>
+      </div>
+      <div style="display:flex;gap:.8rem;align-items:center">
+        <div class="view-toggle">
+          <button class="view-btn active" id="cardViewBtn" onclick="switchView('card')"><i class="fas fa-th-large"></i></button>
+          <button class="view-btn" id="tableViewBtn" onclick="switchView('table')"><i class="fas fa-list"></i></button>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAdd()"><i class="fas fa-plus"></i> Nouvelle Équipe</button>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar">
+      <div class="search-input-wrap" style="max-width:340px">
+        <span class="search-icon"><i class="fas fa-search"></i></span>
+        <input type="text" id="searchEquipe" class="form-control" placeholder="Rechercher une équipe..." oninput="renderEquipes()">
+      </div>
+      <select id="filterCat" class="form-control" style="max-width:180px" onchange="renderEquipes()">
+        <option value="">Toutes catégories</option>
+        <option value="Football">Football</option>
+        <option value="Basketball">Basketball</option>
+        <option value="Tennis">Tennis</option>
+        <option value="Natation">Natation</option>
+        <option value="Athlétisme">Athlétisme</option>
+      </select>
+      <select id="filterStatutEq" class="form-control" style="max-width:140px" onchange="renderEquipes()">
+        <option value="">Tous statuts</option>
+        <option value="actif">Actif</option>
+        <option value="inactif">Inactif</option>
+      </select>
+    </div>
+
+    <!-- VUE CARTES -->
+    <div id="cardView" class="grid-3" style="margin-bottom:1.5rem"></div>
+
+    <!-- VUE TABLEAU -->
+    <div id="tableView" class="hidden">
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr><th>#</th><th>Équipe</th><th>Catégorie</th><th>Coach</th><th>Effectif</th><th>Fondée</th><th>Statut</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="equipesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="equipeInfo" style="color:var(--gray);font-size:.85rem;margin-top:.5rem"></div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="equipeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="equipeModalTitle">Nouvelle Équipe</span>
+      <span class="modal-close" onclick="Modal.close('equipeModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <form id="equipeForm" novalidate>
+        <input type="hidden" id="equipeId">
+        <div class="form-group">
+          <label class="form-label">Nom de l'équipe *</label>
+          <input type="text" id="eNom" class="form-control" placeholder="Équipe A Football" data-rules="required" required>
+          <span class="form-error" data-error="nom"></span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Catégorie *</label>
+            <select id="eCat" class="form-control" data-rules="required" required>
+              <option value="">— Choisir —</option>
+              <option value="Football" data-icon="⚽">Football</option>
+              <option value="Basketball" data-icon="🏀">Basketball</option>
+              <option value="Tennis" data-icon="🎾">Tennis</option>
+              <option value="Natation" data-icon="🏊">Natation</option>
+              <option value="Athlétisme" data-icon="🏃">Athlétisme</option>
+              <option value="Arts Martiaux" data-icon="🥋">Arts Martiaux</option>
+              <option value="Cyclisme" data-icon="🚴">Cyclisme</option>
+              <option value="Volleyball" data-icon="🏐">Volleyball</option>
+            </select>
+            <span class="form-error" data-error="categorie"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Effectif Max</label>
+            <input type="number" id="eEffectif" class="form-control" value="20" min="2" max="100">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Coach</label>
+            <select id="eCoach" class="form-control">
+              <option value="">— Aucun —</option>
+              <option value="Martin Sophie">Sophie Martin</option>
+              <option value="Benali Karim">Karim Benali</option>
+              <option value="Kaddour Leila">Leila Kaddour</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Année de création</label>
+            <input type="number" id="eAnnee" class="form-control" placeholder="2020" min="2000" max="2030">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="eDesc" class="form-control" rows="3" placeholder="Description de l'équipe..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select id="eStatut" class="form-control">
+            <option value="actif">Actif</option>
+            <option value="inactif">Inactif</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="Modal.close('equipeModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEquipe()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+const catIcons = {Football:'⚽',Basketball:'🏀',Tennis:'🎾',Natation:'🏊',Athlétisme:'🏃','Arts Martiaux':'🥋',Cyclisme:'🚴',Volleyball:'🏐'};
+let equipes = [
+  {id:1,nom:'Équipe A Football',categorie:'Football',coach:'Sophie Martin',effectif_max:18,membres:14,annee:2019,statut:'actif',desc:'Équipe première adulte'},
+  {id:2,nom:'Équipe U17 Football',categorie:'Football',coach:'Sophie Martin',effectif_max:16,membres:12,annee:2020,statut:'actif',desc:'Équipe jeunes 17 ans'},
+  {id:3,nom:'Team Basketball',categorie:'Basketball',coach:'Karim Benali',effectif_max:12,membres:10,annee:2021,statut:'actif',desc:'Basketball séniors mixte'},
+  {id:4,nom:'Club Tennis',categorie:'Tennis',coach:'',effectif_max:30,membres:22,annee:2018,statut:'actif',desc:'Tous niveaux'},
+  {id:5,nom:'Natation Seniors',categorie:'Natation',coach:'',effectif_max:25,membres:20,annee:2017,statut:'actif',desc:'Programme adultes'},
+];
+let nextEqId = 6;
+let currentView = 'card';
+
+function getFiltered() {
+  const q = document.getElementById('searchEquipe').value.toLowerCase();
+  const cat = document.getElementById('filterCat').value;
+  const st = document.getElementById('filterStatutEq').value;
+  return equipes.filter(e =>
+    (!q || e.nom.toLowerCase().includes(q) || e.categorie.toLowerCase().includes(q))
+    && (!cat || e.categorie === cat)
+    && (!st || e.statut === st)
+  );
+}
+
+function renderEquipes() {
+  const data = getFiltered();
+  document.getElementById('equipeInfo').textContent = `${data.length} équipe(s)`;
+  if (currentView === 'card') renderCards(data);
+  else renderTableView(data);
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('cardView');
+  grid.innerHTML = data.length ? '' : '<p style="color:var(--gray);grid-column:1/-1;text-align:center;padding:2rem">Aucune équipe trouvée.</p>';
+  data.forEach(e => {
+    const pct = Math.round(e.membres / e.effectif_max * 100);
+    grid.innerHTML += `
+    <div class="team-card-admin">
+      <div class="team-card-header">
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <div class="team-icon-big">${catIcons[e.categorie]||'🏅'}</div>
+          <div><div style="font-family:var(--font-display);font-size:1.2rem;color:var(--white)">${e.nom}</div>
+          <div style="font-size:.78rem;color:var(--gray)">${e.categorie}</div></div>
+        </div>
+        <span class="badge ${e.statut==='actif'?'badge-success':'badge-warning'}">${e.statut}</span>
+      </div>
+      <div class="team-card-body">
+        ${e.coach?`<div class="info-row"><i class="fas fa-user-tie"></i> ${e.coach}</div>`:''}
+        <div class="info-row"><i class="fas fa-users"></i> ${e.membres} / ${e.effectif_max} membres</div>
+        <div class="info-row"><i class="fas fa-calendar"></i> Fondée en ${e.annee||'—'}</div>
+        ${e.desc?`<p style="color:var(--gray);font-size:.85rem;margin-top:.6rem">${e.desc}</p>`:''}
+        <div style="margin-top:1rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--gray);margin-bottom:.3rem"><span>Effectif</span><span>${pct}%</span></div>
+          <div class="spots-bar" style="height:6px"><div class="spots-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div class="team-card-footer">
+        <button class="btn btn-sm btn-outline" onclick="openEdit(${e.id})"><i class="fas fa-edit"></i> Modifier</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteEquipe(${e.id})"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+  });
+}
+
+function renderTableView(data) {
+  const tbody = document.getElementById('equipesTbody');
+  tbody.innerHTML = data.length ? '' : '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Aucune équipe</td></tr>';
+  data.forEach(e => {
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--gray)">${e.id}</td>
+      <td><strong style="color:var(--white)">${catIcons[e.categorie]||'🏅'} ${e.nom}</strong></td>
+      <td>${e.categorie}</td>
+      <td style="color:var(--gray)">${e.coach||'—'}</td>
+      <td>${e.membres}/${e.effectif_max}</td>
+      <td style="color:var(--gray)">${e.annee||'—'}</td>
+      <td><span class="badge ${e.statut==='actif'?'badge-success':'badge-warning'}">${e.statut}</span></td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="btn btn-sm btn-outline" onclick="openEdit(${e.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteEquipe(${e.id})"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+}
+
+function switchView(v) {
+  currentView = v;
+  document.getElementById('cardView').classList.toggle('hidden', v === 'table');
+  document.getElementById('tableView').classList.toggle('hidden', v === 'card');
+  document.getElementById('cardViewBtn').classList.toggle('active', v === 'card');
+  document.getElementById('tableViewBtn').classList.toggle('active', v === 'table');
+  renderEquipes();
+}
+
+function openAdd() {
+  document.getElementById('equipeModalTitle').textContent = 'Nouvelle Équipe';
+  document.getElementById('equipeForm').reset();
+  document.getElementById('equipeId').value = '';
+  Modal.open('equipeModal');
+}
+
+function openEdit(id) {
+  const e = equipes.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('equipeModalTitle').textContent = 'Modifier l\'Équipe';
+  document.getElementById('equipeId').value = e.id;
+  document.getElementById('eNom').value = e.nom;
+  document.getElementById('eCat').value = e.categorie;
+  document.getElementById('eEffectif').value = e.effectif_max;
+  document.getElementById('eCoach').value = e.coach || '';
+  document.getElementById('eAnnee').value = e.annee || '';
+  document.getElementById('eDesc').value = e.desc || '';
+  document.getElementById('eStatut').value = e.statut;
+  Modal.open('equipeModal');
+}
+
+function saveEquipe() {
+  const nom = document.getElementById('eNom').value.trim();
+  const cat = document.getElementById('eCat').value;
+  if (!nom || !cat) { Toast.error('Nom et catégorie sont obligatoires.'); return; }
+  const id = document.getElementById('equipeId').value;
+  const data = {
+    id: id ? +id : nextEqId++,
+    nom, categorie: cat,
+    coach: document.getElementById('eCoach').value,
+    effectif_max: +document.getElementById('eEffectif').value || 20,
+    membres: 0,
+    annee: +document.getElementById('eAnnee').value || null,
+    desc: document.getElementById('eDesc').value,
+    statut: document.getElementById('eStatut').value,
+  };
+  if (id) {
+    const existing = equipes.find(e => e.id === +id);
+    data.membres = existing ? existing.membres : 0;
+    const idx = equipes.findIndex(e => e.id === +id);
+    if (idx >= 0) equipes[idx] = data;
+    Toast.success('Équipe mise à jour !');
+  } else {
+    equipes.push(data);
+    Toast.success('Équipe créée !');
+  }
+  Modal.close('equipeModal');
+  renderEquipes();
+}
+
+function deleteEquipe(id) {
+  confirmAction('Supprimer cette équipe ?', () => {
+    equipes = equipes.filter(e => e.id !== id);
+    Toast.success('Équipe supprimée.');
+    renderEquipes();
+  });
+}
+
+renderEquipes();
+</script>
+
+<script>
+(async function loadEquipesFromAPI() {
+  try {
+    const res = await fetch('../../api/equipes.php');
+    const json = await res.json();
+    if (!json.success || !json.data.length) return;
+    equipes = json.data.map(e => ({
+      id: e.id, nom: e.nom, categorie: e.categorie_nom || e.categorie || '',
+      coach: e.coach || '', effectif_max: e.effectif_max || 20,
+      membres: e.nb_membres || 0, annee: e.annee_creation || null,
+      desc: e.description || '', statut: e.statut || 'actif',
+    }));
+    renderEquipes();
+  } catch(e) { console.info('Equipes API offline, using demo data.'); }
+})();
+
+async function apiSaveEquipe(data, isNew) {
+  try {
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '../../api/equipes.php' : `../../api/equipes.php?id=${data.id}`;
+    const res = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+
+async function apiDeleteEquipe(id) {
+  try {
+    const res = await fetch(`../../api/equipes.php?id=${id}`, {method:'DELETE'});
+    return await res.json();
+  } catch(e) { return {success:true}; }
+}
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>

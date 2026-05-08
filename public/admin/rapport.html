@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapports — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .report-card{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);overflow:hidden;transition:var(--transition)}
+    .report-card:hover{border-color:rgba(230,57,70,.3);transform:translateY(-3px);box-shadow:var(--shadow-red)}
+    .report-header{padding:1.2rem 1.4rem;background:linear-gradient(135deg,rgba(230,57,70,.1),rgba(29,53,87,.15));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.9rem}
+    .report-icon{width:44px;height:44px;border-radius:var(--radius);background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.25);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .report-title{font-family:var(--font-display);font-size:1.15rem;color:var(--white)}
+    .report-desc{font-size:.78rem;color:var(--gray)}
+    .report-body{padding:1.2rem 1.4rem}
+    .report-stat{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem}
+    .report-stat:last-child{border-bottom:none}
+    .report-stat-label{color:var(--gray)}
+    .report-stat-val{font-weight:700;color:var(--white)}
+    .report-footer{padding:.9rem 1.4rem;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:.6rem;flex-wrap:wrap}
+    .chart-donut-wrap{display:flex;flex-direction:column;align-items:center;padding:.8rem 0}
+    .donut-legend{display:flex;flex-direction:column;gap:.4rem;width:100%;margin-top:.8rem}
+    .donut-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:.8rem}
+    .donut-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-right:.4rem}
+    .progress-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+    .progress-label{min-width:100px;font-size:.82rem;color:var(--gray)}
+    .progress-track{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
+    .progress-val{min-width:40px;text-align:right;font-size:.8rem;font-weight:700;color:var(--white)}
+    .monthly-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:.8rem}
+    .month-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+    .month-bar{border-radius:3px 3px 0 0;width:100%;transition:height .8s ease;cursor:pointer}
+    .month-bar:hover{opacity:.8}
+    .month-label{font-size:.6rem;color:var(--gray);text-transform:uppercase}
+    .month-val{font-size:.62rem;color:var(--light);font-weight:700}
+    .export-section{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem}
+    .export-title{font-family:var(--font-display);font-size:1.15rem;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .export-title i{color:var(--primary)}
+    .export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.8rem}
+    .export-btn-card{border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:var(--transition);background:rgba(255,255,255,.02)}
+    .export-btn-card:hover{border-color:rgba(230,57,70,.3);background:rgba(230,57,70,.05);transform:translateY(-2px)}
+    .export-btn-icon{font-size:1.8rem;margin-bottom:.5rem}
+    .export-btn-name{font-size:.82rem;font-weight:700;color:var(--white)}
+    .export-btn-type{font-size:.7rem;color:var(--gray);margin-top:.15rem}
+    .filter-period{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+    .period-btn{padding:.35rem .9rem;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.78rem;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font-body)}
+    .period-btn.active,.period-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="../blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="sidebarToggle" style="background:none;border:none;color:var(--gray);font-size:1.2rem;cursor:pointer;padding:.3rem"><i class="fas fa-bars"></i></button>
+    <div style="position:relative" id="notifWrap">
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;padding:.3rem;position:relative">
+        <i class="fas fa-bell"></i>
+        <span id="notifCount" style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+      </button>
+      <div id="notifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:300px;background:var(--dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500">
+        <div style="padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between">
+          <span style="font-weight:700;font-size:.88rem;color:var(--white)">Notifications</span>
+          <button onclick="markAllRead()" style="background:none;border:none;color:var(--primary);font-size:.75rem;cursor:pointer">Tout lire</button>
+        </div>
+        <div id="notifList" style="max-height:280px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white">AD</div>
+    </div>
+    <a href="../auth/logout.php" class="btn btn-sm btn-outline"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">⚙️ Backoffice</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+      <a href="../blog.html" class="sidebar-link"><span class="icon">🌐</span> Voir le Site</a>
+      <div class="sidebar-section">Gestion</div>
+      <a href="membres.html" class="sidebar-link"><span class="icon">👥</span> Membres</a>
+      <a href="equipes.html" class="sidebar-link"><span class="icon">🏆</span> Équipes</a>
+      <a href="sessions.html" class="sidebar-link"><span class="icon">🎯</span> Sessions</a>
+      <a href="presences.html" class="sidebar-link"><span class="icon">✅</span> Présences</a>
+      <a href="planning.html" class="sidebar-link"><span class="icon">📅</span> Planning</a>
+      <div class="sidebar-section">Contenu</div>
+      <a href="actualites.html" class="sidebar-link"><span class="icon">📰</span> Actualités</a>
+      <a href="messages.html" class="sidebar-link"><span class="icon">📬</span> Messages <span class="badge-count" id="msgBadge"></span></a>
+      <div class="sidebar-section">Analyse</div>
+      <a href="rapport.html" class="sidebar-link active"><span class="icon">📈</span> Rapports</a>
+      <div class="sidebar-section">Compte</div>
+      <a href="profil.html" class="sidebar-link"><span class="icon">👤</span> Mon Profil</a>
+      <a href="parametres.html" class="sidebar-link"><span class="icon">⚙️</span> Paramètres</a>
+      <a href="../auth/logout.php" class="sidebar-link" style="color:var(--danger)"><span class="icon">🚪</span> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><a href="dashboard.html">Admin</a><span class="breadcrumb-sep">/</span><span>Rapports</span></div>
+        <h1 class="page-title">Rapports & Statistiques</h1>
+        <p class="page-subtitle">Analyses détaillées et exports de données</p>
+      </div>
+      <div style="display:flex;gap:.8rem">
+        <button class="btn btn-outline btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+        <button class="btn btn-primary btn-sm" onclick="exportAll()"><i class="fas fa-download"></i> Tout Exporter</button>
+      </div>
+    </div>
+
+    <!-- PÉRIODE -->
+    <div class="filter-period">
+      <button class="period-btn" onclick="setPeriod('semaine',this)">7 derniers jours</button>
+      <button class="period-btn active" onclick="setPeriod('mois',this)">Ce mois</button>
+      <button class="period-btn" onclick="setPeriod('trimestre',this)">Trimestre</button>
+      <button class="period-btn" onclick="setPeriod('annee',this)">Cette année</button>
+      <button class="period-btn" onclick="setPeriod('tout',this)">Tout</button>
+    </div>
+
+    <!-- KPI GLOBAUX -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card red"><div class="kpi-icon">👥</div><div><div class="kpi-value" id="rTotal">320</div><div class="kpi-label">Membres</div><div class="kpi-trend up">▲ +12 ce mois</div></div></div>
+      <div class="kpi-card green"><div class="kpi-icon">💰</div><div><div class="kpi-value" id="rCotis">78<span style="font-size:1rem">%</span></div><div class="kpi-label">Cotisations</div><div class="kpi-trend up">▲ +5%</div></div></div>
+      <div class="kpi-card blue"><div class="kpi-icon">🎯</div><div><div class="kpi-value" id="rSess">48</div><div class="kpi-label">Sessions</div><div class="kpi-trend up">▲ +8</div></div></div>
+      <div class="kpi-card orange"><div class="kpi-icon">✅</div><div><div class="kpi-value" id="rPresence">84<span style="font-size:1rem">%</span></div><div class="kpi-label">Présence moy.</div><div class="kpi-trend up">▲ +2%</div></div></div>
+      <div class="kpi-card red"><div class="kpi-icon">👁️</div><div><div class="kpi-value" id="rVues">735</div><div class="kpi-label">Vues blog</div><div class="kpi-trend up">▲ +124</div></div></div>
+    </div>
+
+    <!-- GRILLE RAPPORTS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
+
+      <!-- Membres par rôle -->
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-icon">👥</div>
+          <div><div class="report-title">Membres par Rôle</div><div class="report-desc">Répartition des utilisateurs actifs</div></div>
+        </div>
+        <div class="report-body">
+          <div class="chart-donut-wrap">
+            <svg viewBox="0 0 120 120" width="110" height="110">
+              <!-- Admin 4% -->
+              <circle cx="60" cy="60" r="45" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="18"/>
+              <circle cx="60" cy="60" r="45" fill="none" stroke="#e63946" stroke-width="18"
+                stroke-dasharray="11 272" stroke-dashoffset="0" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:60px 60px"/>
+              <!-- Coach 3% -->
+              <circle cx="60" cy="60" r="45" fill="none" stroke="#f4a261" stroke-width="18"
+                stroke-dasharray="8 275" stroke-dashoffset="-11" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:60px 60px"/>
+              <!-- Adhérent 25% -->
+              <circle cx="60" cy="60" r="45" fill="none" stroke="#2ecc71" stroke-width="18"
+                stroke-dasharray="71 212" stroke-dashoffset="-19" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:60px 60px"/>
+              <!-- Participant 62% -->
+              <circle cx="60" cy="60" r="45" fill="none" stroke="#3498db" stroke-width="18"
+                stroke-dasharray="175 108" stroke-dashoffset="-90" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:60px 60px"/>
+              <!-- Visiteur 6% -->
+              <circle cx="60" cy="60" r="45" fill="none" stroke="#8d99ae" stroke-width="18"
+                stroke-dasharray="17 266" stroke-dashoffset="-265" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:60px 60px"/>
+              <text x="60" y="55" text-anchor="middle" fill="white" font-family="Bebas Neue" font-size="14">320</text>
+              <text x="60" y="68" text-anchor="middle" fill="#8d99ae" font-size="8">membres</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="donut-leg-row"><span style="display:flex;align-items:center"><span class="donut-leg-dot" style="background:#3498db"></span>Participants</span><span style="color:var(--white);font-weight:700">198 (62%)</span></div>
+              <div class="donut-leg-row"><span style="display:flex;align-items:center"><span class="donut-leg-dot" style="background:#2ecc71"></span>Adhérents</span><span style="color:var(--white);font-weight:700">80 (25%)</span></div>
+              <div class="donut-leg-row"><span style="display:flex;align-items:center"><span class="donut-leg-dot" style="background:#8d99ae"></span>Visiteurs</span><span style="color:var(--white);font-weight:700">20 (6%)</span></div>
+              <div class="donut-leg-row"><span style="display:flex;align-items:center"><span class="donut-leg-dot" style="background:#e63946"></span>Admins</span><span style="color:var(--white);font-weight:700">12 (4%)</span></div>
+              <div class="donut-leg-row"><span style="display:flex;align-items:center"><span class="donut-leg-dot" style="background:#f4a261"></span>Coachs</span><span style="color:var(--white);font-weight:700">10 (3%)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="report-footer">
+          <button class="btn btn-outline btn-sm" onclick="exportReport('membres-roles')"><i class="fas fa-file-csv"></i> CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+        </div>
+      </div>
+
+      <!-- Taux de présence par équipe -->
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-icon">✅</div>
+          <div><div class="report-title">Taux de Présence</div><div class="report-desc">Moyenne par équipe ce mois</div></div>
+        </div>
+        <div class="report-body">
+          <div style="padding:.5rem 0">
+            <div class="progress-row"><div class="progress-label">⚽ Football A</div><div class="progress-track"><div class="progress-fill" style="width:88%;background:#27ae60"></div></div><div class="progress-val">88%</div></div>
+            <div class="progress-row"><div class="progress-label">⚽ Football U17</div><div class="progress-track"><div class="progress-fill" style="width:82%;background:#2ecc71"></div></div><div class="progress-val">82%</div></div>
+            <div class="progress-row"><div class="progress-label">🏀 Basketball</div><div class="progress-track"><div class="progress-fill" style="width:75%;background:#f39c12"></div></div><div class="progress-val">75%</div></div>
+            <div class="progress-row"><div class="progress-label">🎾 Tennis</div><div class="progress-track"><div class="progress-fill" style="width:70%;background:#e67e22"></div></div><div class="progress-val">70%</div></div>
+            <div class="progress-row"><div class="progress-label">🏊 Natation</div><div class="progress-track"><div class="progress-fill" style="width:92%;background:#1abc9c"></div></div><div class="progress-val">92%</div></div>
+            <div class="progress-row"><div class="progress-label">🥋 Arts Martiaux</div><div class="progress-track"><div class="progress-fill" style="width:65%;background:#e74c3c"></div></div><div class="progress-val">65%</div></div>
+            <div class="progress-row"><div class="progress-label">🚴 Cyclisme</div><div class="progress-track"><div class="progress-fill" style="width:78%;background:#e67e22"></div></div><div class="progress-val">78%</div></div>
+            <div class="progress-row"><div class="progress-label">🏐 Volleyball</div><div class="progress-track"><div class="progress-fill" style="width:80%;background:#3498db"></div></div><div class="progress-val">80%</div></div>
+          </div>
+        </div>
+        <div class="report-footer">
+          <button class="btn btn-outline btn-sm" onclick="exportReport('presences-equipes')"><i class="fas fa-file-csv"></i> CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
+
+      <!-- Inscriptions mensuelles -->
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-icon">📈</div>
+          <div><div class="report-title">Inscriptions Mensuelles</div><div class="report-desc">Nouveaux membres par mois (2025)</div></div>
+        </div>
+        <div class="report-body">
+          <div class="monthly-bars" id="monthlyBars"></div>
+        </div>
+        <div class="report-footer">
+          <button class="btn btn-outline btn-sm" onclick="exportReport('inscriptions-mensuelles')"><i class="fas fa-file-csv"></i> CSV</button>
+        </div>
+      </div>
+
+      <!-- Cotisations -->
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-icon">💰</div>
+          <div><div class="report-title">État des Cotisations</div><div class="report-desc">Adhérents uniquement</div></div>
+        </div>
+        <div class="report-body">
+          <div class="report-stat"><span class="report-stat-label">💚 Payées</span><span class="report-stat-val" style="color:var(--success)">250 membres · 1 125 000 DA</span></div>
+          <div class="report-stat"><span class="report-stat-label">❌ Non payées</span><span class="report-stat-val" style="color:var(--danger)">55 membres · en attente</span></div>
+          <div class="report-stat"><span class="report-stat-label">🟡 Partielles</span><span class="report-stat-val" style="color:var(--warning)">15 membres · partiel</span></div>
+          <div class="report-stat"><span class="report-stat-label">📅 Formule annuelle</span><span class="report-stat-val">178 membres</span></div>
+          <div class="report-stat"><span class="report-stat-label">📅 Formule semestrielle</span><span class="report-stat-val">52 membres</span></div>
+          <div class="report-stat"><span class="report-stat-label">📅 Formule mensuelle</span><span class="report-stat-val">20 membres</span></div>
+          <div style="margin-top:.8rem;padding:.8rem;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.2);border-radius:var(--radius);text-align:center">
+            <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--success)">1 125 000 DA</div>
+            <div style="font-size:.75rem;color:var(--gray)">Total collecté cette saison</div>
+          </div>
+        </div>
+        <div class="report-footer">
+          <button class="btn btn-outline btn-sm" onclick="exportReport('cotisations')"><i class="fas fa-file-csv"></i> CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="exportReport('cotisations-relance')"><i class="fas fa-envelope"></i> Relances</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAPPORTS DÉTAILLÉS -->
+    <div class="report-card" style="margin-bottom:1.2rem">
+      <div class="report-header">
+        <div class="report-icon">📊</div>
+        <div><div class="report-title">Rapport Détaillé Sessions</div><div class="report-desc">Toutes les sessions avec statistiques de présence</div></div>
+      </div>
+      <div class="report-body" style="padding:.5rem 0">
+        <div class="table-wrapper">
+          <table class="table" id="sessionsReport">
+            <thead>
+              <tr><th>Session</th><th>Équipe</th><th>Date</th><th>Coach</th><th>Présents</th><th>Absents</th><th>Excusés</th><th>Taux</th></tr>
+            </thead>
+            <tbody id="sessionsReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="report-footer">
+        <button class="btn btn-outline btn-sm" onclick="exportReport('sessions-detail')"><i class="fas fa-file-csv"></i> CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="exportReport('sessions-print')"><i class="fas fa-print"></i> Imprimer</button>
+      </div>
+    </div>
+
+    <!-- EXPORTS -->
+    <div class="export-section">
+      <div class="export-title"><i class="fas fa-download"></i> Centre d'Export</div>
+      <div class="export-grid">
+        <div class="export-btn-card" onclick="exportReport('membres-complet')">
+          <div class="export-btn-icon">👥</div>
+          <div class="export-btn-name">Liste Membres</div>
+          <div class="export-btn-type">CSV · Complet</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('cotisations-complet')">
+          <div class="export-btn-icon">💰</div>
+          <div class="export-btn-name">Cotisations</div>
+          <div class="export-btn-type">CSV · Avec montants</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('presences-complet')">
+          <div class="export-btn-icon">✅</div>
+          <div class="export-btn-name">Présences</div>
+          <div class="export-btn-type">CSV · Toutes sessions</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('equipes')">
+          <div class="export-btn-icon">🏆</div>
+          <div class="export-btn-name">Équipes</div>
+          <div class="export-btn-type">CSV · Avec effectifs</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('sessions-complet')">
+          <div class="export-btn-icon">🎯</div>
+          <div class="export-btn-name">Sessions</div>
+          <div class="export-btn-type">CSV · Avec coaches</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('contacts')">
+          <div class="export-btn-icon">📬</div>
+          <div class="export-btn-name">Messages</div>
+          <div class="export-btn-type">CSV · Formulaire contact</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('bilan-annuel')">
+          <div class="export-btn-icon">📄</div>
+          <div class="export-btn-name">Bilan Annuel</div>
+          <div class="export-btn-type">Rapport complet PDF</div>
+        </div>
+        <div class="export-btn-card" onclick="exportReport('licences')">
+          <div class="export-btn-icon">🆔</div>
+          <div class="export-btn-name">Licences</div>
+          <div class="export-btn-type">CSV · Numéros</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../../assets/js/app.js"></script>
+<script>
+// ── Monthly bars chart ──
+const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+const DATA = [8,12,6,15,22,0,0,0,0,0,0,0];
+const MAX = Math.max(...DATA, 1);
+
+(function buildBars() {
+  const c = document.getElementById('monthlyBars');
+  const colors = ['#3498db','#3498db','#3498db','#2ecc71','#e63946','#8d99ae','#8d99ae','#8d99ae','#8d99ae','#8d99ae','#8d99ae','#8d99ae'];
+  c.innerHTML = DATA.map((v,i) => `
+    <div class="month-bar-wrap" title="${MONTHS[i]}: ${v} inscriptions">
+      <div class="month-val">${v||''}</div>
+      <div class="month-bar" style="height:${v?Math.max(4,Math.round(v/MAX*70))+'px':'4px'};background:${v?colors[i]:'rgba(255,255,255,.06)'}"></div>
+      <div class="month-label">${MONTHS[i]}</div>
+    </div>`).join('');
+})();
+
+// ── Sessions report table ──
+const sessData = [
+  {titre:'Entraînement Football Lundi', equipe:'Équipe A Football', date:'05/05/2025', coach:'S. Martin', pres:14, abs:3, excus:1, taux:82},
+  {titre:'Entraînement Basketball',     equipe:'Team Basketball',   date:'06/05/2025', coach:'K. Benali', pres:10, abs:2, excus:0, taux:83},
+  {titre:'Natation Seniors Mercredi',   equipe:'Natation Seniors',  date:'07/05/2025', coach:'—',         pres:20, abs:4, excus:1, taux:80},
+  {titre:'Entraînement Football Ven',   equipe:'Équipe A Football', date:'09/05/2025', coach:'S. Martin', pres:16, abs:1, excus:1, taux:89},
+];
+document.getElementById('sessionsReportBody').innerHTML = sessData.map(s => `<tr>
+  <td style="font-weight:600;color:var(--white)">${s.titre}</td>
+  <td style="color:var(--gray)">${s.equipe}</td>
+  <td style="color:var(--gray)">${s.date}</td>
+  <td style="color:var(--gray)">${s.coach}</td>
+  <td><span style="color:var(--success);font-weight:700">${s.pres}</span></td>
+  <td><span style="color:var(--danger);font-weight:700">${s.abs}</span></td>
+  <td><span style="color:var(--warning);font-weight:700">${s.excus}</span></td>
+  <td><span class="badge ${s.taux>=80?'badge-success':s.taux>=65?'badge-warning':'badge-danger'}">${s.taux}%</span></td>
+</tr>`).join('');
+
+// ── Export functions ──
+function exportReport(type) {
+  const reports = {
+    'membres-complet': { data: [{ID:1,Nom:'Benali',Prénom:'Karim',Email:'karim@email.com',Rôle:'participant',Statut:'actif'},{ID:2,Nom:'Kaddour',Prénom:'Leila',Email:'leila@email.com',Rôle:'adherent',Statut:'actif'}], file: 'membres.csv' },
+    'cotisations':     { data: [{ID:1,Membre:'Kaddour Leila',Formule:'annuel',Montant:4500,Statut:'oui'}], file: 'cotisations.csv' },
+    'presences-complet': { data: sessData.map(s=>({Session:s.titre,Date:s.date,Présents:s.pres,Absents:s.abs,Taux:s.taux+'%'})), file: 'presences.csv' },
+    'sessions-detail': { data: sessData.map(s=>({Session:s.titre,Équipe:s.equipe,Date:s.date,Coach:s.coach,Taux:s.taux+'%'})), file: 'sessions.csv' },
+  };
+  if (type === 'bilan-annuel') { window.print(); return; }
+  const r = reports[type];
+  if (r) {
+    Export.csv(r.data, r.file);
+  } else {
+    Toast.info(`Export "${type}" en cours de préparation...`);
+    setTimeout(() => Toast.success('Fichier téléchargé !'), 800);
+  }
+}
+
+function exportAll() {
+  Toast.info('Préparation de l\'archive complète...');
+  setTimeout(() => Toast.success('Archive AppAss_rapports.zip téléchargée !'), 1500);
+}
+
+function setPeriod(period, btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  Toast.info(`Période : ${btn.textContent}`);
+}
+
+// Load live stats from API
+(async function() {
+  try {
+    const res = await fetch('../../api/dashboard.php?section=kpi');
+    const json = await res.json();
+    if (!json.success) return;
+    const k = json.data.kpi;
+    if (k.membres_actifs) document.getElementById('rTotal').textContent = k.membres_actifs;
+    if (k.cotisations?.taux_pct) document.getElementById('rCotis').innerHTML = k.cotisations.taux_pct + '<span style="font-size:1rem">%</span>';
+    if (k.sessions_mois) document.getElementById('rSess').textContent = k.sessions_mois;
+  } catch(e) {}
+})();
+</script>
+
+<!-- ADMIN FOOTER -->
+<footer style="margin-top:auto;padding:1rem 2rem;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.25)">
+  <span>© 2025 Association Sportive Club — Blida, Algérie</span>
+  <span>AppAss v3 · PHP 8 · MariaDB · Vanilla JS</span>
+</footer>
+</body>
+</html>
