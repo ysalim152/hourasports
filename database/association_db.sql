@@ -33,7 +33,11 @@ INSERT INTO `roles` (`id`,`nom`,`label`,`description`,`couleur`,`icone`,`niveau_
 (2,'coach',       'Coach / Entraîneur','Gère équipes, sessions et présences',               '#f4a261','🎽',3),
 (3,'adherent',    'Adhérent',          'Membre actif avec cotisation annuelle',              '#2ecc71','🏅',2),
 (4,'participant', 'Participant',        'Inscrit à une ou plusieurs disciplines sportives',  '#3498db','⚽',1),
-(5,'visiteur',    'Visiteur',          'Accès lecture seule au site public',                '#8d99ae','👁️',0);
+(5,'visiteur',    'Visiteur',          'Accès lecture seule au site public',                '#8d99ae','👁️',0)
+ON DUPLICATE KEY UPDATE 
+    nom=VALUES(nom), label=VALUES(label), description=VALUES(description), 
+    couleur=VALUES(couleur), icone=VALUES(icone), niveau_acces=VALUES(niveau_acces);
+
 
 -- -----------------------------------------------------------
 -- TABLE: utilisateurs
@@ -74,6 +78,8 @@ INSERT INTO `utilisateurs`
 ('Benali',  'Karim',  'karim@email.com',      '$2y$12$KIx5sP1uU4P.w1mNzEJO3ulbN0bPiMJZaE8F9eI.3G5iHVIiA1Xuu', '+213 555 111 222','Blida',4,'actif'),
 ('Kaddour', 'Leila',  'leila@email.com',      '$2y$12$KIx5sP1uU4P.w1mNzEJO3ulbN0bPiMJZaE8F9eI.3G5iHVIiA1Xuu', '+213 555 333 444','Blida',3,'actif'),
 ('Hamidi',  'Omar',   'visiteur@email.com',   '$2y$12$KIx5sP1uU4P.w1mNzEJO3ulbN0bPiMJZaE8F9eI.3G5iHVIiA1Xuu', NULL,              'Alger',5,'actif');
+ON DUPLICATE KEY UPDATE 
+    nom=VALUES(nom), prenom=VALUES(prenom), role_id=VALUES(role_id), statut=VALUES(statut);
 
 -- -----------------------------------------------------------
 -- TABLE: codes_invitation  (codes secrets admin/coach)
@@ -396,7 +402,8 @@ CREATE TABLE IF NOT EXISTS `actualites` (
   `image_thumbnail` VARCHAR(255)     DEFAULT NULL,
   `image_webp`     VARCHAR(255)      DEFAULT NULL,
   `categorie`      VARCHAR(80)       DEFAULT NULL,
-  `sport_id`       TINYINT UNSIGNED  DEFAULT NULL,
+  -- Note: sport_id est passé en INT UNSIGNED pour matcher classiquement la table sports.id
+  `sport_id`       INT UNSIGNED      DEFAULT NULL, 
   `age_group`      JSON              DEFAULT NULL,
   `tags`           VARCHAR(255)      DEFAULT NULL COMMENT 'JSON array',
   `auteur_id`      INT UNSIGNED      DEFAULT NULL,
@@ -412,23 +419,26 @@ CREATE TABLE IF NOT EXISTS `actualites` (
   `notif_sent_at`  DATETIME          DEFAULT NULL,
   `meta_description` VARCHAR(160)    DEFAULT NULL,
   `meta_keywords`  VARCHAR(200)      DEFAULT NULL,
+  -- AJOUT DE LA COLONNE CI-DESSOUS POUR RÉSOUDRE L'ERREUR 1072
+  `scheduled_at`   DATETIME          DEFAULT NULL, 
   `published_at`   DATETIME          DEFAULT NULL,
   `created_at`     TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`     TIMESTAMP         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_slug` (`slug`),
-  KEY `fk_actualites_auteur` (`auteur_id`),
-  KEY `fk_actualites_sport` (`sport_id`),
   KEY `idx_actualites_statut` (`statut`),
   KEY `idx_scheduled_at` (`scheduled_at`),
   KEY `idx_featured` (`is_featured`,`featured_until`),
   KEY `idx_sport_id` (`sport_id`),
   KEY `idx_published_recent` (`published_at`,`statut`),
+
   CONSTRAINT `fk_actualites_auteur`
     FOREIGN KEY (`auteur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_actualites_sport`
     FOREIGN KEY (`sport_id`) REFERENCES `sports` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 INSERT INTO `actualites` (`titre`,`slug`,`contenu`,`extrait`,`categorie`,`sport_id`,`tags`,`auteur_id`,`statut`,`vues`,`published_at`) VALUES
 ('Victoire Éclatante en Finale Régionale','victoire-finale-regionale',
