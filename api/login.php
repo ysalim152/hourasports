@@ -143,6 +143,7 @@ echo json_encode([
         'prenom'      => $user['prenom'],
         'email'       => $user['email'],
         'role'        => $user['role'],
+        'niveau_acces'=> (int)$user['niveau_acces'],
         'role_label'  => $user['role_label'],
         'niveau_acces'=> (int)$user['niveau_acces'],
         'avatar'      => $user['avatar'],

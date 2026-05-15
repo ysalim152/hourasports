@@ -38,6 +38,13 @@ function currentUserId(): ?int {
 }
 
 /**
+ * Retourne le niveau d'accès de l'utilisateur connecté.
+ */
+function currentUserLevel(): int {
+    return isset($_SESSION['niveau_acces']) ? (int)$_SESSION['niveau_acces'] : 0;
+}
+
+/**
  * Redirige vers login si non authentifié.
  */
 function requireAuth(string $redirect = '/public/auth/login.html'): void {
@@ -61,8 +68,8 @@ function requireRole(string $role, string $redirect = '/public/index.html'): voi
         'coach'       => 3,
         'admin'       => 4
     ];    $current = $hierarchy[currentRole()] ?? 0;
-    $required = $hierarchy[$role] ?? 99;
-    if ($current < $required) {
+    $requiredLevel = $hierarchy[$role] ?? 99;
+    if (currentUserLevel() < $requiredLevel) {
         header('Location: ' . $redirect);
         exit;
     }
@@ -78,6 +85,7 @@ function loginUser(array $user): void {
     $_SESSION['user_prenom']= $user['prenom'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_role']  = $user['role'] ?? 'membre';
+    $_SESSION['niveau_acces'] = (int)($user['niveau_acces'] ?? 0);
     $_SESSION['logged_at']  = time();
 }
 
@@ -121,8 +129,7 @@ function verifyCsrf(string $token): bool {
  * admin=4, coach=3, adherent=2, participant=1, visiteur=0
  */
 function hasAccess(int $minNiveau): bool {
-    $niveaux = ['admin' => 4, 'coach' => 3, 'adherent' => 2, 'participant' => 1, 'visiteur' => 0];
-    return ($niveaux[currentRole()] ?? 0) >= $minNiveau;
+    return currentUserLevel() >= $minNiveau;
 }
 
 /**
@@ -143,5 +150,6 @@ function currentUser(): array {
         'prenom' => $_SESSION['user_prenom'] ?? '',
         'email'  => $_SESSION['user_email']  ?? '',
         'role'   => $_SESSION['user_role']   ?? 'visiteur',
+        'niveau_acces' => currentUserLevel(),
     ];
 }
