@@ -225,12 +225,14 @@ try {
             $publishedAt = ($statut === 'publie') ? date('Y-m-d H:i:s') : null;
 
             $newId = dbInsert('actualites', [
-                'titre'        => $d['titre'],
-                'slug'         => $slug,
-                'contenu'      => $d['contenu']   ?? '',
-                'extrait'      => $d['extrait']   ?? null,
-                'image'        => $d['image']     ?? null,
-                'categorie'    => $d['categorie'] ?? null,
+                'titre'           => $d['titre'],
+                'slug'            => $slug,
+                'contenu'         => $d['contenu']   ?? '',
+                'extrait'         => $d['extrait']   ?? null,
+                'image'           => $d['image']     ?? null, // URL de l'image principale
+                'image_thumbnail' => $d['image_thumbnail'] ?? null, // URL de la miniature
+                'image_webp'      => $d['image_webp'] ?? null, // URL de la version WebP
+                'categorie'       => $d['categorie'] ?? null,
                 'tags'         => !empty($d['tags']) ? json_encode($d['tags']) : null,
                 'auteur_id'    => currentUserId(),
                 'statut'       => $statut,
@@ -286,12 +288,14 @@ try {
             $publishedAt = ($statut === 'publie') ? ($d['published_at'] ?? date('Y-m-d H:i:s')) : null;
 
             $updateData = array_filter([
-                'titre'        => $d['titre']     ?? null,
-                'contenu'      => $d['contenu']   ?? null,
-                'extrait'      => $d['extrait']   ?? null,
-                'image'        => $d['image']     ?? null,
-                'categorie'    => $d['categorie'] ?? null,
-                'tags'         => !empty($d['tags']) ? json_encode($d['tags']) : null,
+                'titre'           => $d['titre']     ?? null,
+                'contenu'         => $d['contenu']   ?? null,
+                'extrait'         => $d['extrait']   ?? null,
+                'image'           => $d['image']     ?? null,
+                'image_thumbnail' => $d['image_thumbnail'] ?? null,
+                'image_webp'      => $d['image_webp'] ?? null,
+                'categorie'       => $d['categorie'] ?? null,
+                'tags'            => isset($d['tags']) ? json_encode($d['tags']) : null,
                 'statut'       => $statut,
                 'published_at' => $publishedAt,
             ], fn($v) => $v !== null);
