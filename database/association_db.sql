@@ -7,8 +7,8 @@
 -- ============================================================
 
 -- Assurez-vous que la base de données est créée et sélectionnée au début de votre script principal.
--- CREATE DATABASE IF NOT EXISTS `association_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- USE `association_db`;
+CREATE DATABASE IF NOT EXISTS `association_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `association_db`;
 
 -- ============================================================
 -- 1. CRÉER LA TABLE DE RÉFÉRENCE `sports` (AVANT `actualites`)
