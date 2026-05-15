@@ -83,7 +83,12 @@ CREATE TABLE IF NOT EXISTS `utilisateurs` (
 -- Remplacez votre ancien `CREATE TABLE actualites` par celui-ci.
 -- ============================================================
 
-DROP TABLE IF EXISTS `actualites`; -- Si vous recréez de zéro
+-- Supprimer les éléments dépendants AVANT de supprimer la table `actualites`
+DROP VIEW IF EXISTS `vw_actualites_statistiques`;
+DROP TABLE IF EXISTS `actualite_likes`;
+DROP TABLE IF EXISTS `actualite_saves`;
+DROP TABLE IF EXISTS `actualite_commentaires`;
+DROP TABLE IF EXISTS `actualites`;
 CREATE TABLE `actualites` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `titre` VARCHAR(255) NOT NULL,
