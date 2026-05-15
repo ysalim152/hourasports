@@ -41,28 +41,36 @@ try {
             $d = json_decode(file_get_contents('php://input'), true) ?? [];
             if (empty($d)) { http_response_code(400); echo json_encode(['success' => false, 'message' => 'Corps vide.']); exit; }
 
-            $updated = 0;
+            $updated_keys = [];
             foreach ($d as $cle => $valeur) {
                 $cle = trim($cle);
                 if (empty($cle) || in_array($cle, LOCKED_KEYS)) continue;
-                $existing = dbFetchOne('SELECT cle FROM parametres WHERE cle = ?', [$cle]);
+
+                $existing = dbFetchOne('SELECT cle, valeur FROM parametres WHERE cle = ?', [$cle]);
+                $old_value = null;
+
                 if ($existing) {
+                    $old_value = $existing['valeur'];
                     dbUpdate('parametres', ['valeur' => (string)$valeur], ['cle' => $cle]);
                 } else {
                     try {
                         dbQuery('INSERT INTO parametres (cle, valeur) VALUES (?, ?)', [$cle, (string)$valeur]);
                     } catch (PDOException $e) { /* doublon ignoré */ }
                 }
-                $updated++;
+                $updated_keys[] = [
+                    'key' => $cle,
+                    'old_value' => $old_value,
+                    'new_value' => (string)$valeur
+                ];
             }
             dbInsert('audit_log', [
                 'utilisateur_id' => currentUserId(),
                 'action'         => 'maj_parametres',
                 'table_cible'    => 'parametres',
-                'details'        => json_encode(['keys_updated' => $updated]),
+                'details'        => json_encode(['keys_updated' => $updated_keys]),
                 'ip_address'     => $_SERVER['REMOTE_ADDR'] ?? null,
             ]);
-            echo json_encode(['success' => true, 'message' => "{$updated} paramètre(s) mis à jour."]);
+            echo json_encode(['success' => true, 'message' => count($updated_keys) . " paramètre(s) mis à jour."]);
             break;
 
         default:

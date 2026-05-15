@@ -21,6 +21,23 @@ $body     = json_decode(file_get_contents('php://input'), true) ?? [];
 $email    = trim($body['email']    ?? '');
 $password = trim($body['password'] ?? $body['mot_de_passe'] ?? '');
 
+// ── Rate Limiting (sécurité) ──
+session_start();
+$ip = $_SERVER['REMOTE_ADDR'];
+$_SESSION['login_attempts'][$ip] = $_SESSION['login_attempts'][$ip] ?? ['count' => 0, 'time' => time()];
+
+if (time() - $_SESSION['login_attempts'][$ip]['time'] > 300) { // Reset after 5 minutes
+    $_SESSION['login_attempts'][$ip] = ['count' => 0, 'time' => time()];
+}
+
+if ($_SESSION['login_attempts'][$ip]['count'] >= 5) {
+    http_response_code(429); // Too Many Requests
+    echo json_encode(['success' => false, 'message' => 'Trop de tentatives. Veuillez réessayer dans 5 minutes.']);
+    exit;
+}
+
+$_SESSION['login_attempts'][$ip]['count']++;
+
 // ── Validation basique ──
 if (empty($email) || empty($password)) {
     http_response_code(400);
@@ -45,6 +62,7 @@ $user = dbFetchOne(
 
 if (!$user) {
     http_response_code(401);
+    session_write_close(); // Ferme la session avant de terminer
     echo json_encode(['success' => false, 'message' => 'Identifiants incorrects.']);
     exit;
 }
@@ -69,12 +87,16 @@ if (in_array($user['statut'], ['inactif', 'suspendu'])) {
 
 // ── Vérifier mot de passe ──
 if (!password_verify($password, $user['mot_de_passe'])) {
+    // Note: le message d'erreur est volontairement le même que pour un email invalide
     http_response_code(401);
+    session_write_close(); // Ferme la session avant de terminer
     echo json_encode(['success' => false, 'message' => 'Identifiants incorrects.']);
     exit;
 }
 
 // ── Créer la session PHP ──
+// Succès, on réinitialise le compteur de tentatives
+unset($_SESSION['login_attempts'][$ip]);
 loginUser($user);
 
 // ── Mettre à jour dernière connexion ──

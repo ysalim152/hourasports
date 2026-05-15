@@ -3,22 +3,29 @@
  * config/db.php — Connexion MariaDB via PDO
  */
 
-define('DB_HOST', 'localhost');
-define('DB_PORT', '3306');
-define('DB_NAME', 'association_db');
-define('DB_USER', 'root');          // ← à modifier
-define('DB_PASS', '');              // ← à modifier
-define('DB_CHARSET', 'utf8mb4');
+// Pour utiliser les variables d'environnement, vous pouvez décommenter la ligne suivante
+// require_once __DIR__ . '/../../vendor/autoload.php';
+// (new Dotenv\Dotenv(__DIR__ . '/../../'))->load();
+
+$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbPort = getenv('DB_PORT') ?: '3306';
+$dbName = getenv('DB_NAME') ?: 'association_db';
+$dbUser = getenv('DB_USER') ?: 'root';
+$dbPass = getenv('DB_PASS') ?: '';
+$dbCharset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 /**
  * Retourne une instance PDO (singleton).
  */
 function getPDO(): PDO {
     static $pdo = null;
+
+    global $dbHost, $dbPort, $dbName, $dbCharset, $dbUser, $dbPass;
+
     if ($pdo === null) {
         $dsn = sprintf(
             'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-            DB_HOST, DB_PORT, DB_NAME, DB_CHARSET
+            $dbHost, $dbPort, $dbName, $dbCharset
         );
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -26,7 +33,7 @@ function getPDO(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            $pdo = new PDO($dsn, $dbUser, $dbPass, $options);
         } catch (PDOException $e) {
             // En production, loguer l'erreur sans l'afficher
             error_log('[DB] Connexion échouée: ' . $e->getMessage());

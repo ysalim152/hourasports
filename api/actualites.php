@@ -11,6 +11,7 @@
  */
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/auth_check.php';
+require_once __DIR__ . '/../config/redis.php';
 require_once __DIR__ . '/../config/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -20,6 +21,9 @@ $id     = isset($_GET['id'])   ? (int)$_GET['id']   : null;
 $slug   = trim($_GET['slug']   ?? '');
 $action = trim($_GET['action'] ?? '');
 
+// Durée de vie du cache en secondes (ex: 10 minutes)
+const CACHE_TTL = 600;
+
 // Lecture publique autorisée, écriture nécessite coach+
 $isPublicRead = ($method === 'GET');
 
@@ -27,12 +31,27 @@ if (!$isPublicRead) {
     requireRole('coach');
 }
 
+$redis = getRedis();
+
 try {
     switch ($method) {
 
         /* ── LIST / ONE ── */
         case 'GET':
             if ($id || $slug) {
+                // --- LOGIQUE DE CACHE POUR UN ARTICLE ---
+                $cacheKey = $id ? "article:{$id}" : "article:slug:{$slug}";
+                if ($redis) {
+                    $cachedArticle = $redis->get($cacheKey);
+                    if ($cachedArticle) {
+                        // On ne met pas en cache l'incrémentation des vues
+                        $articleData = json_decode($cachedArticle, true);
+                        dbQuery('UPDATE actualites SET vues = vues + 1 WHERE id = ?', [$articleData['data']['id']]);
+                        echo $cachedArticle;
+                        exit;
+                    }
+                }
+
                 $col = $id ? 'a.id' : 'a.slug';
                 $val = $id ?: $slug;
                 // Si non connecté → uniquement les publiés
@@ -55,8 +74,30 @@ try {
                 dbQuery('UPDATE actualites SET vues = vues + 1 WHERE id = ?', [$row['id']]);
                 $row['vues']++;
                 $row['tags'] = json_decode($row['tags'] ?? '[]', true) ?: [];
-                echo json_encode(['success' => true, 'data' => $row]);
+                $response = json_encode(['success' => true, 'data' => $row]);
+                
+                // Mettre en cache la réponse
+                if ($redis) {
+                    $redis->setex($cacheKey, CACHE_TTL, $response);
+                }
+                
+                echo $response;
             } else {
+                // --- LOGIQUE DE CACHE POUR LA LISTE ---
+                // Crée une clé de cache unique basée sur les paramètres de la requête
+                $queryParams = $_GET;
+                unset($queryParams['page']); // La pagination est gérée par la réponse complète
+                ksort($queryParams);
+                $cacheKey = 'articles_list:' . http_build_query($queryParams) . ':page:' . max(1, (int)($_GET['page'] ?? 1));
+
+                if ($redis) {
+                    $cachedList = $redis->get($cacheKey);
+                    if ($cachedList) {
+                        echo $cachedList;
+                        exit;
+                    }
+                }
+
                 $statut   = trim($_GET['statut']    ?? '');
                 $categorie= trim($_GET['categorie'] ?? '');
                 $q        = trim($_GET['q']         ?? '');
@@ -100,14 +141,21 @@ try {
                     $r['tags'] = json_decode($r['tags'] ?? '[]', true) ?: [];
                 }
 
-                echo json_encode([
+                $responseArray = [
                     'success'  => true,
                     'data'     => $rows,
                     'total'    => $total,
                     'page'     => $page,
                     'per_page' => $perPage,
                     'pages'    => max(1, (int)ceil($total / $perPage)),
-                ]);
+                ];
+                $response = json_encode($responseArray);
+
+                // Mettre en cache la réponse
+                if ($redis) {
+                    $redis->setex($cacheKey, CACHE_TTL, $response);
+                }
+                echo $response;
             }
             break;
 
@@ -160,6 +208,12 @@ try {
                 'ip_address'     => $_SERVER['REMOTE_ADDR'] ?? null,
             ]);
 
+            // Invalider le cache des listes
+            if ($redis) {
+                $keys = $redis->keys('articles_list:*');
+                if ($keys) $redis->del($keys);
+            }
+
             http_response_code(201);
             echo json_encode(['success' => true, 'message' => 'Article créé.', 'id' => $newId, 'slug' => $slug]);
             break;
@@ -171,7 +225,7 @@ try {
 
             // Action rapide : publier/dépublier
             if ($action === 'publish') {
-                $current = dbFetchOne('SELECT statut FROM actualites WHERE id = ?', [$id]);
+                $current = dbFetchOne('SELECT id, slug, statut FROM actualites WHERE id = ?', [$id]);
                 if (!$current) { http_response_code(404); echo json_encode(['success' => false, 'message' => 'Article introuvable.']); exit; }
                 $newStatut    = $current['statut'] === 'publie' ? 'brouillon' : 'publie';
                 $publishedAt  = $newStatut === 'publie' ? date('Y-m-d H:i:s') : null;
@@ -179,6 +233,14 @@ try {
                     ['statut' => $newStatut, 'published_at' => $publishedAt],
                     ['id' => $id]
                 );
+
+                // Invalider le cache de cet article et les listes
+                if ($redis) {
+                    $redis->del(["article:{$id}", "article:slug:{$current['slug']}"]);
+                    $keys = $redis->keys('articles_list:*');
+                    if ($keys) $redis->del($keys);
+                }
+
                 echo json_encode(['success' => true, 'message' => "Article {$newStatut}.", 'statut' => $newStatut]);
                 break;
             }
@@ -202,7 +264,16 @@ try {
                 echo json_encode(['success' => false, 'message' => 'Aucune donnée à mettre à jour.']);
                 exit;
             }
+
+            $current = dbFetchOne('SELECT id, slug FROM actualites WHERE id = ?', [$id]);
             dbUpdate('actualites', $updateData, ['id' => $id]);
+
+            // Invalider le cache de cet article et les listes
+            if ($redis && $current) {
+                $redis->del(["article:{$current['id']}", "article:slug:{$current['slug']}"]);
+                $keys = $redis->keys('articles_list:*');
+                if ($keys) $redis->del($keys);
+            }
 
             dbInsert('audit_log', [
                 'utilisateur_id' => currentUserId(),
@@ -219,7 +290,15 @@ try {
         case 'DELETE':
             requireRole('admin');
             if (!$id) { http_response_code(400); echo json_encode(['success' => false, 'message' => 'ID requis.']); exit; }
-            $art = dbFetchOne('SELECT titre FROM actualites WHERE id = ?', [$id]);
+            $art = dbFetchOne('SELECT id, slug, titre FROM actualites WHERE id = ?', [$id]);
+
+            // Invalider le cache AVANT de supprimer
+            if ($redis && $art) {
+                $redis->del(["article:{$art['id']}", "article:slug:{$art['slug']}"]);
+                $keys = $redis->keys('articles_list:*');
+                if ($keys) $redis->del($keys);
+            }
+
             dbDelete('actualites', ['id' => $id]);
             dbInsert('audit_log', [
                 'utilisateur_id' => currentUserId(),
