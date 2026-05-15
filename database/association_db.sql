@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `utilisateurs` (
 -- Remplacez votre ancien `CREATE TABLE actualites` par celui-ci.
 -- ============================================================
 
--- DROP TABLE IF EXISTS `actualites`; -- Si vous recréez de zéro
+DROP TABLE IF EXISTS `actualites`; -- Si vous recréez de zéro
 CREATE TABLE `actualites` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `titre` VARCHAR(255) NOT NULL,
