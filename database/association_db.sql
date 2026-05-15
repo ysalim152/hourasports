@@ -78,6 +78,15 @@ CREATE TABLE IF NOT EXISTS `utilisateurs` (
   CONSTRAINT `fk_utilisateurs_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Insérer les utilisateurs de démonstration (mot de passe pour tous: "Admin@2024")
+INSERT IGNORE INTO `utilisateurs` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `role_id`, `statut`) VALUES
+(1, 'Admin', 'Super', 'admin@association.dz', '$2y$10$TjZp6i.gJ3g.eRzL5zB9D.EWkPAz4S5j5gq8s.yL5kF3qG2H4jC/m', 1, 'actif'),
+(2, 'Coach', 'Sophie', 'coach@association.dz', '$2y$10$TjZp6i.gJ3g.eRzL5zB9D.EWkPAz4S5j5gq8s.yL5kF3qG2H4jC/m', 2, 'actif'),
+(3, 'Adhérent', 'Leila', 'leila@email.com', '$2y$10$TjZp6i.gJ3g.eRzL5zB9D.EWkPAz4S5j5gq8s.yL5kF3qG2H4jC/m', 3, 'actif'),
+(4, 'Participant', 'Karim', 'karim@email.com', '$2y$10$TjZp6i.gJ3g.eRzL5zB9D.EWkPAz4S5j5gq8s.yL5kF3qG2H4jC/m', 4, 'actif'),
+(5, 'Visiteur', 'Test', 'visiteur@email.com', '$2y$10$TjZp6i.gJ3g.eRzL5zB9D.EWkPAz4S5j5gq8s.yL5kF3qG2H4jC/m', 5, 'actif');
+
+
 -- ============================================================
 -- 2. MODIFIER LA DÉCLARATION `CREATE TABLE actualites`
 -- Remplacez votre ancien `CREATE TABLE actualites` par celui-ci.
