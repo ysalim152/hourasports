@@ -11,7 +11,7 @@ $dbHost = getenv('DB_HOST') ?: 'localhost';
 $dbPort = getenv('DB_PORT') ?: '3306';
 $dbName = getenv('DB_NAME') ?: 'association_db';
 $dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: '';
+$dbPass = getenv('DB_PASS') ?: 'Aylissam@26'; // 👈 REMPLACEZ CECI par le mot de passe que vous avez défini
 $dbCharset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 /**
