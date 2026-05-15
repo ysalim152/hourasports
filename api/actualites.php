@@ -31,6 +31,57 @@ if (!$isPublicRead) {
     requireRole('coach');
 }
 
+/**
+ * Génère un slug unique pour la table 'actualites'.
+ *
+ * @param string $title Le titre à partir duquel générer le slug.
+ * @param ?int $excludeId L'ID de l'article à exclure de la vérification (pour les mises à jour).
+ * @return string Le slug unique.
+ */
+function generateUniqueSlug(string $title, ?int $excludeId = null): string {
+    // 1. Translitérer et nettoyer le titre pour créer un slug de base.
+    $slug = iconv('UTF-8', 'ASCII//TRANSLIT', $title);
+    $slug = strtolower(trim($slug));
+    $slug = preg_replace('/[^a-z0-9 -]/', '', $slug);
+    $slug = preg_replace('/[\s-]+/', '-', $slug);
+    $baseSlug = trim($slug, '-');
+
+    if (empty($baseSlug)) {
+        $baseSlug = 'article';
+    }
+
+    // 2. Vérifier si le slug de base est déjà pris.
+    $where = 'slug = ?';
+    $params = [$baseSlug];
+    if ($excludeId !== null) {
+        $where .= ' AND id != ?';
+        $params[] = $excludeId;
+    }
+    $exists = dbFetchOne("SELECT id FROM actualites WHERE {$where}", $params);
+
+    // Si le slug de base n'existe pas, on le retourne directement.
+    if (!$exists) {
+        return $baseSlug;
+    }
+
+    // 3. Si le slug de base est pris, trouver le premier suffixe numérique disponible.
+    // On récupère tous les slugs similaires en une seule requête pour la performance.
+    $likeSlug = $baseSlug . '-%';
+    $similarSlugs = dbFetchAll("SELECT slug FROM actualites WHERE slug LIKE ?", [$likeSlug]);
+    $existingSuffixes = [];
+    foreach ($similarSlugs as $row) {
+        if (preg_match('/-([0-9]+)$/', $row['slug'], $matches)) {
+            $existingSuffixes[] = (int)$matches[1];
+        }
+    }
+
+    $i = 2; // On commence à chercher à partir de -2
+    while (in_array($i, $existingSuffixes)) {
+        $i++;
+    }
+    return $baseSlug . '-' . $i;
+}
+
 $redis = getRedis();
 
 try {
@@ -167,22 +218,8 @@ try {
                 echo json_encode(['success' => false, 'message' => 'Le titre est obligatoire.']);
                 exit;
             }
-            // Générer slug unique
-            $slug = strtolower(trim($d['slug'] ?? $d['titre']));
-            $slug = preg_replace('/[àáâäãåā]/u','a', $slug);
-            $slug = preg_replace('/[éèêëē]/u','e',  $slug);
-            $slug = preg_replace('/[ìíîïī]/u','i',  $slug);
-            $slug = preg_replace('/[òóôöõøō]/u','o',$slug);
-            $slug = preg_replace('/[ùúûüū]/u','u',  $slug);
-            $slug = preg_replace('/ç/u','c', $slug);
-            $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-            $slug = preg_replace('/[\s-]+/', '-', trim($slug, '-'));
-            // Unicité
-            $baseSlug = $slug;
-            $i = 1;
-            while (dbFetchOne('SELECT id FROM actualites WHERE slug = ?', [$slug])) {
-                $slug = $baseSlug . '-' . $i++;
-            }
+            // Générer un slug unique et robuste
+            $slug = generateUniqueSlug($d['titre']);
 
             $statut      = in_array($d['statut'] ?? '', ['brouillon','publie','archive']) ? $d['statut'] : 'brouillon';
             $publishedAt = ($statut === 'publie') ? date('Y-m-d H:i:s') : null;
