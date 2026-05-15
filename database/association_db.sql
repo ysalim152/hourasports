@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `actualite_saves` (
 CREATE TABLE IF NOT EXISTS `actualite_commentaires` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `actualite_id` INT UNSIGNED NOT NULL,
-  `user_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED DEFAULT NULL,
   `comment_parent_id` INT UNSIGNED DEFAULT NULL COMMENT 'Pour les réponses imbriquées',
   `contenu` TEXT NOT NULL,
   `statut` ENUM('en_attente','approuve','rejete','spam') DEFAULT 'en_attente',
