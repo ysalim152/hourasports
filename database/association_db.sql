@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `sports` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Référentiel des sports proposés';
 
 -- Insérer les sports de base
-INSERT INTO `sports` (`nom`, `slug`, `icone`, `couleur`, `description`) VALUES
+INSERT IGNORE INTO `sports` (`nom`, `slug`, `icone`, `couleur`, `description`) VALUES
 ('Football', 'football', '⚽', '#e63946', 'Sports collectif ballon'),
 ('Basketball', 'basketball', '🏀', '#f4a261', 'Sports collectif ballon'),
 ('Volleyball', 'volleyball', '🏐', '#2ecc71', 'Sports collectif filet'),
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `roles` (
   UNIQUE KEY `uk_nom` (`nom`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `roles` (`id`, `nom`, `label`, `niveau_acces`) VALUES
+INSERT IGNORE INTO `roles` (`id`, `nom`, `label`, `niveau_acces`) VALUES
 (1, 'admin', 'Administrateur', 4),
 (2, 'coach', 'Coach', 3),
 (3, 'adherent', 'Adhérent', 2),
