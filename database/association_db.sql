@@ -43,6 +43,42 @@ INSERT INTO `sports` (`nom`, `slug`, `icone`, `couleur`, `description`) VALUES
 ('Tennis', 'tennis', '🎾', '#f1c40f', 'Sports raquette');
 
 -- ============================================================
+-- 1.5. CRÉER LES TABLES `roles` ET `utilisateurs` (AVANT `actualites`)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nom` VARCHAR(50) NOT NULL,
+  `label` VARCHAR(50) NOT NULL,
+  `niveau_acces` TINYINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_nom` (`nom`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `roles` (`id`, `nom`, `label`, `niveau_acces`) VALUES
+(1, 'admin', 'Administrateur', 4),
+(2, 'coach', 'Coach', 3),
+(3, 'adherent', 'Adhérent', 2),
+(4, 'participant', 'Participant', 1),
+(5, 'visiteur', 'Visiteur', 0);
+
+CREATE TABLE IF NOT EXISTS `utilisateurs` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nom` VARCHAR(100) NOT NULL,
+  `prenom` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `mot_de_passe` VARCHAR(255) NOT NULL,
+  `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 5,
+  `statut` ENUM('actif','inactif','en_attente','suspendu') DEFAULT 'en_attente',
+  `avatar` VARCHAR(255) DEFAULT NULL,
+  `derniere_connexion` DATETIME DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_email` (`email`),
+  CONSTRAINT `fk_utilisateurs_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- 2. MODIFIER LA DÉCLARATION `CREATE TABLE actualites`
 -- Remplacez votre ancien `CREATE TABLE actualites` par celui-ci.
 -- ============================================================
