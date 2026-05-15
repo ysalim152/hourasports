@@ -53,8 +53,14 @@ function requireAuth(string $redirect = '/public/auth/login.html'): void {
  */
 function requireRole(string $role, string $redirect = '/public/index.html'): void {
     requireAuth();
-    $hierarchy = ['visiteur' => 0, 'membre' => 1, 'coach' => 2, 'admin' => 3];
-    $current = $hierarchy[currentRole()] ?? 0;
+    // Hiérarchie des rôles basée sur `niveau_acces` dans la table `roles`
+    $hierarchy = [
+        'visiteur'    => 0,
+        'participant' => 1,
+        'adherent'    => 2,
+        'coach'       => 3,
+        'admin'       => 4
+    ];    $current = $hierarchy[currentRole()] ?? 0;
     $required = $hierarchy[$role] ?? 99;
     if ($current < $required) {
         header('Location: ' . $redirect);
