@@ -300,6 +300,12 @@ try {
                 'published_at' => $publishedAt,
             ], fn($v) => $v !== null);
 
+            // Si le titre est modifié, on régénère le slug.
+            if (isset($updateData['titre'])) {
+                // On passe l'ID de l'article pour l'exclure de la vérification d'unicité.
+                $updateData['slug'] = generateUniqueSlug($updateData['titre'], $id);
+            }
+
             if (empty($updateData)) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Aucune donnée à mettre à jour.']);
@@ -312,6 +318,10 @@ try {
             // Invalider le cache de cet article et les listes
             if ($redis && $current) {
                 $redis->del(["article:{$current['id']}", "article:slug:{$current['slug']}"]);
+                // Si le slug a changé, on invalide aussi le cache de la nouvelle URL
+                if (isset($updateData['slug']) && $updateData['slug'] !== $current['slug']) {
+                    $redis->del(["article:slug:{$updateData['slug']}"]);
+                }
                 $keys = $redis->keys('articles_list:*');
                 if ($keys) $redis->del($keys);
             }
