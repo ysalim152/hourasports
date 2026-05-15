@@ -10,6 +10,10 @@
 CREATE DATABASE IF NOT EXISTS `association_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `association_db`;
 
+-- Forcer le jeu de caractères de la connexion pour accepter les émojis
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
+
 -- ============================================================
 -- 1. CRÉER LA TABLE DE RÉFÉRENCE `sports` (AVANT `actualites`)
 -- ============================================================
