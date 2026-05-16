@@ -456,6 +456,11 @@
    ================================================================= */
 
 /* FIX: Toast fallback si app.js absent */
+const COMMON_PASSWORDS = new Set([
+  '123456', '12345678', '123456789', 'password', 'azerty', 'qwerty',
+  'azertyuiop', '111111', 'football', 'iloveyou', 'admin', 'root', 'welcome'
+]);
+
 var Toast = window.Toast || {
   warning: function(m){ alert('⚠️ ' + m); },
   error:   function(m){ alert('❌ ' + m); }
@@ -953,12 +958,14 @@ function tglPwd(id, icon) {
 }
 
 function chkStr(v) {
+  const isCommon = COMMON_PASSWORDS.has(v.toLowerCase());
   const criteria = {
     len: v.length >= 8,
     maj: /[A-Z]/.test(v),
     min: /[a-z]/.test(v),
     num: /[0-9]/.test(v),
-    spe: /[^A-Za-z0-9]/.test(v)
+    spe: /[^A-Za-z0-9]/.test(v),
+    common: !isCommon
   };
 
   let score = 0;
@@ -966,6 +973,11 @@ function chkStr(v) {
     const el = document.getElementById('crit-' + key);
     if (el) el.classList.toggle('valid', criteria[key]);
     if (criteria[key]) score++;
+  }
+
+  // Si le mot de passe est commun, le score est pénalisé et la barre est rouge.
+  if (isCommon) {
+    score = 1;
   }
 
   passwordScore = score; // Mettre à jour le score global
