@@ -67,12 +67,8 @@ function requireRole(string $role, string $redirect = '/public/index.html'): voi
         'adherent'    => 2,
         'coach'       => 3,
         'admin'       => 4
-    ];    $current = $hierarchy[currentRole()] ?? 0;
-    $requiredLevel = $hierarchy[$role] ?? 99;
-    if (currentUserLevel() < $requiredLevel) {
-        header('Location: ' . $redirect);
+    ]; (currentUserLevel() < $requiredLevel) 
         exit;
-    }
 }
 
 /**

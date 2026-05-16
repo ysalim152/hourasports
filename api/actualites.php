@@ -212,12 +212,17 @@ try {
 
         /* ── CREATE ── */
         case 'POST':
-            $d = json_decode(file_get_contents('php://input'), true) ?? [];
+            // Les données arrivent via FormData (comme indiqué dans GUIDE_ADMIN_CRUD.md), donc on utilise $_POST.
+            $d = $_POST;
             if (empty($d['titre'])) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Le titre est obligatoire.']);
                 exit;
             }
+
+            // Les champs JSON (tags, age_group) sont envoyés comme des chaînes de caractères, il faut les décoder.
+            $tags = !empty($d['tags']) ? json_decode($d['tags'], true) : null;
+
             // Générer un slug unique et robuste
             $slug = generateUniqueSlug($d['titre']);
 
@@ -233,7 +238,7 @@ try {
                 'image_thumbnail' => $d['image_thumbnail'] ?? null, // URL de la miniature
                 'image_webp'      => $d['image_webp'] ?? null, // URL de la version WebP
                 'categorie'       => $d['categorie'] ?? null,
-                'tags'         => !empty($d['tags']) ? json_encode($d['tags']) : null,
+                'tags'            => $tags ? json_encode($tags) : null,
                 'auteur_id'    => currentUserId(),
                 'statut'       => $statut,
                 'published_at' => $publishedAt,
@@ -260,7 +265,10 @@ try {
         /* ── UPDATE ── */
         case 'PUT':
             if (!$id) { http_response_code(400); echo json_encode(['success' => false, 'message' => 'ID requis.']); exit; }
-            $d = json_decode(file_get_contents('php://input'), true) ?? [];
+            
+            // Pour une mise à jour, on s'attend à un corps de requête JSON.
+            // L'upload d'image se fait via l'endpoint dédié /api/upload-image.php.
+            $d = json_decode(file_get_contents("php://input"), true) ?? [];
 
             // Action rapide : publier/dépublier
             if ($action === 'publish') {

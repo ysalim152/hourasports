@@ -106,6 +106,7 @@ try {
 
     // --- a) Créer l'image principale (1200px de large, compressée) ---
     $mainWidth = 1200;
+    list($originalWidth, $originalHeight) = getimagesize($paths['original']);
     $mainImage = imagescale($sourceImage, $mainWidth);
     imagejpeg($mainImage, $paths['main'], 80); // Compression à 80%
 
@@ -137,6 +138,9 @@ try {
     imagecopyresampled($thumbImage, $sourceImage, 0, 0, $src_x, $src_y, $thumbWidth, $thumbHeight, $src_w, $src_h);
     imagejpeg($thumbImage, $paths['thumbnail'], 75);
 
+    // Récupérer la hauteur de l'image principale redimensionnée
+    $mainHeight = (int) (($mainWidth / $originalWidth) * $originalHeight);
+
     // Libérer la mémoire
     imagedestroy($sourceImage);
     imagedestroy($mainImage);
@@ -155,7 +159,7 @@ try {
             'image_webp'=> $urls['webp'],
             'thumbnail' => $urls['thumbnail'],
             'width'     => $mainWidth,
-            'height'    => imagesy(imagecreatefromjpeg($paths['main'])),
+            'height'    => $mainHeight,
             'size_original' => $file['size'],
             'size_compressed' => filesize($paths['main']),
         ]
