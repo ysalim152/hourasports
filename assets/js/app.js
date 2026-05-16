@@ -332,35 +332,50 @@ document.addEventListener('click', function (e) {
 // Fermeture du dropdown avec la touche Échap
 document.addEventListener('keydown', function (e) {
     const openDropdown = document.querySelector('.nav-item-dropdown.open');
+    if (!openDropdown) return;
 
-    // 1. Fermeture avec la touche "Échap"
-    if (e.key === 'Escape' || e.key === 'Esc') {
-        if (openDropdown) {
+    switch (e.key) {
+        case 'Escape':
+        case 'Esc': // Compatibilité
             const toggle = openDropdown.querySelector('[aria-expanded="true"]');
             openDropdown.classList.remove('open');
             if (toggle) {
                 toggle.setAttribute('aria-expanded', 'false');
                 toggle.focus(); // Important : retourne le focus au bouton qui a ouvert le menu
             }
-        }
-    }
+            break;
 
-    // 2. Navigation au clavier (flèches haut/bas)
-    if (openDropdown && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-        e.preventDefault(); // Empêche le défilement de la page
+        case 'ArrowDown':
+        case 'ArrowUp':
+            e.preventDefault(); // Empêche le défilement de la page
+            const items = Array.from(openDropdown.querySelectorAll('.dropdown-menu a[role="menuitem"]'));
+            if (!items.length) return;
 
-        const items = Array.from(openDropdown.querySelectorAll('.dropdown-menu a[role="menuitem"]'));
-        if (!items.length) return;
+            let currentIndex = items.findIndex(item => item === document.activeElement);
 
-        let currentIndex = items.findIndex(item => item === document.activeElement);
+            if (e.key === 'ArrowDown') {
+                currentIndex = (currentIndex + 1) % items.length;
+            } else { // ArrowUp
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+            }
+            items[currentIndex].focus();
+            break;
 
-        if (e.key === 'ArrowDown') {
-            currentIndex = (currentIndex + 1) % items.length;
-        } else { // ArrowUp
-            currentIndex = (currentIndex - 1 + items.length) % items.length;
-        }
-        
-        items[currentIndex].focus();
+        case 'Tab':
+            const focusableItems = Array.from(openDropdown.querySelectorAll('.dropdown-menu a[role="menuitem"]'));
+            if (!focusableItems.length) return;
+
+            const firstElement = focusableItems[0];
+            const lastElement = focusableItems[focusableItems.length - 1];
+
+            if (e.shiftKey && document.activeElement === firstElement) { // Shift + Tab sur le premier élément
+                e.preventDefault();
+                lastElement.focus(); // Aller au dernier
+            } else if (!e.shiftKey && document.activeElement === lastElement) { // Tab sur le dernier élément
+                e.preventDefault();
+                firstElement.focus(); // Revenir au premier
+            }
+            break;
     }
 });
 
