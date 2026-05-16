@@ -321,6 +321,16 @@ document.addEventListener('click', function (e) {
     }
 });
 
+// Fermeture du dropdown avec la touche Échap
+document.addEventListener('keydown', function (e) {
+    // 'Esc' est pour la compatibilité avec d'anciens navigateurs
+    if (e.key === 'Escape' || e.key === 'Esc') {
+        document.querySelectorAll('.nav-item-dropdown.open').forEach(openDropdown => {
+            openDropdown.classList.remove('open');
+        });
+    }
+});
+
 
 /* ===== EXPORT / PRINT HELPERS ===== */
 const Export = {
