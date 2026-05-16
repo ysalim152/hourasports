@@ -525,6 +525,7 @@ let cotisation = null;
 let selDiscs   = [];
 let selSpecs   = [];
 let selDispos  = [];
+let passwordScore = 0;
 
 /* ── Construction des grilles disciplines / spécialités ── */
 (function buildDiscs() {
@@ -845,6 +846,17 @@ function doSubmit() {
     Toast.warning('Veuillez accepter la politique de confidentialité.'); return;
   }
 
+  // Vérifier la force du mot de passe
+  if (passwordScore < 3) {
+    Toast.error('Votre mot de passe est trop faible. Veuillez le renforcer.');
+    // Remettre le bouton dans son état initial
+    var btn = document.getElementById('btnSubmit');
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-user-plus"></i> Créer mon Compte';
+      btn.disabled = false;
+    }
+    return;
+  }
   var btn = document.getElementById('btnSubmit');
   if (btn) {
     btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;vertical-align:middle"></span> Création...';
@@ -941,23 +953,34 @@ function tglPwd(id, icon) {
 }
 
 function chkStr(v) {
-  var s = 0;
-  if (v.length >= 8)          s++;
-  if (/[A-Z]/.test(v))        s++;
-  if (/[0-9]/.test(v))        s++;
-  if (/[^A-Za-z0-9]/.test(v)) s++;
-  var lvl = [
-    { w:'0%',    c:'transparent',   t:'' },
-    { w:'25%',   c:'var(--danger)', t:'🔴 Très faible' },
-    { w:'50%',   c:'#f4a261',       t:'🟡 Faible' },
-    { w:'75%',   c:'#3498db',       t:'🔵 Moyen' },
-    { w:'100%',  c:'var(--success)',t:'🟢 Fort' }
+  const criteria = {
+    len: v.length >= 8,
+    maj: /[A-Z]/.test(v),
+    min: /[a-z]/.test(v),
+    num: /[0-9]/.test(v),
+    spe: /[^A-Za-z0-9]/.test(v)
+  };
+
+  let score = 0;
+  for (const key in criteria) {
+    const el = document.getElementById('crit-' + key);
+    if (el) el.classList.toggle('valid', criteria[key]);
+    if (criteria[key]) score++;
+  }
+
+  passwordScore = score; // Mettre à jour le score global
+
+  const levels = [
+    { w: '0%',  c: 'transparent' }, // Score 0
+    { w: '20%', c: 'var(--danger)' }, // Score 1
+    { w: '40%', c: 'var(--danger)' }, // Score 2
+    { w: '60%', c: '#f4a261' },       // Score 3
+    { w: '80%', c: '#3498db' },       // Score 4
+    { w: '100%',c: 'var(--success)'}  // Score 5
   ];
-  var l = lvl[s] || lvl[0];
+  const l = levels[score] || levels[0];
   var fill  = document.getElementById('strFill');
-  var label = document.getElementById('strLbl');
   if (fill)  fill.style.cssText  = 'width:' + l.w + ';background:' + l.c;
-  if (label) { label.style.color = l.c; label.textContent = l.t; }
 }
 
 </script>
