@@ -52,14 +52,25 @@ $rootPath   = $rootPath   ?? '../';
                 : "{$rootPath}public/espace-membre.html";
         ?>
         <li class="nav-item-dropdown">
-            <a href="#" class="nav-link-dropdown-toggle">👤 Bonjour, <?= $userPrenom ?> <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 0.3rem;"></i></a>
-            <ul class="dropdown-menu">
-                <li><a href="<?= $espaceUrl ?>"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
+            <a href="#" 
+               class="nav-link-dropdown-toggle" 
+               id="user-menu-button-php" 
+               aria-haspopup="true" 
+               aria-expanded="false" 
+               aria-controls="user-menu-php">
+                👤 Bonjour, <?= $userPrenom ?> <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 0.3rem;"></i>
+            </a>
+            <ul class="dropdown-menu" id="user-menu-php" role="menu" aria-labelledby="user-menu-button-php">
+                <li role="none"><a href="<?= $espaceUrl ?>" role="menuitem"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
                 <?php if ($userRole === 'admin' || $userRole === 'coach'): ?>
-                    <li><a href="<?= $rootPath ?>public/admin/dashboard.html"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>
+                    <li role="none"><a href="<?= $rootPath ?>public/admin/dashboard.html" role="menuitem"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>
                 <?php endif; ?>
-                <li><hr class="dropdown-divider"></li>
-                <li><a href="<?= $rootPath ?>public/auth/logout.php" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion</a></li>
+                <li role="none"><hr class="dropdown-divider" role="separator"></li>
+                <li role="none">
+                    <a href="<?= $rootPath ?>public/auth/logout.php" role="menuitem" style="color: var(--danger);">
+                        <i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion
+                    </a>
+                </li>
             </ul>
         </li>
     <?php else: ?>

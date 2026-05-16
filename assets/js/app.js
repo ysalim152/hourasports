@@ -311,13 +311,17 @@ document.addEventListener('click', function (e) {
     document.querySelectorAll('.nav-item-dropdown.open').forEach(openDropdown => {
         if (!dropdownContainer || openDropdown !== dropdownContainer) {
             openDropdown.classList.remove('open');
+            const toggle = openDropdown.querySelector('.nav-link-dropdown-toggle');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
         }
     });
 
     // Si un bouton de dropdown a été cliqué, ouvre/ferme son parent
     if (dropdownToggle) {
         e.preventDefault();
-        dropdownToggle.closest('.nav-item-dropdown').classList.toggle('open');
+        const container = dropdownToggle.closest('.nav-item-dropdown');
+        const isOpen = container.classList.toggle('open');
+        dropdownToggle.setAttribute('aria-expanded', isOpen);
     }
 });
 
@@ -327,6 +331,8 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' || e.key === 'Esc') {
         document.querySelectorAll('.nav-item-dropdown.open').forEach(openDropdown => {
             openDropdown.classList.remove('open');
+            const toggle = openDropdown.querySelector('.nav-link-dropdown-toggle');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
         });
     }
 });
@@ -460,18 +466,23 @@ window.Auth = Auth;
             : '/public/espace-membre.html';
 
         const dashboardLink = (role === 'admin' || role === 'coach')
-            ? `<li><a href="/public/admin/dashboard.html"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>`
+            ? `<li role="none"><a href="/public/admin/dashboard.html" role="menuitem"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>`
             : '';
 
         const dropdownHTML = `
-            <a href="#" class="nav-link-dropdown-toggle">
+            <a href="#" 
+               class="nav-link-dropdown-toggle" 
+               id="user-menu-button-js" 
+               aria-haspopup="true" 
+               aria-expanded="false" 
+               aria-controls="user-menu-js">
                 👤 Bonjour, ${prenom} <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 0.3rem;"></i>
             </a>
-            <ul class="dropdown-menu">
-                <li><a href="${profileUrl}"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
+            <ul class="dropdown-menu" id="user-menu-js" role="menu" aria-labelledby="user-menu-button-js">
+                <li role="none"><a href="${profileUrl}" role="menuitem"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
                 ${dashboardLink}
-                <li><hr class="dropdown-divider"></li>
-                <li><a href="/public/auth/logout.php" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion</a></li>
+                <li role="none"><hr class="dropdown-divider" role="separator"></li>
+                <li role="none"><a href="/public/auth/logout.php" role="menuitem" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion</a></li>
             </ul>
         `;
 
