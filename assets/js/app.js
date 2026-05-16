@@ -302,16 +302,25 @@ document.querySelectorAll('form[data-ajax]').forEach(form => {
 })();
 
 /* ===== DROPDOWN ===== */
-document.querySelectorAll('[data-dropdown]').forEach(trigger => {
-  trigger.addEventListener('click', e => {
-    e.stopPropagation();
-    const target = document.getElementById(trigger.dataset.dropdown);
-    target?.classList.toggle('open');
-  });
+document.addEventListener('click', function (e) {
+    // Utilise .closest() pour vérifier si le clic est sur un bouton de dropdown ou à l'intérieur d'un dropdown
+    const dropdownToggle = e.target.closest('.nav-link-dropdown-toggle');
+    const dropdownContainer = e.target.closest('.nav-item-dropdown');
+
+    // Ferme tous les autres dropdowns ouverts
+    document.querySelectorAll('.nav-item-dropdown.open').forEach(openDropdown => {
+        if (!dropdownContainer || openDropdown !== dropdownContainer) {
+            openDropdown.classList.remove('open');
+        }
+    });
+
+    // Si un bouton de dropdown a été cliqué, ouvre/ferme son parent
+    if (dropdownToggle) {
+        e.preventDefault();
+        dropdownToggle.closest('.nav-item-dropdown').classList.toggle('open');
+    }
 });
-document.addEventListener('click', () => {
-  document.querySelectorAll('.dropdown-menu.open').forEach(d => d.classList.remove('open'));
-});
+
 
 /* ===== EXPORT / PRINT HELPERS ===== */
 const Export = {
@@ -426,3 +435,43 @@ const Auth = {
   niveau() { return parseInt(sessionStorage.getItem('user_niveau_acces')||'0'); },
 };
 window.Auth = Auth;
+
+/* ===== DYNAMIC AUTH NAVBAR (CLIENT-SIDE) ===== */
+(function initAuthNavbar() {
+    const authSection = document.getElementById('nav-auth-section');
+    if (!authSection) return;
+
+    if (Auth.isLoggedIn()) {
+        const prenom = Auth.get('prenom') || 'Membre';
+        const role = Auth.get('role');
+
+        const profileUrl = (role === 'admin' || role === 'coach')
+            ? '/public/admin/profil.html'
+            : '/public/espace-membre.html';
+
+        const dashboardLink = (role === 'admin' || role === 'coach')
+            ? `<li><a href="/public/admin/dashboard.html"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>`
+            : '';
+
+        const dropdownHTML = `
+            <a href="#" class="nav-link-dropdown-toggle">
+                👤 Bonjour, ${prenom} <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 0.3rem;"></i>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="${profileUrl}"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
+                ${dashboardLink}
+                <li><hr class="dropdown-divider"></li>
+                <li><a href="/public/auth/logout.php" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion</a></li>
+            </ul>
+        `;
+
+        // Ajoute la classe au li parent et injecte le HTML
+        authSection.classList.add('nav-item-dropdown');
+        authSection.innerHTML = dropdownHTML;
+
+    } else {
+        // L'utilisateur n'est pas connecté, s'assurer que le bouton de connexion est présent
+        authSection.innerHTML = `<a href="/public/auth/login.html" class="nav-cta">Connexion</a>`;
+        authSection.classList.remove('nav-item-dropdown', 'open');
+    }
+})();

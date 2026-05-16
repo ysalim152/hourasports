@@ -43,20 +43,25 @@ $rootPath   = $rootPath   ?? '../';
     <li><a href="<?= $rootPath ?>public/activites.html" class="<?= $activePage==='activites'?'active':'' ?>">Activités</a></li>
     <li><a href="<?= $rootPath ?>public/apropos.html" class="<?= $activePage==='apropos'?'active':'' ?>">À Propos</a></li>
     <li><a href="<?= $rootPath ?>public/contact.html" class="<?= $activePage==='contact'?'active':'' ?>">Contact</a></li>
-
     <?php if (isset($_SESSION['user_id'])): ?>
         <?php
             $userPrenom = htmlspecialchars($_SESSION['user_prenom'] ?? 'Membre');
             $userRole = $_SESSION['user_role'] ?? 'visiteur';
-            $espaceUrl = ($userRole === 'admin' || $userRole === 'coach') 
-                ? "{$rootPath}public/admin/profil.html" 
+            $espaceUrl = ($userRole === 'admin' || $userRole === 'coach')
+                ? "{$rootPath}public/admin/profil.html"
                 : "{$rootPath}public/espace-membre.html";
         ?>
-        <li><a href="<?= $espaceUrl ?>">👤 Bonjour, <?= $userPrenom ?></a></li>
-        <?php if ($userRole === 'admin' || $userRole === 'coach'): ?>
-            <li><a href="<?= $rootPath ?>public/admin/dashboard.html">Tableau de bord</a></li>
-        <?php endif; ?>
-        <li><a href="<?= $rootPath ?>public/auth/logout.php" class="nav-cta">Déconnexion</a></li>
+        <li class="nav-item-dropdown">
+            <a href="#" class="nav-link-dropdown-toggle">👤 Bonjour, <?= $userPrenom ?> <i class="fas fa-chevron-down" style="font-size: 0.7em; margin-left: 0.3rem;"></i></a>
+            <ul class="dropdown-menu">
+                <li><a href="<?= $espaceUrl ?>"><i class="fas fa-user-circle" style="width:14px"></i> Mon Profil</a></li>
+                <?php if ($userRole === 'admin' || $userRole === 'coach'): ?>
+                    <li><a href="<?= $rootPath ?>public/admin/dashboard.html"><i class="fas fa-tachometer-alt" style="width:14px"></i> Tableau de bord</a></li>
+                <?php endif; ?>
+                <li><hr class="dropdown-divider"></li>
+                <li><a href="<?= $rootPath ?>public/auth/logout.php" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="width:14px"></i> Déconnexion</a></li>
+            </ul>
+        </li>
     <?php else: ?>
         <li><a href="<?= $rootPath ?>public/auth/login.html" class="nav-cta">Connexion</a></li>
     <?php endif; ?>
