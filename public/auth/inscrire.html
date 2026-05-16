@@ -7,165 +7,232 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../../assets/css/style.css">
+  <!-- FIX: style.css externe remplacé par variables CSS inline pour autonomie -->
   <style>
+    /* ── Fallback variables (normalement dans style.css) ── */
     :root {
+      --primary:      #e63946;
+      --dark:         #0d1117;
+      --dark2:        #161b22;
+      --white:        #ffffff;
+      --light:        #e6edf3;
+      --gray:         #8b949e;
+      --success:      #2ecc71;
+      --warning:      #f4a261;
+      --danger:       #e63946;
+      --info:         #3498db;
+      --font-display: 'Bebas Neue', sans-serif;
+      --radius:       6px;
+      --transition:   all .2s ease;
       --role-admin:      #e63946;
       --role-coach:      #f4a261;
       --role-adherent:   #2ecc71;
       --role-participant:#3498db;
       --role-visiteur:   #8d99ae;
     }
-    .reg-wrapper{min-height:100vh;display:grid;grid-template-columns:360px 1fr;background:var(--dark)}
-    @media(max-width:900px){.reg-wrapper{grid-template-columns:1fr}.reg-side{display:none}}
-    .reg-side{position:relative;background:linear-gradient(160deg,#0a1628 0%,#1a0812 60%,#0d1b2a 100%);overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem}
-    .reg-side::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(230,57,70,.18) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(29,53,87,.35) 0%,transparent 50%)}
-    .side-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(230,57,70,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(230,57,70,.04) 1px,transparent 1px);background-size:44px 44px}
-    .side-content{position:relative;z-index:1}
-    .side-logo{display:flex;align-items:center;gap:.7rem;font-family:var(--font-display);font-size:1.7rem;color:var(--white);letter-spacing:.08em}
-    .side-logo .ball{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 24px rgba(230,57,70,.5)}
-    .side-tagline{margin-top:2.5rem}
-    .side-tagline h2{font-family:var(--font-display);font-size:2.5rem;color:var(--white);line-height:1;margin-bottom:.8rem}
-    .side-tagline h2 span{color:var(--primary)}
-    .side-tagline p{color:var(--gray);font-size:.92rem;line-height:1.7}
-    .side-roles{margin-top:2rem;display:flex;flex-direction:column;gap:.5rem}
-    .side-role{display:flex;align-items:center;gap:.8rem;padding:.6rem .9rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);transition:var(--transition)}
-    .side-role.lit{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.07);transform:translateX(4px)}
-    .side-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .side-role-name{font-weight:700;font-size:.85rem;color:var(--light)}
-    .side-role-desc{font-size:.72rem;color:var(--gray)}
-    .side-footer{position:relative;z-index:1;font-size:.75rem;color:rgba(255,255,255,.22)}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: var(--light); }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+    textarea, input, select { font-family: inherit; }
+    .hidden { display: none !important; }
+
+    /* ── Form helpers ── */
+    .form-group { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
+    .form-label { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+    .form-control { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); padding: .65rem .9rem; color: var(--white); font-size: .9rem; transition: var(--transition); width: 100%; }
+    .form-control:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,.07); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+    .form-error { font-size: .75rem; color: var(--danger); min-height: 1em; }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .75rem 1.5rem; border-radius: var(--radius); font-family: var(--font-display); font-size: 1rem; letter-spacing: .06em; border: 2px solid transparent; transition: var(--transition); }
+    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-primary:hover { filter: brightness(1.12); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-outline { background: transparent; color: var(--light); border-color: rgba(255,255,255,.15); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-lg { padding: .9rem 2rem; font-size: 1.1rem; }
+    .badge { display: inline-block; padding: .18rem .55rem; border-radius: 20px; font-size: .7rem; font-weight: 700; }
+    .badge-warning { background: rgba(244,162,97,.15); color: var(--warning); border: 1px solid rgba(244,162,97,.3); }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Layout ── */
+    .reg-wrapper { min-height:100vh; display:grid; grid-template-columns:360px 1fr; background:var(--dark) }
+    @media(max-width:900px){ .reg-wrapper{ grid-template-columns:1fr } .reg-side{ display:none } }
+    .reg-side { position:relative; background:linear-gradient(160deg,#0a1628 0%,#1a0812 60%,#0d1b2a 100%); overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:2.5rem }
+    .reg-side::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 20%,rgba(230,57,70,.18) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(29,53,87,.35) 0%,transparent 50%) }
+    .side-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(230,57,70,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(230,57,70,.04) 1px,transparent 1px); background-size:44px 44px }
+    .side-content { position:relative; z-index:1 }
+    .side-logo { display:flex; align-items:center; gap:.7rem; font-family:var(--font-display); font-size:1.7rem; color:var(--white); letter-spacing:.08em }
+    .side-logo .ball { width:40px; height:40px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 0 24px rgba(230,57,70,.5) }
+    .side-tagline { margin-top:2.5rem }
+    .side-tagline h2 { font-family:var(--font-display); font-size:2.5rem; color:var(--white); line-height:1; margin-bottom:.8rem }
+    .side-tagline h2 span { color:var(--primary) }
+    .side-tagline p { color:var(--gray); font-size:.92rem; line-height:1.7 }
+    .side-roles { margin-top:2rem; display:flex; flex-direction:column; gap:.5rem }
+    .side-role { display:flex; align-items:center; gap:.8rem; padding:.6rem .9rem; border-radius:var(--radius); border:1px solid rgba(255,255,255,.05); background:rgba(255,255,255,.02); transition:var(--transition) }
+    .side-role.lit { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.07); transform:translateX(4px) }
+    .side-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0 }
+    .side-role-name { font-weight:700; font-size:.85rem; color:var(--light) }
+    .side-role-desc { font-size:.72rem; color:var(--gray) }
+    .side-footer { position:relative; z-index:1; font-size:.75rem; color:rgba(255,255,255,.22) }
+
     /* MAIN */
-    .reg-main{overflow-y:auto;padding:2.5rem;display:flex;flex-direction:column;align-items:center}
-    .reg-form-wrap{width:100%;max-width:640px;padding-top:.5rem}
-    .reg-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
-    .reg-back{color:var(--gray);font-size:.85rem;display:flex;align-items:center;gap:.4rem}
-    .reg-back:hover{color:var(--primary)}
-    .login-link{font-size:.85rem;color:var(--gray)}
-    .login-link a{color:var(--primary);font-weight:700}
-    /* Accent bar */
-    .accent-bar{height:3px;border-radius:3px 3px 0 0;background:var(--primary);margin-bottom:1.5rem;transition:background .4s}
+    .reg-main { overflow-y:auto; padding:2.5rem; display:flex; flex-direction:column; align-items:center }
+    .reg-form-wrap { width:100%; max-width:640px; padding-top:.5rem }
+    .reg-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem }
+    .reg-back { color:var(--gray); font-size:.85rem; display:flex; align-items:center; gap:.4rem }
+    .reg-back:hover { color:var(--primary) }
+    .login-link { font-size:.85rem; color:var(--gray) }
+    .login-link a { color:var(--primary); font-weight:700 }
+
+    .accent-bar { height:3px; border-radius:3px 3px 0 0; background:var(--primary); margin-bottom:1.5rem; transition:background .4s }
+
     /* STEPPER */
-    .stepper{display:flex;align-items:center;margin-bottom:2.5rem;position:relative}
-    .stepper-line{position:absolute;top:20px;left:20px;right:20px;height:2px;background:rgba(255,255,255,.07);z-index:0}
-    .stepper-prog{position:absolute;top:20px;left:20px;height:2px;background:var(--primary);z-index:1;transition:width .5s cubic-bezier(.4,0,.2,1)}
-    .si{display:flex;flex-direction:column;align-items:center;gap:.4rem;flex:1;position:relative;z-index:2}
-    .si-bubble{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;border:2px solid rgba(255,255,255,.1);background:var(--dark2);color:var(--gray);transition:all .35s ease}
-    .si.active .si-bubble{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 0 0 4px rgba(230,57,70,.18)}
-    .si.done .si-bubble{background:var(--success);border-color:var(--success);color:white}
-    .si-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray);text-align:center;transition:color .3s}
-    .si.active .si-label{color:var(--primary)}
-    .si.done .si-label{color:var(--success)}
+    .stepper { display:flex; align-items:center; margin-bottom:2.5rem; position:relative }
+    .stepper-line { position:absolute; top:20px; left:20px; right:20px; height:2px; background:rgba(255,255,255,.07); z-index:0 }
+    .stepper-prog { position:absolute; top:20px; left:20px; height:2px; background:var(--primary); z-index:1; transition:width .5s cubic-bezier(.4,0,.2,1) }
+    .si { display:flex; flex-direction:column; align-items:center; gap:.4rem; flex:1; position:relative; z-index:2 }
+    .si-bubble { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.82rem; font-weight:700; border:2px solid rgba(255,255,255,.1); background:var(--dark2); color:var(--gray); transition:all .35s ease }
+    .si.active .si-bubble { background:var(--primary); border-color:var(--primary); color:white; box-shadow:0 0 0 4px rgba(230,57,70,.18) }
+    .si.done .si-bubble { background:var(--success); border-color:var(--success); color:white }
+    .si-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--gray); text-align:center; transition:color .3s }
+    .si.active .si-label { color:var(--primary) }
+    .si.done .si-label { color:var(--success) }
+
     /* SECTION HEADING */
-    .sh{margin-bottom:1.8rem}
-    .sh h3{font-family:var(--font-display);font-size:1.9rem;color:var(--white);margin-bottom:.25rem}
-    .sh p{color:var(--gray);font-size:.88rem;line-height:1.6}
+    .sh { margin-bottom:1.8rem }
+    .sh h3 { font-family:var(--font-display); font-size:1.9rem; color:var(--white); margin-bottom:.25rem }
+    .sh p { color:var(--gray); font-size:.88rem; line-height:1.6 }
+
     /* ROLE CARDS */
-    .role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:.85rem;margin-bottom:1.3rem}
-    .rc{border:2px solid rgba(255,255,255,.07);border-radius:8px;padding:1.2rem 1rem;cursor:pointer;transition:all .3s ease;background:rgba(255,255,255,.02);position:relative;text-align:center;user-select:none}
-    .rc:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.16)}
-    .rc.sel{transform:translateY(-3px)}
-    .rc[data-role=admin].sel{border-color:var(--role-admin);background:rgba(230,57,70,.07)}
-    .rc[data-role=admin]:hover{border-color:rgba(230,57,70,.35)}
-    .rc[data-role=coach].sel{border-color:var(--role-coach);background:rgba(244,162,97,.07)}
-    .rc[data-role=coach]:hover{border-color:rgba(244,162,97,.35)}
-    .rc[data-role=adherent].sel{border-color:var(--role-adherent);background:rgba(46,204,113,.07)}
-    .rc[data-role=adherent]:hover{border-color:rgba(46,204,113,.35)}
-    .rc[data-role=participant].sel{border-color:var(--role-participant);background:rgba(52,152,219,.07)}
-    .rc[data-role=participant]:hover{border-color:rgba(52,152,219,.35)}
-    .rc[data-role=visiteur].sel{border-color:var(--role-visiteur);background:rgba(141,153,174,.07)}
-    .rc[data-role=visiteur]:hover{border-color:rgba(141,153,174,.35)}
-    .rc-check{position:absolute;top:.55rem;right:.55rem;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:white;opacity:0;transition:opacity .3s}
-    .rc.sel .rc-check{opacity:1}
-    .rc[data-role=admin].sel .rc-check{background:var(--role-admin)}
-    .rc[data-role=coach].sel .rc-check{background:var(--role-coach)}
-    .rc[data-role=adherent].sel .rc-check{background:var(--role-adherent)}
-    .rc[data-role=participant].sel .rc-check{background:var(--role-participant)}
-    .rc[data-role=visiteur].sel .rc-check{background:var(--role-visiteur)}
-    .rc-icon{font-size:2.1rem;margin-bottom:.65rem;display:block;transition:transform .3s}
-    .rc:hover .rc-icon,.rc.sel .rc-icon{transform:scale(1.12)}
-    .rc-name{font-family:var(--font-display);font-size:1.05rem;color:var(--white);margin-bottom:.2rem}
-    .rc-desc{font-size:.7rem;color:var(--gray);line-height:1.45}
+    .role-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:.85rem; margin-bottom:1.3rem }
+    .rc { border:2px solid rgba(255,255,255,.07); border-radius:8px; padding:1.2rem 1rem; cursor:pointer; transition:all .3s ease; background:rgba(255,255,255,.02); position:relative; text-align:center; user-select:none }
+    .rc:hover { transform:translateY(-3px); border-color:rgba(255,255,255,.16) }
+    .rc.sel { transform:translateY(-3px) }
+    .rc[data-role=admin].sel    { border-color:var(--role-admin);      background:rgba(230,57,70,.07) }
+    .rc[data-role=admin]:hover  { border-color:rgba(230,57,70,.35) }
+    .rc[data-role=coach].sel    { border-color:var(--role-coach);      background:rgba(244,162,97,.07) }
+    .rc[data-role=coach]:hover  { border-color:rgba(244,162,97,.35) }
+    .rc[data-role=adherent].sel { border-color:var(--role-adherent);   background:rgba(46,204,113,.07) }
+    .rc[data-role=adherent]:hover { border-color:rgba(46,204,113,.35) }
+    .rc[data-role=participant].sel  { border-color:var(--role-participant); background:rgba(52,152,219,.07) }
+    .rc[data-role=participant]:hover{ border-color:rgba(52,152,219,.35) }
+    .rc[data-role=visiteur].sel  { border-color:var(--role-visiteur);  background:rgba(141,153,174,.07) }
+    .rc[data-role=visiteur]:hover{ border-color:rgba(141,153,174,.35) }
+    .rc-check { position:absolute; top:.55rem; right:.55rem; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.65rem; color:white; opacity:0; transition:opacity .3s }
+    .rc.sel .rc-check { opacity:1 }
+    .rc[data-role=admin].sel      .rc-check { background:var(--role-admin) }
+    .rc[data-role=coach].sel      .rc-check { background:var(--role-coach) }
+    .rc[data-role=adherent].sel   .rc-check { background:var(--role-adherent) }
+    .rc[data-role=participant].sel .rc-check { background:var(--role-participant) }
+    .rc[data-role=visiteur].sel   .rc-check { background:var(--role-visiteur) }
+    .rc-icon { font-size:2.1rem; margin-bottom:.65rem; display:block; transition:transform .3s }
+    .rc:hover .rc-icon, .rc.sel .rc-icon { transform:scale(1.12) }
+    .rc-name { font-family:var(--font-display); font-size:1.05rem; color:var(--white); margin-bottom:.2rem }
+    .rc-desc { font-size:.7rem; color:var(--gray); line-height:1.45 }
+
     /* INFO BOX */
-    .role-info{padding:1rem 1.2rem;border-radius:var(--radius);border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);margin-bottom:1.3rem;display:flex;gap:.85rem;align-items:flex-start;min-height:56px;transition:all .35s ease}
-    .ri-icon{font-size:1.4rem;flex-shrink:0;margin-top:.1rem}
-    .ri-title{font-weight:700;font-size:.92rem;margin-bottom:.2rem}
-    .ri-text{color:var(--gray);font-size:.8rem;line-height:1.55}
-    .ri-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.45rem}
-    .ri-badge{font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;border:1px solid}
+    .role-info { padding:1rem 1.2rem; border-radius:var(--radius); border:1px solid rgba(255,255,255,.07); background:rgba(255,255,255,.03); margin-bottom:1.3rem; display:flex; gap:.85rem; align-items:flex-start; min-height:56px; transition:all .35s ease }
+    .ri-icon { font-size:1.4rem; flex-shrink:0; margin-top:.1rem }
+    .ri-title { font-weight:700; font-size:.92rem; margin-bottom:.2rem }
+    .ri-text { color:var(--gray); font-size:.8rem; line-height:1.55 }
+    .ri-badges { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.45rem }
+    .ri-badge { font-size:.65rem; font-weight:700; padding:.15rem .5rem; border-radius:20px; text-transform:uppercase; letter-spacing:.06em; border:1px solid }
+
     /* PANELS */
-    .panel{animation:fadeInUp .32s ease}
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .panel { animation:fadeInUp .32s ease }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
     /* DISCIPLINES */
-    .disc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.65rem;margin-bottom:.8rem}
-    .dc{border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.7rem .5rem;cursor:pointer;text-align:center;transition:all .25s ease;background:rgba(255,255,255,.02);position:relative}
-    .dc:hover{border-color:rgba(52,152,219,.38);background:rgba(52,152,219,.04)}
-    .dc.sel{border-color:var(--role-participant);background:rgba(52,152,219,.09)}
-    .dc-check{position:absolute;top:.35rem;right:.35rem;width:17px;height:17px;border-radius:50%;background:var(--role-participant);display:flex;align-items:center;justify-content:center;font-size:.58rem;color:white;opacity:0;transition:opacity .22s}
-    .dc.sel .dc-check{opacity:1}
-    .dc-icon{font-size:1.5rem;margin-bottom:.3rem}
-    .dc-name{font-size:.74rem;font-weight:700;color:var(--light)}
-    .dc-slots{font-size:.65rem;color:var(--gray);margin-top:.1rem}
-    .dc-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.35rem;overflow:hidden}
-    .dc-bar-fill{height:100%;background:var(--role-participant);border-radius:2px}
+    .disc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:.65rem; margin-bottom:.8rem }
+    .dc { border:1px solid rgba(255,255,255,.07); border-radius:var(--radius); padding:.7rem .5rem; cursor:pointer; text-align:center; transition:all .25s ease; background:rgba(255,255,255,.02); position:relative }
+    .dc:hover { border-color:rgba(52,152,219,.38); background:rgba(52,152,219,.04) }
+    .dc.sel { border-color:var(--role-participant); background:rgba(52,152,219,.09) }
+    .dc-check { position:absolute; top:.35rem; right:.35rem; width:17px; height:17px; border-radius:50%; background:var(--role-participant); display:flex; align-items:center; justify-content:center; font-size:.58rem; color:white; opacity:0; transition:opacity .22s }
+    .dc.sel .dc-check { opacity:1 }
+    .dc-icon { font-size:1.5rem; margin-bottom:.3rem }
+    .dc-name { font-size:.74rem; font-weight:700; color:var(--light) }
+    .dc-slots { font-size:.65rem; color:var(--gray); margin-top:.1rem }
+    .dc-bar { height:3px; background:rgba(255,255,255,.05); border-radius:2px; margin-top:.35rem; overflow:hidden }
+    .dc-bar-fill { height:100%; background:var(--role-participant); border-radius:2px }
+
     /* COACH SPECS */
-    .spec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.65rem;margin-bottom:.8rem}
-    .sc{border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:.7rem .6rem;cursor:pointer;text-align:center;transition:all .25s ease;background:rgba(255,255,255,.02)}
-    .sc:hover{border-color:rgba(244,162,97,.38)}
-    .sc.sel{border-color:var(--role-coach);background:rgba(244,162,97,.08)}
+    .spec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:.65rem; margin-bottom:.8rem }
+    .sc { border:1px solid rgba(255,255,255,.07); border-radius:var(--radius); padding:.7rem .6rem; cursor:pointer; text-align:center; transition:all .25s ease; background:rgba(255,255,255,.02) }
+    .sc:hover { border-color:rgba(244,162,97,.38) }
+    .sc.sel { border-color:var(--role-coach); background:rgba(244,162,97,.08) }
+
     /* COTISATION */
-    .cotis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1rem}
-    .cc{border:2px solid rgba(255,255,255,.07);border-radius:8px;padding:1.2rem .8rem;cursor:pointer;text-align:center;transition:all .25s ease;background:rgba(255,255,255,.02);position:relative}
-    .cc:hover{border-color:rgba(46,204,113,.38)}
-    .cc.sel{border-color:var(--role-adherent);background:rgba(46,204,113,.07)}
-    .cc .pop{position:absolute;top:-.75rem;left:50%;transform:translateX(-50%);background:var(--primary);color:white;font-size:.62rem;padding:.12rem .55rem;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-    .cc-price{font-family:var(--font-display);font-size:1.7rem;color:var(--white);line-height:1}
-    .cc-unit{font-size:.68rem;color:var(--gray)}
-    .cc-label{font-size:.78rem;font-weight:700;color:var(--light);margin-top:.35rem}
-    .cc-note{font-size:.68rem;color:var(--gray);margin-top:.25rem}
+    .cotis-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem; margin-bottom:1rem }
+    .cc { border:2px solid rgba(255,255,255,.07); border-radius:8px; padding:1.2rem .8rem; cursor:pointer; text-align:center; transition:all .25s ease; background:rgba(255,255,255,.02); position:relative }
+    .cc:hover { border-color:rgba(46,204,113,.38) }
+    .cc.sel { border-color:var(--role-adherent); background:rgba(46,204,113,.07) }
+    .cc .pop { position:absolute; top:-.75rem; left:50%; transform:translateX(-50%); background:var(--primary); color:white; font-size:.62rem; padding:.12rem .55rem; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap }
+    .cc-price { font-family:var(--font-display); font-size:1.7rem; color:var(--white); line-height:1 }
+    .cc-unit { font-size:.68rem; color:var(--gray) }
+    .cc-label { font-size:.78rem; font-weight:700; color:var(--light); margin-top:.35rem }
+    .cc-note { font-size:.68rem; color:var(--gray); margin-top:.25rem }
+
     /* PWD */
-    .pwd-wrap{position:relative}
-    .pwd-wrap .form-control{padding-right:2.8rem}
-    .show-pwd{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:var(--gray);cursor:pointer;font-size:.9rem;transition:var(--transition)}
-    .show-pwd:hover{color:var(--primary)}
-    .str-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:.4rem;overflow:hidden}
-    .str-fill{height:100%;border-radius:2px;transition:width .4s,background .4s}
-    .str-lbl{font-size:.74rem;margin-top:.28rem}
+    .pwd-wrap { position:relative }
+    .pwd-wrap .form-control { padding-right:2.8rem }
+    .show-pwd { position:absolute; right:.9rem; top:50%; transform:translateY(-50%); color:var(--gray); cursor:pointer; font-size:.9rem; transition:var(--transition) }
+    .show-pwd:hover { color:var(--primary) }
+    .str-bar { height:4px; border-radius:2px; background:rgba(255,255,255,.07); margin-top:.4rem; overflow:hidden }
+    .str-fill { height:100%; border-radius:2px; transition:width .4s,background .4s }
+    .str-lbl { font-size:.74rem; margin-top:.28rem }
+
     /* CONDITIONAL */
-    .cond{display:none;animation:fadeInUp .32s ease}
-    .cond.show{display:block}
+    .cond { display:none; animation:fadeInUp .32s ease }
+    .cond.show { display:block }
+
     /* NOTICES */
-    .notice{padding:.85rem 1rem;border-radius:var(--radius);display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;font-size:.83rem;color:var(--gray)}
-    .notice.red{background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.22)}
-    .notice.orange{background:rgba(244,162,97,.07);border:1px solid rgba(244,162,97,.22)}
-    .notice i{flex-shrink:0;margin-top:2px}
+    .notice { padding:.85rem 1rem; border-radius:var(--radius); display:flex; gap:.75rem; align-items:flex-start; margin-bottom:1rem; font-size:.83rem; color:var(--gray) }
+    .notice.red { background:rgba(230,57,70,.07); border:1px solid rgba(230,57,70,.22) }
+    .notice.orange { background:rgba(244,162,97,.07); border:1px solid rgba(244,162,97,.22) }
+    .notice i { flex-shrink:0; margin-top:2px }
+
     /* SUMMARY */
-    .sum-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;margin-bottom:1rem}
-    .sum-hd{padding:.7rem 1.1rem;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
-    .sum-body{padding:.9rem 1.1rem}
-    .sum-row{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem}
-    .sum-row:last-child{border-bottom:none}
-    .sum-key{color:var(--gray)}
-    .sum-val{color:var(--white);font-weight:600;text-align:right;max-width:58%;word-break:break-word}
+    .sum-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:8px; overflow:hidden; margin-bottom:1rem }
+    .sum-hd { padding:.7rem 1.1rem; background:rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.05); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--gray) }
+    .sum-body { padding:.9rem 1.1rem }
+    .sum-row { display:flex; justify-content:space-between; align-items:center; padding:.35rem 0; border-bottom:1px solid rgba(255,255,255,.04); font-size:.85rem }
+    .sum-row:last-child { border-bottom:none }
+    .sum-key { color:var(--gray) }
+    .sum-val { color:var(--white); font-weight:600; text-align:right; max-width:58%; word-break:break-word }
+
     /* TERMS */
-    .terms-row{display:flex;align-items:flex-start;gap:.7rem;padding:.9rem 1rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);cursor:pointer;margin-bottom:.8rem}
-    .terms-row input{width:16px;height:16px;flex-shrink:0;margin-top:3px;cursor:pointer;accent-color:var(--primary)}
-    .terms-row label{font-size:.83rem;color:var(--gray);cursor:pointer;line-height:1.5}
-    .terms-row label a{color:var(--primary)}
+    .terms-row { display:flex; align-items:flex-start; gap:.7rem; padding:.9rem 1rem; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:var(--radius); cursor:pointer; margin-bottom:.8rem }
+    .terms-row input { width:16px; height:16px; flex-shrink:0; margin-top:3px; cursor:pointer; accent-color:var(--primary) }
+    .terms-row label { font-size:.83rem; color:var(--gray); cursor:pointer; line-height:1.5 }
+    .terms-row label a { color:var(--primary) }
+
     /* NAV */
-    .step-nav{display:flex;gap:.8rem;margin-top:1.5rem}
-    .btn-back{flex-shrink:0}
-    .btn-next{flex:1}
+    .step-nav { display:flex; gap:.8rem; margin-top:1.5rem }
+    .btn-back { flex-shrink:0 }
+    .btn-next { flex:1 }
+
     /* SUCCESS */
-    .success-wrap{text-align:center;padding:2.5rem 0}
-    .success-ring{width:84px;height:84px;border-radius:50%;background:rgba(46,204,113,.12);border:2px solid var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.2rem;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275)}
-    @keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+    .success-wrap { text-align:center; padding:2.5rem 0 }
+    .success-ring { width:84px; height:84px; border-radius:50%; background:rgba(46,204,113,.12); border:2px solid var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-size:2.2rem; animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) }
+    @keyframes popIn { from{opacity:0;transform:scale(.5)} to{opacity:1;transform:scale(1)} }
+
     /* Dispo tags */
-    .dispo-tag{display:inline-block;padding:.3rem .85rem;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .22s;margin:.25rem}
-    .dispo-tag.sel{background:var(--role-coach);color:#0d1b2a;border-color:var(--role-coach)}
+    .dispo-tag { display:inline-block; padding:.3rem .85rem; border-radius:20px; border:1px solid rgba(255,255,255,.1); background:transparent; color:var(--gray); font-size:.78rem; font-weight:600; cursor:pointer; transition:all .22s; margin:.25rem }
+    .dispo-tag.sel { background:var(--role-coach); color:#0d1b2a; border-color:var(--role-coach) }
+
     /* Disc levels */
-    .disc-level-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.55rem;flex-wrap:wrap}
-    @media(max-width:600px){.reg-main{padding:1.5rem 1rem}.role-grid{grid-template-columns:repeat(2,1fr)}.cotis-grid{grid-template-columns:1fr}.disc-grid{grid-template-columns:repeat(3,1fr)}.spec-grid{grid-template-columns:repeat(2,1fr)}}
+    .disc-level-row { display:flex; align-items:center; gap:.8rem; margin-bottom:.55rem; flex-wrap:wrap }
+
+    @media(max-width:600px){
+      .reg-main { padding:1.5rem 1rem }
+      .role-grid { grid-template-columns:repeat(2,1fr) }
+      .cotis-grid { grid-template-columns:1fr }
+      .disc-grid { grid-template-columns:repeat(3,1fr) }
+      .spec-grid { grid-template-columns:repeat(2,1fr) }
+      .form-row { grid-template-columns:1fr }
+    }
   </style>
 </head>
 <body>
@@ -179,7 +246,8 @@
     <div class="side-logo"><div class="ball">🏆</div>AS<span style="color:var(--primary)">Club</span></div>
     <div class="side-tagline">
       <h2>Choisissez<br>votre <span>rôle</span></h2>
-      <p>Chaque compte est entièrement adapté à votre profil et vos responsabilités au sein de l'association.</p>
+      <!-- FIX: apostrophe typographique → entité HTML -->
+      <p>Chaque compte est entièrement adapté à votre profil et vos responsabilités au sein de l&apos;association.</p>
     </div>
     <div class="side-roles" id="sideRoles">
       <div class="side-role" data-srole="admin"><div class="side-dot" style="background:var(--role-admin)"></div><div><div class="side-role-name">Administrateur</div><div class="side-role-desc">Accès complet backoffice</div></div></div>
@@ -189,7 +257,7 @@
       <div class="side-role" data-srole="visiteur"><div class="side-dot" style="background:var(--role-visiteur)"></div><div><div class="side-role-name">Visiteur</div><div class="side-role-desc">Lecture seule, sans adhésion</div></div></div>
     </div>
   </div>
-  <div class="side-footer">© 2025 Association Sportive Club — Blida, Algérie</div>
+  <div class="side-footer">&copy; 2025 Association Sportive Club &mdash; Blida, Algérie</div>
 </aside>
 
 <!-- ══ FORMULAIRE ══ -->
@@ -216,9 +284,9 @@
 
     <!-- ═══ PANEL 1 : RÔLE ═══ -->
     <div id="p1" class="panel">
-      <div class="sh"><h3>Votre <span style="color:var(--primary)">Profil</span></h3><p>Sélectionnez le rôle qui correspond à votre situation dans l'association.</p></div>
+      <div class="sh"><h3>Votre <span style="color:var(--primary)">Profil</span></h3><p>Sélectionnez le rôle qui correspond à votre situation dans l&apos;association.</p></div>
       <div class="role-grid">
-        <div class="rc" data-role="admin" onclick="pickRole('admin',this)"><div class="rc-check"><i class="fas fa-check"></i></div><span class="rc-icon">🛡️</span><div class="rc-name">Admin</div><div class="rc-desc">Gestion complète de l'association</div></div>
+        <div class="rc" data-role="admin" onclick="pickRole('admin',this)"><div class="rc-check"><i class="fas fa-check"></i></div><span class="rc-icon">🛡️</span><div class="rc-name">Admin</div><div class="rc-desc">Gestion complète de l&apos;association</div></div>
         <div class="rc" data-role="coach" onclick="pickRole('coach',this)"><div class="rc-check"><i class="fas fa-check"></i></div><span class="rc-icon">🎽</span><div class="rc-name">Coach</div><div class="rc-desc">Encadrement des équipes et sessions</div></div>
         <div class="rc" data-role="adherent" onclick="pickRole('adherent',this)"><div class="rc-check"><i class="fas fa-check"></i></div><span class="rc-icon">🏅</span><div class="rc-name">Adhérent</div><div class="rc-desc">Membre actif avec cotisation</div></div>
         <div class="rc" data-role="participant" onclick="pickRole('participant',this)"><div class="rc-check"><i class="fas fa-check"></i></div><span class="rc-icon">⚽</span><div class="rc-name">Participant</div><div class="rc-desc">Inscrit à une ou plusieurs disciplines</div></div>
@@ -252,7 +320,7 @@
     <!-- ═══ PANEL 3 : ACCÈS ═══ -->
     <div id="p3" class="panel hidden">
       <div class="sh"><h3>Accès au <span style="color:var(--primary)">Compte</span></h3><p>Créez vos identifiants de connexion sécurisés.</p></div>
-      <div class="notice red cond" id="noticeAdmin"><i class="fas fa-shield-alt" style="color:var(--role-admin)"></i><span>Un compte <strong style="color:var(--role-admin)">Administrateur</strong> nécessite une validation manuelle (48h) par l'équipe dirigeante.</span></div>
+      <div class="notice red cond" id="noticeAdmin"><i class="fas fa-shield-alt" style="color:var(--role-admin)"></i><span>Un compte <strong style="color:var(--role-admin)">Administrateur</strong> nécessite une validation manuelle (48h) par l&apos;équipe dirigeante.</span></div>
       <div class="notice orange cond" id="noticeCoach"><i class="fas fa-id-badge" style="color:var(--role-coach)"></i><span>Le rôle <strong style="color:var(--role-coach)">Coach</strong> requiert un code de validation remis lors de votre recrutement.</span></div>
       <div class="form-group"><label class="form-label"><i class="fas fa-envelope" style="color:var(--primary);margin-right:.4rem"></i>Email *</label><input type="email" id="fEmail" class="form-control" placeholder="votre@email.com" autocomplete="email"><span class="form-error" id="eEmail"></span></div>
       <div class="form-group">
@@ -267,7 +335,7 @@
         <div class="pwd-wrap"><input type="password" id="fPwdC" class="form-control" placeholder="Répétez le mot de passe" autocomplete="new-password"><span class="show-pwd" onclick="tglPwd('fPwdC',this)"><i class="fas fa-eye"></i></span></div>
         <span class="form-error" id="ePwdC"></span>
       </div>
-      <div class="form-group cond" id="adminCodeWrap"><label class="form-label"><i class="fas fa-key" style="color:var(--role-admin);margin-right:.4rem"></i>Code d'invitation Admin *</label><input id="fAdminCode" class="form-control" placeholder="Code fourni par l'administration" style="letter-spacing:.14em"><span class="form-error" id="eAdminCode"></span><small style="color:var(--gray);font-size:.75rem;margin-top:.3rem;display:block">Contactez la direction pour obtenir ce code.</small></div>
+      <div class="form-group cond" id="adminCodeWrap"><label class="form-label"><i class="fas fa-key" style="color:var(--role-admin);margin-right:.4rem"></i>Code d&apos;invitation Admin *</label><input id="fAdminCode" class="form-control" placeholder="Code fourni par l&apos;administration" style="letter-spacing:.14em"><span class="form-error" id="eAdminCode"></span><small style="color:var(--gray);font-size:.75rem;margin-top:.3rem;display:block">Contactez la direction pour obtenir ce code.</small></div>
       <div class="form-group cond" id="coachCodeWrap"><label class="form-label"><i class="fas fa-id-badge" style="color:var(--role-coach);margin-right:.4rem"></i>Code Coach *</label><input id="fCoachCode" class="form-control" placeholder="Code remis lors du recrutement" style="letter-spacing:.14em"><span class="form-error" id="eCoachCode"></span></div>
       <div class="step-nav">
         <button class="btn btn-outline btn-back" onclick="goStep(2)"><i class="fas fa-arrow-left"></i></button>
@@ -282,22 +350,23 @@
       <!-- ADMIN -->
       <div id="pAdmin" class="cond">
         <div class="form-group"><label class="form-label"><i class="fas fa-building" style="color:var(--role-admin);margin-right:.4rem"></i>Fonction *</label><select id="fAdminFn" class="form-control"><option value="">— Choisir —</option><option value="president">Président(e)</option><option value="vice_president">Vice-Président(e)</option><option value="secretaire">Secrétaire Général(e)</option><option value="tresorier">Trésorier(e)</option><option value="it_admin">Responsable Informatique</option><option value="autre">Autre membre du bureau</option></select></div>
+        <!-- FIX: apostrophe dans placeholder échappée -->
         <div class="form-group"><label class="form-label"><i class="fas fa-file-alt" style="color:var(--role-admin);margin-right:.4rem"></i>Justification de la demande *</label><textarea id="fAdminJustif" class="form-control" rows="4" placeholder="Expliquez pourquoi vous demandez un accès administrateur..."></textarea><small style="color:var(--gray);font-size:.75rem;margin-top:.3rem;display:block"><i class="fas fa-clock"></i> Votre demande sera examinée sous 48h ouvrables.</small></div>
       </div>
 
       <!-- COACH -->
       <div id="pCoach" class="cond">
         <div class="form-group">
-          <label class="form-label" style="margin-bottom:.75rem"><i class="fas fa-futbol" style="color:var(--role-coach);margin-right:.4rem"></i>Spécialité(s) d'entraînement * <small style="font-weight:400;color:var(--gray)">(Multi-choix)</small></label>
+          <label class="form-label" style="margin-bottom:.75rem"><i class="fas fa-futbol" style="color:var(--role-coach);margin-right:.4rem"></i>Spécialité(s) d&apos;entraînement * <small style="font-weight:400;color:var(--gray)">(Multi-choix)</small></label>
           <div class="spec-grid" id="specGrid"></div>
           <span class="form-error" id="eSpec"></span>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Diplôme</label><select id="fDiplome" class="form-control"><option value="">—</option><option value="bees1">BEES 1er degré</option><option value="bees2">BEES 2e degré</option><option value="cap">CAP Sport</option><option value="licence">Licence STAPS</option><option value="master">Master STAPS</option><option value="fed">Diplôme Fédéral</option><option value="autre">Autre</option></select></div>
-          <div class="form-group"><label class="form-label">Expérience</label><select id="fExp" class="form-control"><option value="">—</option><option value="0-1">Moins d'1 an</option><option value="1-3">1 à 3 ans</option><option value="3-5">3 à 5 ans</option><option value="5-10">5 à 10 ans</option><option value="10+">+10 ans</option></select></div>
+          <div class="form-group"><label class="form-label">Expérience</label><select id="fExp" class="form-control"><option value="">—</option><option value="0-1">Moins d&apos;1 an</option><option value="1-3">1 à 3 ans</option><option value="3-5">3 à 5 ans</option><option value="5-10">5 à 10 ans</option><option value="10+">+10 ans</option></select></div>
         </div>
         <div class="form-group"><label class="form-label"><i class="fas fa-calendar-alt" style="color:var(--role-coach);margin-right:.4rem"></i>Disponibilités</label><div id="dispoWrap" style="margin-top:.4rem"></div></div>
-        <div class="form-group"><label class="form-label">Présentation courte</label><textarea id="fBio" class="form-control" rows="3" placeholder="Parlez de votre expérience et de votre approche d'entraînement..."></textarea></div>
+        <div class="form-group"><label class="form-label">Présentation courte</label><textarea id="fBio" class="form-control" rows="3" placeholder="Parlez de votre expérience et de votre approche d&apos;entraînement..."></textarea></div>
       </div>
 
       <!-- ADHERENT -->
@@ -306,7 +375,7 @@
           <label class="form-label" style="margin-bottom:1.1rem"><i class="fas fa-credit-card" style="color:var(--role-adherent);margin-right:.4rem"></i>Formule de cotisation *</label>
           <div class="cotis-grid">
             <div class="cc" onclick="pickCotis('mensuel',this)"><div class="cc-price">500</div><div class="cc-unit">DA / mois</div><div class="cc-label">Mensuel</div><div class="cc-note">Sans engagement</div></div>
-            <div class="cc" onclick="pickCotis('semestriel',this)"><div class="pop">✨ Populaire</div><div class="cc-price">2500</div><div class="cc-unit">DA / 6 mois</div><div class="cc-label">Semestriel</div><div class="cc-note">Économisez 17%</div></div>
+            <div class="cc" onclick="pickCotis('semestriel',this)"><div class="pop">&#10024; Populaire</div><div class="cc-price">2500</div><div class="cc-unit">DA / 6 mois</div><div class="cc-label">Semestriel</div><div class="cc-note">Économisez 17%</div></div>
             <div class="cc" onclick="pickCotis('annuel',this)"><div class="cc-price">4500</div><div class="cc-unit">DA / an</div><div class="cc-label">Annuel</div><div class="cc-note">Économisez 25%</div></div>
           </div>
           <span class="form-error" id="eCotis"></span>
@@ -315,7 +384,7 @@
           <div class="form-group"><label class="form-label"><i class="fas fa-tint" style="color:var(--role-adherent);margin-right:.4rem"></i>Groupe sanguin</label><select id="fSangA" class="form-control"><option value="">—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
           <div class="form-group"><label class="form-label"><i class="fas fa-notes-medical" style="color:var(--role-adherent);margin-right:.4rem"></i>Condition médicale</label><select id="fMedA" class="form-control"><option value="aucune">Aucune</option><option value="asthme">Asthme</option><option value="diabete">Diabète</option><option value="cardiaque">Problème cardiaque</option><option value="autre">Autre</option></select></div>
         </div>
-        <div class="form-group"><label class="form-label"><i class="fas fa-phone-alt" style="color:var(--role-adherent);margin-right:.4rem"></i>Contact d'urgence</label><div class="form-row"><input id="fUrgNom" class="form-control" placeholder="Nom du contact"><input type="tel" id="fUrgTel" class="form-control" placeholder="+213 555 000 000"></div></div>
+        <div class="form-group"><label class="form-label"><i class="fas fa-phone-alt" style="color:var(--role-adherent);margin-right:.4rem"></i>Contact d&apos;urgence</label><div class="form-row"><input id="fUrgNom" class="form-control" placeholder="Nom du contact"><input type="tel" id="fUrgTel" class="form-control" placeholder="+213 555 000 000"></div></div>
         <div class="form-group"><label class="form-label" style="display:flex;justify-content:space-between"><span><i class="fas fa-file-medical" style="color:var(--role-adherent);margin-right:.4rem"></i>Certificat médical</span><span class="badge badge-warning" style="font-size:.62rem">Requis avant la 1ère session</span></label><input type="file" id="fCertA" class="form-control" accept=".pdf,.jpg,.jpeg,.png" style="padding:.5rem"><small style="color:var(--gray);font-size:.74rem">PDF, JPG ou PNG — Max 2 Mo</small></div>
       </div>
 
@@ -329,7 +398,7 @@
         <div id="discLevels"></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label"><i class="fas fa-tint" style="color:var(--role-participant);margin-right:.4rem"></i>Groupe sanguin</label><select id="fSangP" class="form-control"><option value="">—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
-          <div class="form-group"><label class="form-label"><i class="fas fa-phone-alt" style="color:var(--role-participant);margin-right:.4rem"></i>Contact d'urgence (tél.)</label><input type="tel" id="fUrgP" class="form-control" placeholder="+213 555 000 000"></div>
+          <div class="form-group"><label class="form-label"><i class="fas fa-phone-alt" style="color:var(--role-participant);margin-right:.4rem"></i>Contact d&apos;urgence (tél.)</label><input type="tel" id="fUrgP" class="form-control" placeholder="+213 555 000 000"></div>
         </div>
         <div class="form-group"><label class="form-label"><i class="fas fa-file-medical" style="color:var(--role-participant);margin-right:.4rem"></i>Certificat médical</label><input type="file" id="fCertP" class="form-control" accept=".pdf,.jpg,.jpeg,.png" style="padding:.5rem"><small style="color:var(--gray);font-size:.74rem">Requis avant la 1ère participation</small></div>
       </div>
@@ -339,15 +408,16 @@
         <div style="background:rgba(141,153,174,.07);border:1px solid rgba(141,153,174,.18);border-radius:var(--radius);padding:1.3rem;text-align:center;margin-bottom:1.5rem">
           <div style="font-size:2.5rem;margin-bottom:.7rem">👁️</div>
           <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--white);margin-bottom:.5rem">Compte Visiteur Gratuit</div>
-          <p style="color:var(--gray);font-size:.85rem;line-height:1.7;max-width:380px;margin:0 auto">Accès aux actualités, programme des activités et formulaire de contact. Aucune cotisation n'est requise.</p>
+          <!-- FIX: apostrophes dans le texte HTML -->
+          <p style="color:var(--gray);font-size:.85rem;line-height:1.7;max-width:380px;margin:0 auto">Accès aux actualités, programme des activités et formulaire de contact. Aucune cotisation n&apos;est requise.</p>
         </div>
         <div class="form-group"><label class="form-label">Comment avez-vous connu notre association ?</label><select id="fSource" class="form-control"><option value="">— Sélectionner —</option><option value="bouche">Bouche-à-oreille</option><option value="social">Réseaux sociaux</option><option value="web">Recherche web</option><option value="affiche">Affichage / Flyers</option><option value="ami">Ami(e) membre du club</option><option value="autre">Autre</option></select></div>
-        <div class="form-group"><label class="form-label">Intérêt principal</label><select id="fInteret" class="form-control"><option value="">— Sélectionner —</option><option value="actu">Suivre les actualités</option><option value="futur">Envisage d'adhérer bientôt</option><option value="support">Supporter un proche</option><option value="partenariat">Partenariat / Sponsoring</option><option value="presse">Journaliste / Presse</option></select></div>
+        <div class="form-group"><label class="form-label">Intérêt principal</label><select id="fInteret" class="form-control"><option value="">— Sélectionner —</option><option value="actu">Suivre les actualités</option><option value="futur">Envisage d&apos;adhérer bientôt</option><option value="support">Supporter un proche</option><option value="partenariat">Partenariat / Sponsoring</option><option value="presse">Journaliste / Presse</option></select></div>
       </div>
 
       <div class="step-nav">
         <button class="btn btn-outline btn-back" onclick="goStep(3)"><i class="fas fa-arrow-left"></i></button>
-        <button class="btn btn-primary btn-next" onclick="validateP4()">Vérifier & Confirmer <i class="fas fa-arrow-right"></i></button>
+        <button class="btn btn-primary btn-next" onclick="validateP4()">Vérifier &amp; Confirmer <i class="fas fa-arrow-right"></i></button>
       </div>
     </div>
 
@@ -355,8 +425,8 @@
     <div id="p5" class="panel hidden">
       <div class="sh"><h3><span style="color:var(--primary)">Vérifiez</span> vos informations</h3><p>Relisez attentivement avant de valider votre inscription.</p></div>
       <div id="sumContent"></div>
-      <div class="terms-row" onclick="document.getElementById('tCGU').click()"><input type="checkbox" id="tCGU"><label>J'accepte les <a href="#" onclick="return false">conditions d'utilisation</a> et le règlement intérieur de l'association.</label></div>
-      <div class="terms-row" onclick="document.getElementById('tRGPD').click()"><input type="checkbox" id="tRGPD"><label>J'autorise l'association à conserver mes données personnelles conformément à la législation en vigueur.</label></div>
+      <div class="terms-row" onclick="document.getElementById('tCGU').click()"><input type="checkbox" id="tCGU"><label>J&apos;accepte les <a href="#" onclick="return false">conditions d&apos;utilisation</a> et le règlement intérieur de l&apos;association.</label></div>
+      <div class="terms-row" onclick="document.getElementById('tRGPD').click()"><input type="checkbox" id="tRGPD"><label>J&apos;autorise l&apos;association à conserver mes données personnelles conformément à la législation en vigueur.</label></div>
       <div class="step-nav">
         <button class="btn btn-outline btn-back" onclick="goStep(4)"><i class="fas fa-arrow-left"></i></button>
         <button class="btn btn-primary btn-next" id="btnSubmit" onclick="doSubmit()"><i class="fas fa-user-plus"></i> Créer mon Compte</button>
@@ -378,20 +448,61 @@
 </main>
 </div><!-- /reg-wrapper -->
 
-<script src="../../assets/js/app.js"></script>
 <script>
 
 /* =================================================================
    inscrire.html — INSCRIPTION 5 RÔLES × 5 ÉTAPES
-   Variables globales correctement déclarées
+   FIX: toutes les apostrophes dans les strings JS échappées en \'
    ================================================================= */
 
+/* FIX: Toast fallback si app.js absent */
+var Toast = window.Toast || {
+  warning: function(m){ alert('⚠️ ' + m); },
+  error:   function(m){ alert('❌ ' + m); }
+};
+
 const ROLES_CFG = {
-  admin:       { color:'#e63946', icon:'🛡️', label:'Administrateur',     desc:'Accès complet à la gestion de l'association : membres, équipes, sessions, planning et paramètres système.',           badges:['Accès total','Backoffice','Validation requise'],  p4sub:'Indiquez votre fonction et justifiez votre demande d'accès administrateur.' },
-  coach:       { color:'#f4a261', icon:'🎽', label:'Coach / Entraîneur',  desc:'Gérez vos équipes, planifiez les sessions d'entraînement et assurez le suivi des présences et performances.',        badges:['Gestion équipes','Sessions','Présences'],         p4sub:'Précisez vos spécialités sportives, vos diplômes et vos disponibilités.' },
-  adherent:    { color:'#2ecc71', icon:'🏅', label:'Adhérent',            desc:'Membre actif avec cotisation. Accès aux événements du club, vote aux assemblées générales et newsletter exclusive.',    badges:['Cotisation','Vote AG','Newsletter'],               p4sub:'Choisissez votre formule de cotisation et complétez vos informations médicales.' },
-  participant: { color:'#3498db', icon:'⚽', label:'Participant',         desc:'Inscrivez-vous à une ou plusieurs disciplines. Accès au planning de vos sports, suivi des sessions et résultats.',   badges:['Multi-disciplines','Planning perso'],              p4sub:'Sélectionnez vos disciplines sportives et indiquez votre niveau pour chacune.' },
-  visiteur:    { color:'#8d99ae', icon:'👁️', label:'Visiteur',            desc:'Accès lecture au site public : actualités, programme des activités, contact. Gratuit et sans engagement.',            badges:['Gratuit','Lecture seule'],                         p4sub:'Quelques questions facultatives pour mieux vous connaître.' },
+  /* FIX: toutes les apostrophes dans les strings échappées en \' */
+  admin: {
+    color:  '#e63946',
+    icon:   '🛡️',
+    label:  'Administrateur',
+    desc:   'Accès complet à la gestion de l\'association : membres, équipes, sessions, planning et paramètres système.',
+    badges: ['Accès total', 'Backoffice', 'Validation requise'],
+    p4sub:  'Indiquez votre fonction et justifiez votre demande d\'accès administrateur.'
+  },
+  coach: {
+    color:  '#f4a261',
+    icon:   '🎽',
+    label:  'Coach / Entraîneur',
+    desc:   'Gérez vos équipes, planifiez les sessions d\'entraînement et assurez le suivi des présences et performances.',
+    badges: ['Gestion équipes', 'Sessions', 'Présences'],
+    p4sub:  'Précisez vos spécialités sportives, vos diplômes et vos disponibilités.'
+  },
+  adherent: {
+    color:  '#2ecc71',
+    icon:   '🏅',
+    label:  'Adhérent',
+    desc:   'Membre actif avec cotisation. Accès aux événements du club, vote aux assemblées générales et newsletter exclusive.',
+    badges: ['Cotisation', 'Vote AG', 'Newsletter'],
+    p4sub:  'Choisissez votre formule de cotisation et complétez vos informations médicales.'
+  },
+  participant: {
+    color:  '#3498db',
+    icon:   '⚽',
+    label:  'Participant',
+    desc:   'Inscrivez-vous à une ou plusieurs disciplines. Accès au planning de vos sports, suivi des sessions et résultats.',
+    badges: ['Multi-disciplines', 'Planning perso'],
+    p4sub:  'Sélectionnez vos disciplines sportives et indiquez votre niveau pour chacune.'
+  },
+  visiteur: {
+    color:  '#8d99ae',
+    icon:   '👁️',
+    label:  'Visiteur',
+    desc:   'Accès lecture au site public : actualités, programme des activités, contact. Gratuit et sans engagement.',
+    badges: ['Gratuit', 'Lecture seule'],
+    p4sub:  'Quelques questions facultatives pour mieux vous connaître.'
+  }
 };
 
 const DISCIPLINES = [
@@ -402,18 +513,18 @@ const DISCIPLINES = [
   {id:'athletisme',    name:'Athlétisme',    icon:'🏃', spots:40, taken:30},
   {id:'arts_martiaux', name:'Arts Martiaux', icon:'🥋', spots:50, taken:35},
   {id:'cyclisme',      name:'Cyclisme',      icon:'🚴', spots:20, taken:12},
-  {id:'volleyball',    name:'Volleyball',    icon:'🏐', spots:20, taken:14},
+  {id:'volleyball',    name:'Volleyball',    icon:'🏐', spots:20, taken:14}
 ];
 
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 
-/* ── État global (déclarations explicites) ── */
+/* ── État global ── */
 let curStep    = 1;
-let role       = null;   /* rôle sélectionné : 'admin'|'coach'|'adherent'|'participant'|'visiteur' */
-let cotisation = null;   /* formule cotisation : 'mensuel'|'semestriel'|'annuel' */
-let selDiscs   = [];     /* disciplines sélectionnées (ids) */
-let selSpecs   = [];     /* spécialités coach (ids) */
-let selDispos  = [];     /* disponibilités coach (jours) */
+let role       = null;
+let cotisation = null;
+let selDiscs   = [];
+let selSpecs   = [];
+let selDispos  = [];
 
 /* ── Construction des grilles disciplines / spécialités ── */
 (function buildDiscs() {
@@ -421,38 +532,46 @@ let selDispos  = [];     /* disponibilités coach (jours) */
   const sg = document.getElementById('specGrid');
   const dw = document.getElementById('dispoWrap');
 
-  DISCIPLINES.forEach(d => {
-    const pct = Math.round(d.taken / d.spots * 100);
+  DISCIPLINES.forEach(function(d) {
+    var pct = Math.round(d.taken / d.spots * 100);
 
     if (g) {
-      const el = document.createElement('div');
-      el.className = 'dc'; el.dataset.id = d.id;
-      el.innerHTML = `<div class="dc-check"><i class="fas fa-check"></i></div>
-        <div class="dc-icon">${d.icon}</div>
-        <div class="dc-name">${d.name}</div>
-        <div class="dc-slots">${d.spots - d.taken} places</div>
-        <div class="dc-bar"><div class="dc-bar-fill" style="width:${pct}%"></div></div>`;
-      el.onclick = () => toggleDisc(d.id, el);
+      var el = document.createElement('div');
+      el.className = 'dc';
+      el.dataset.id = d.id;
+      /* FIX: template literals remplacés par concaténation pour éviter tout conflit de guillemets */
+      el.innerHTML =
+        '<div class="dc-check"><i class="fas fa-check"></i></div>' +
+        '<div class="dc-icon">' + d.icon + '</div>' +
+        '<div class="dc-name">' + d.name + '</div>' +
+        '<div class="dc-slots">' + (d.spots - d.taken) + ' places</div>' +
+        '<div class="dc-bar"><div class="dc-bar-fill" style="width:' + pct + '%"></div></div>';
+      el.onclick = (function(id, elem){ return function(){ toggleDisc(id, elem); }; })(d.id, el);
       g.appendChild(el);
     }
 
     if (sg) {
-      const el = document.createElement('div');
-      el.className = 'sc'; el.dataset.id = d.id;
-      el.innerHTML = `<div style="font-size:1.3rem;margin-bottom:.3rem">${d.icon}</div>
-        <div style="font-size:.77rem;font-weight:700;color:var(--light)">${d.name}</div>`;
-      el.onclick = () => toggleSpec(d.id, el);
-      sg.appendChild(el);
+      var el2 = document.createElement('div');
+      el2.className = 'sc';
+      el2.dataset.id = d.id;
+      el2.innerHTML =
+        '<div style="font-size:1.3rem;margin-bottom:.3rem">' + d.icon + '</div>' +
+        '<div style="font-size:.77rem;font-weight:700;color:var(--light)">' + d.name + '</div>';
+      el2.onclick = (function(id, elem){ return function(){ toggleSpec(id, elem); }; })(d.id, el2);
+      sg.appendChild(el2);
     }
   });
 
   if (dw) {
-    JOURS.forEach(j => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'dispo-tag'; b.dataset.j = j; b.textContent = j;
-      b.onclick = () => {
+    JOURS.forEach(function(j) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'dispo-tag';
+      b.dataset.j = j;
+      b.textContent = j;
+      b.onclick = function() {
         b.classList.toggle('sel');
-        selDispos = [...document.querySelectorAll('.dispo-tag.sel')].map(x => x.dataset.j);
+        selDispos = Array.from(document.querySelectorAll('.dispo-tag.sel')).map(function(x){ return x.dataset.j; });
       };
       dw.appendChild(b);
     });
@@ -461,31 +580,33 @@ let selDispos  = [];     /* disponibilités coach (jours) */
 
 function toggleDisc(id, el) {
   el.classList.toggle('sel');
-  selDiscs = el.classList.contains('sel')
-    ? [...selDiscs, id]
-    : selDiscs.filter(x => x !== id);
+  if (el.classList.contains('sel')) {
+    selDiscs.push(id);
+  } else {
+    selDiscs = selDiscs.filter(function(x){ return x !== id; });
+  }
   buildLevelSelects();
 }
 
 function buildLevelSelects() {
-  const c = document.getElementById('discLevels');
+  var c = document.getElementById('discLevels');
   if (!c) return;
   if (!selDiscs.length) { c.innerHTML = ''; return; }
-  let h = '<div style="background:rgba(52,152,219,.05);border:1px solid rgba(52,152,219,.13);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">';
+  var h = '<div style="background:rgba(52,152,219,.05);border:1px solid rgba(52,152,219,.13);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">';
   h += '<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--role-participant);margin-bottom:.8rem"><i class="fas fa-sliders-h"></i> Niveau par discipline</div>';
-  selDiscs.forEach(id => {
-    const d = DISCIPLINES.find(x => x.id === id);
+  selDiscs.forEach(function(id) {
+    var d = DISCIPLINES.find(function(x){ return x.id === id; });
     if (!d) return;
-    h += `<div class="disc-level-row">
-      <span style="min-width:100px;font-size:.83rem;color:var(--light)">${d.icon} ${d.name}</span>
-      <select class="form-control dl-sel" data-d="${id}" style="max-width:175px;padding:.38rem .65rem;font-size:.8rem">
-        <option value="">— Niveau —</option>
-        <option value="debutant">🟢 Débutant</option>
-        <option value="intermediaire">🟡 Intermédiaire</option>
-        <option value="avance">🔵 Avancé</option>
-        <option value="competiteur">🔴 Compétiteur</option>
-      </select>
-    </div>`;
+    h += '<div class="disc-level-row">' +
+         '<span style="min-width:100px;font-size:.83rem;color:var(--light)">' + d.icon + ' ' + d.name + '</span>' +
+         '<select class="form-control dl-sel" data-d="' + id + '" style="max-width:175px;padding:.38rem .65rem;font-size:.8rem">' +
+           '<option value="">\u2014 Niveau \u2014</option>' +
+           '<option value="debutant">🟢 Débutant</option>' +
+           '<option value="intermediaire">🟡 Intermédiaire</option>' +
+           '<option value="avance">🔵 Avancé</option>' +
+           '<option value="competiteur">🔴 Compétiteur</option>' +
+         '</select>' +
+         '</div>';
   });
   h += '</div>';
   c.innerHTML = h;
@@ -493,72 +614,72 @@ function buildLevelSelects() {
 
 function toggleSpec(id, el) {
   el.classList.toggle('sel');
-  selSpecs = [...document.querySelectorAll('#specGrid .sc.sel')].map(x => x.dataset.id);
+  selSpecs = Array.from(document.querySelectorAll('#specGrid .sc.sel')).map(function(x){ return x.dataset.id; });
 }
 
 function pickCotis(val, el) {
-  document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
+  document.querySelectorAll('.cc').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
   cotisation = val;
 }
 
 /* ── Sélection du rôle (étape 1) ── */
 function pickRole(r, el) {
-  document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
+  document.querySelectorAll('.rc').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
   role = r;
 
-  const cfg = ROLES_CFG[r];
+  var cfg = ROLES_CFG[r];
   if (!cfg) return;
 
-  const badges = cfg.badges.map(b =>
-    `<span class="ri-badge" style="background:${cfg.color}18;color:${cfg.color};border:1px solid ${cfg.color}33">${b}</span>`
-  ).join('');
+  var badges = cfg.badges.map(function(b) {
+    return '<span class="ri-badge" style="background:' + cfg.color + '18;color:' + cfg.color + ';border:1px solid ' + cfg.color + '33">' + b + '</span>';
+  }).join('');
 
-  document.getElementById('roleInfo').innerHTML = `
-    <div class="ri-icon">${cfg.icon}</div>
-    <div>
-      <div class="ri-title" style="color:${cfg.color}">${cfg.label}</div>
-      <div class="ri-text">${cfg.desc}</div>
-      <div class="ri-badges">${badges}</div>
-    </div>`;
+  document.getElementById('roleInfo').innerHTML =
+    '<div class="ri-icon">' + cfg.icon + '</div>' +
+    '<div>' +
+      '<div class="ri-title" style="color:' + cfg.color + '">' + cfg.label + '</div>' +
+      '<div class="ri-text">' + cfg.desc + '</div>' +
+      '<div class="ri-badges">' + badges + '</div>' +
+    '</div>';
 
   document.getElementById('accentBar').style.background = cfg.color;
 
-  document.querySelectorAll('.side-role').forEach(s =>
-    s.classList.toggle('lit', s.dataset.srole === r)
-  );
+  document.querySelectorAll('.side-role').forEach(function(s) {
+    s.classList.toggle('lit', s.dataset.srole === r);
+  });
 
-  const btn = document.getElementById('btn1');
+  var btn = document.getElementById('btn1');
   if (btn) {
     btn.disabled = false;
-    btn.style.cssText = `background:${cfg.color};border-color:${cfg.color}`;
+    btn.style.cssText = 'background:' + cfg.color + ';border-color:' + cfg.color;
   }
 }
 
 /* ── Navigation entre étapes ── */
 function goStep(s) {
-  for (let i = 1; i <= 5; i++) {
-    const p = document.getElementById('p' + i);
+  for (var i = 1; i <= 5; i++) {
+    var p = document.getElementById('p' + i);
     if (p) p.classList.add('hidden');
   }
-  const panel = document.getElementById('p' + s);
+  var panel = document.getElementById('p' + s);
   if (panel) panel.classList.remove('hidden');
   curStep = s;
 
-  for (let i = 1; i <= 5; i++) {
-    const si = document.getElementById('si' + i);
+  for (var j = 1; j <= 5; j++) {
+    var si = document.getElementById('si' + j);
     if (!si) continue;
-    si.className = 'si' + (i === s ? ' active' : (i < s ? ' done' : ''));
-    const b = si.querySelector('.si-bubble');
+    si.className = 'si' + (j === s ? ' active' : (j < s ? ' done' : ''));
+    var b = si.querySelector('.si-bubble');
     if (!b) continue;
-    if (i < s)       b.innerHTML = '<i class="fas fa-check"></i>';
-    else if (i === 1) b.innerHTML = '<i class="fas fa-user-tag"></i>';
-    else if (i === 5) b.innerHTML = '<i class="fas fa-check"></i>';
-    else              b.textContent = i;
+    if (j < s)       b.innerHTML = '<i class="fas fa-check"></i>';
+    else if (j === 1) b.innerHTML = '<i class="fas fa-user-tag"></i>';
+    else if (j === 5) b.innerHTML = '<i class="fas fa-check"></i>';
+    else              b.textContent = j;
   }
 
-  const prog = document.getElementById('stepperProg');
+  var prog = document.getElementById('stepperProg');
   if (prog) prog.style.width = ((s - 1) / 4 * 100) + '%';
 
   if (s === 3) updateP3();
@@ -569,40 +690,40 @@ function goStep(s) {
 }
 
 function updateP3() {
-  const isAdm   = role === 'admin';
-  const isCoach = role === 'coach';
-  ['noticeAdmin','adminCodeWrap'].forEach(id => {
-    const el = document.getElementById(id);
+  var isAdm   = role === 'admin';
+  var isCoach = role === 'coach';
+  ['noticeAdmin', 'adminCodeWrap'].forEach(function(id) {
+    var el = document.getElementById(id);
     if (el) el.classList.toggle('show', isAdm);
   });
-  ['noticeCoach','coachCodeWrap'].forEach(id => {
-    const el = document.getElementById(id);
+  ['noticeCoach', 'coachCodeWrap'].forEach(function(id) {
+    var el = document.getElementById(id);
     if (el) el.classList.toggle('show', isCoach);
   });
 }
 
 function updateP4() {
-  ['Admin','Coach','Adherent','Participant','Visiteur'].forEach(r => {
-    const el = document.getElementById('p' + r);
+  ['Admin','Coach','Adherent','Participant','Visiteur'].forEach(function(r) {
+    var el = document.getElementById('p' + r);
     if (el) el.classList.toggle('show', role === r.toLowerCase());
   });
-  const cfg = ROLES_CFG[role] || {};
-  const sub = document.getElementById('p4sub');
+  var cfg = ROLES_CFG[role] || {};
+  var sub = document.getElementById('p4sub');
   if (sub) sub.textContent = cfg.p4sub || '';
 }
 
 /* ── Validations par étape ── */
 function validateP2() {
-  const nom    = (document.getElementById('fNom')?.value    || '').trim();
-  const prenom = (document.getElementById('fPrenom')?.value || '').trim();
-  const tel    = (document.getElementById('fTel')?.value    || '').trim();
-  let ok = true;
+  var nom    = (document.getElementById('fNom')   ? document.getElementById('fNom').value    : '').trim();
+  var prenom = (document.getElementById('fPrenom')? document.getElementById('fPrenom').value : '').trim();
+  var tel    = (document.getElementById('fTel')   ? document.getElementById('fTel').value    : '').trim();
+  var ok = true;
 
-  const setE = (id, msg) => {
-    const el = document.getElementById(id);
+  function setE(id, msg) {
+    var el = document.getElementById(id);
     if (el) el.textContent = msg;
     if (msg) ok = false;
-  };
+  }
 
   setE('eNom',    nom.length    < 2 ? 'Minimum 2 caractères' : '');
   setE('ePrenom', prenom.length < 2 ? 'Minimum 2 caractères' : '');
@@ -612,42 +733,42 @@ function validateP2() {
 }
 
 function validateP3() {
-  const email = (document.getElementById('fEmail')?.value  || '').trim();
-  const pwd   = (document.getElementById('fPwd')?.value    || '');
-  const pwdc  = (document.getElementById('fPwdC')?.value   || '');
-  let ok = true;
+  var email = (document.getElementById('fEmail') ? document.getElementById('fEmail').value : '').trim();
+  var pwd   = (document.getElementById('fPwd')   ? document.getElementById('fPwd').value   : '');
+  var pwdc  = (document.getElementById('fPwdC')  ? document.getElementById('fPwdC').value  : '');
+  var ok = true;
 
-  const setE = (id, msg) => {
-    const el = document.getElementById(id);
+  function setE(id, msg) {
+    var el = document.getElementById(id);
     if (el) el.textContent = msg;
     if (msg) ok = false;
-  };
+  }
 
   setE('eEmail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'Email invalide' : '');
   setE('ePwd',   pwd.length < 8 ? 'Minimum 8 caractères' : '');
   setE('ePwdC',  pwd !== pwdc   ? 'Les mots de passe ne correspondent pas' : '');
 
   if (role === 'admin') {
-    const code = (document.getElementById('fAdminCode')?.value || '').trim();
-    setE('eAdminCode', !code ? 'Code requis pour un compte administrateur' : '');
+    var adminCode = (document.getElementById('fAdminCode') ? document.getElementById('fAdminCode').value : '').trim();
+    setE('eAdminCode', !adminCode ? 'Code requis pour un compte administrateur' : '');
   }
   if (role === 'coach') {
-    const code = (document.getElementById('fCoachCode')?.value || '').trim();
-    setE('eCoachCode', !code ? 'Code requis pour un compte coach' : '');
+    var coachCode = (document.getElementById('fCoachCode') ? document.getElementById('fCoachCode').value : '').trim();
+    setE('eCoachCode', !coachCode ? 'Code requis pour un compte coach' : '');
   }
 
   if (ok) goStep(4);
 }
 
 function validateP4() {
-  let ok = true;
-  const setE = (id, msg) => {
-    const el = document.getElementById(id);
+  var ok = true;
+  function setE(id, msg) {
+    var el = document.getElementById(id);
     if (el) { el.textContent = msg; if (msg) ok = false; }
-  };
+  }
 
   if (role === 'coach')       setE('eSpec',  selSpecs.length === 0 ? 'Sélectionnez au moins une spécialité' : '');
-  if (role === 'adherent')    setE('eCotis', !cotisation           ? 'Choisissez une formule de cotisation' : '');
+  if (role === 'adherent')    setE('eCotis', !cotisation           ? 'Choisissez une formule de cotisation'  : '');
   if (role === 'participant') setE('eDisc',  selDiscs.length === 0 ? 'Sélectionnez au moins une discipline'  : '');
 
   if (ok) goStep(5);
@@ -655,125 +776,139 @@ function validateP4() {
 
 /* ── Récapitulatif (étape 5) ── */
 function buildSummary() {
-  const cfg       = ROLES_CFG[role] || {};
-  const prenom    = (document.getElementById('fPrenom')?.value || '').trim();
-  const nom       = (document.getElementById('fNom')?.value    || '').trim();
-  const email     = (document.getElementById('fEmail')?.value  || '').trim();
-  const cotisLbl  = { mensuel:'500 DA/mois', semestriel:'2500 DA/6 mois', annuel:'4500 DA/an' };
-  const discNames = selDiscs.map(id => DISCIPLINES.find(d => d.id === id)?.name || id).join(', ');
-  const specNames = selSpecs.map(id => DISCIPLINES.find(d => d.id === id)?.name || id).join(', ');
+  var cfg      = ROLES_CFG[role] || {};
+  var prenom   = (document.getElementById('fPrenom') ? document.getElementById('fPrenom').value : '').trim();
+  var nom      = (document.getElementById('fNom')    ? document.getElementById('fNom').value    : '').trim();
+  var email    = (document.getElementById('fEmail')  ? document.getElementById('fEmail').value  : '').trim();
+  var cotisLbl = { mensuel:'500 DA/mois', semestriel:'2500 DA/6 mois', annuel:'4500 DA/an' };
 
-  let specific = '';
+  var discNames = selDiscs.map(function(id) {
+    var d = DISCIPLINES.find(function(x){ return x.id === id; });
+    return d ? d.name : id;
+  }).join(', ');
+
+  var specNames = selSpecs.map(function(id) {
+    var d = DISCIPLINES.find(function(x){ return x.id === id; });
+    return d ? d.name : id;
+  }).join(', ');
+
+  var specific = '';
   if (role === 'coach') {
-    specific = `
-      <div class="sum-row"><span class="sum-key">Spécialités</span><span class="sum-val">${specNames || '—'}</span></div>
-      <div class="sum-row"><span class="sum-key">Diplôme</span><span class="sum-val">${document.getElementById('fDiplome')?.value || '—'}</span></div>
-      <div class="sum-row"><span class="sum-key">Disponibilités</span><span class="sum-val">${selDispos.join(', ') || '—'}</span></div>`;
+    specific =
+      '<div class="sum-row"><span class="sum-key">Spécialités</span><span class="sum-val">' + (specNames || '—') + '</span></div>' +
+      '<div class="sum-row"><span class="sum-key">Diplôme</span><span class="sum-val">' + (document.getElementById('fDiplome') ? document.getElementById('fDiplome').value : '—') + '</span></div>' +
+      '<div class="sum-row"><span class="sum-key">Disponibilités</span><span class="sum-val">' + (selDispos.join(', ') || '—') + '</span></div>';
   } else if (role === 'adherent') {
-    specific = `
-      <div class="sum-row"><span class="sum-key">Cotisation</span><span class="sum-val" style="color:var(--success)">${cotisLbl[cotisation] || '—'}</span></div>
-      <div class="sum-row"><span class="sum-key">Groupe sanguin</span><span class="sum-val">${document.getElementById('fSangA')?.value || '—'}</span></div>`;
+    specific =
+      '<div class="sum-row"><span class="sum-key">Cotisation</span><span class="sum-val" style="color:var(--success)">' + (cotisLbl[cotisation] || '—') + '</span></div>' +
+      '<div class="sum-row"><span class="sum-key">Groupe sanguin</span><span class="sum-val">' + (document.getElementById('fSangA') ? document.getElementById('fSangA').value : '—') + '</span></div>';
   } else if (role === 'participant') {
-    specific = `
-      <div class="sum-row"><span class="sum-key">Disciplines</span><span class="sum-val">${discNames || '—'}</span></div>
-      <div class="sum-row"><span class="sum-key">Groupe sanguin</span><span class="sum-val">${document.getElementById('fSangP')?.value || '—'}</span></div>`;
+    specific =
+      '<div class="sum-row"><span class="sum-key">Disciplines</span><span class="sum-val">' + (discNames || '—') + '</span></div>' +
+      '<div class="sum-row"><span class="sum-key">Groupe sanguin</span><span class="sum-val">' + (document.getElementById('fSangP') ? document.getElementById('fSangP').value : '—') + '</span></div>';
   }
 
-  const sumContent = document.getElementById('sumContent');
-  if (sumContent) sumContent.innerHTML = `
-    <div class="sum-card">
-      <div class="sum-hd" style="color:${cfg.color || 'var(--primary)'}">${cfg.icon || ''} RÔLE & COMPTE</div>
-      <div class="sum-body">
-        <div class="sum-row">
-          <span class="sum-key">Rôle sélectionné</span>
-          <span class="sum-val">
-            <span class="badge" style="background:${cfg.color}20;color:${cfg.color};border:1px solid ${cfg.color}40">
-              ${cfg.icon} ${cfg.label}
-            </span>
-          </span>
-        </div>
-        <div class="sum-row"><span class="sum-key">Email</span><span class="sum-val">${email || '—'}</span></div>
-      </div>
-    </div>
-    <div class="sum-card">
-      <div class="sum-hd">👤 IDENTITÉ</div>
-      <div class="sum-body">
-        <div class="sum-row"><span class="sum-key">Nom complet</span><span class="sum-val">${(prenom + ' ' + nom).trim() || '—'}</span></div>
-        <div class="sum-row"><span class="sum-key">Téléphone</span><span class="sum-val">${document.getElementById('fTel')?.value || '—'}</span></div>
-        <div class="sum-row"><span class="sum-key">Date de naissance</span><span class="sum-val">${document.getElementById('fDOB')?.value || '—'}</span></div>
-        <div class="sum-row"><span class="sum-key">Ville</span><span class="sum-val">${document.getElementById('fVille')?.value || '—'}</span></div>
-      </div>
-    </div>
-    ${specific ? `<div class="sum-card"><div class="sum-hd" style="color:${cfg.color}">📋 PROFIL ${(cfg.label || '').toUpperCase()}</div><div class="sum-body">${specific}</div></div>` : ''}`;
+  /* FIX: niveaux lus correctement (dl-sel peut être absent si pas encore rendu) */
+  var niveauxMap = {};
+  document.querySelectorAll('.dl-sel').forEach(function(s){ niveauxMap[s.dataset.d] = s.value; });
+
+  var sumContent = document.getElementById('sumContent');
+  if (!sumContent) return;
+
+  sumContent.innerHTML =
+    '<div class="sum-card">' +
+      '<div class="sum-hd" style="color:' + (cfg.color || 'var(--primary)') + '">' + (cfg.icon || '') + ' RÔLE & COMPTE</div>' +
+      '<div class="sum-body">' +
+        '<div class="sum-row"><span class="sum-key">Rôle sélectionné</span><span class="sum-val"><span class="badge" style="background:' + cfg.color + '20;color:' + cfg.color + ';border:1px solid ' + cfg.color + '40">' + cfg.icon + ' ' + cfg.label + '</span></span></div>' +
+        '<div class="sum-row"><span class="sum-key">Email</span><span class="sum-val">' + (email || '—') + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sum-card">' +
+      '<div class="sum-hd">👤 IDENTITÉ</div>' +
+      '<div class="sum-body">' +
+        '<div class="sum-row"><span class="sum-key">Nom complet</span><span class="sum-val">' + ((prenom + ' ' + nom).trim() || '—') + '</span></div>' +
+        '<div class="sum-row"><span class="sum-key">Téléphone</span><span class="sum-val">' + (document.getElementById('fTel') ? document.getElementById('fTel').value : '—') + '</span></div>' +
+        '<div class="sum-row"><span class="sum-key">Date de naissance</span><span class="sum-val">' + (document.getElementById('fDOB') ? document.getElementById('fDOB').value : '—') + '</span></div>' +
+        '<div class="sum-row"><span class="sum-key">Ville</span><span class="sum-val">' + (document.getElementById('fVille') ? document.getElementById('fVille').value : '—') + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    (specific ? '<div class="sum-card"><div class="sum-hd" style="color:' + cfg.color + '">📋 PROFIL ' + (cfg.label || '').toUpperCase() + '</div><div class="sum-body">' + specific + '</div></div>' : '');
 }
 
 /* ── Soumission finale ── */
 function doSubmit() {
-  if (!document.getElementById('tCGU')?.checked) {
-    Toast.warning('Veuillez accepter les conditions d'utilisation.'); return;
+  /* FIX: apostrophes échappées dans les messages */
+  if (!document.getElementById('tCGU') || !document.getElementById('tCGU').checked) {
+    Toast.warning('Veuillez accepter les conditions d\'utilisation.'); return;
   }
-  if (!document.getElementById('tRGPD')?.checked) {
+  if (!document.getElementById('tRGPD') || !document.getElementById('tRGPD').checked) {
     Toast.warning('Veuillez accepter la politique de confidentialité.'); return;
   }
 
-  const btn = document.getElementById('btnSubmit');
+  var btn = document.getElementById('btnSubmit');
   if (btn) {
     btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;vertical-align:middle"></span> Création...';
     btn.disabled = true;
   }
 
-  const showSuccess = (msg) => {
-    const stepper   = document.getElementById('stepper');
-    const accentBar = document.getElementById('accentBar');
-    if (stepper)   stepper.style.display = 'none';
+  function showSuccess(msg) {
+    var stepper   = document.getElementById('stepper');
+    var accentBar = document.getElementById('accentBar');
+    if (stepper)   stepper.style.display   = 'none';
     if (accentBar) accentBar.style.display = 'none';
-    for (let i = 1; i <= 5; i++) {
-      const p = document.getElementById('p' + i);
+    for (var i = 1; i <= 5; i++) {
+      var p = document.getElementById('p' + i);
       if (p) p.classList.add('hidden');
     }
-    const successPanel = document.getElementById('pSuccess');
-    const successMsg   = document.getElementById('successMsg');
+    var successPanel = document.getElementById('pSuccess');
+    var successMsg   = document.getElementById('successMsg');
     if (successPanel) successPanel.classList.remove('hidden');
     if (successMsg)   successMsg.textContent = msg;
-  };
+  }
 
-  const msgs = {
+  var msgs = {
     admin:       'Votre demande de compte administrateur a été soumise. Validation sous 48h ouvrables.',
     coach:       'Compte Coach créé ! Connectez-vous dès maintenant.',
     adherent:    'Adhésion enregistrée ! Rendez-vous au secrétariat pour finaliser le paiement.',
     participant: 'Inscription confirmée ! Consultez le planning pour vos prochaines sessions.',
-    visiteur:    'Compte visiteur créé ! Bienvenue sur notre site.',
+    visiteur:    'Compte visiteur créé ! Bienvenue sur notre site.'
   };
 
-  const payload = {
-    nom:             (document.getElementById('fNom')?.value    || '').trim(),
-    prenom:          (document.getElementById('fPrenom')?.value || '').trim(),
-    email:           (document.getElementById('fEmail')?.value  || '').trim(),
-    mot_de_passe:    document.getElementById('fPwd')?.value    || '',
-    confirm_password:document.getElementById('fPwdC')?.value   || '',
-    role:            role || 'visiteur',
-    telephone:       document.getElementById('fTel')?.value    || null,
-    date_naissance:  document.getElementById('fDOB')?.value    || null,
-    sexe:            document.getElementById('fSexe')?.value   || null,
-    ville:           document.getElementById('fVille')?.value  || null,
-    code_admin:      document.getElementById('fAdminCode')?.value || null,
-    fonction:        document.getElementById('fAdminFn')?.value  || null,
-    justification:   document.getElementById('fAdminJustif')?.value || null,
-    code_coach:      document.getElementById('fCoachCode')?.value || null,
-    specialites:     selSpecs,
-    diplome:         document.getElementById('fDiplome')?.value || null,
-    experience:      document.getElementById('fExp')?.value    || null,
-    disponibilites:  selDispos,
-    bio:             document.getElementById('fBio')?.value    || null,
+  /* FIX: niveaux lus dynamiquement */
+  var niveaux = {};
+  document.querySelectorAll('.dl-sel').forEach(function(s){ niveaux[s.dataset.d] = s.value; });
+
+  var payload = {
+    nom:              (document.getElementById('fNom')    ? document.getElementById('fNom').value.trim()    : ''),
+    prenom:           (document.getElementById('fPrenom') ? document.getElementById('fPrenom').value.trim() : ''),
+    email:            (document.getElementById('fEmail')  ? document.getElementById('fEmail').value.trim()  : ''),
+    mot_de_passe:     (document.getElementById('fPwd')    ? document.getElementById('fPwd').value           : ''),
+    confirm_password: (document.getElementById('fPwdC')   ? document.getElementById('fPwdC').value          : ''),
+    role:             role || 'visiteur',
+    telephone:        (document.getElementById('fTel')    ? document.getElementById('fTel').value           : null),
+    date_naissance:   (document.getElementById('fDOB')    ? document.getElementById('fDOB').value           : null),
+    sexe:             (document.getElementById('fSexe')   ? document.getElementById('fSexe').value          : null),
+    ville:            (document.getElementById('fVille')  ? document.getElementById('fVille').value         : null),
+    code_admin:       (document.getElementById('fAdminCode')  ? document.getElementById('fAdminCode').value : null),
+    fonction:         (document.getElementById('fAdminFn')    ? document.getElementById('fAdminFn').value   : null),
+    justification:    (document.getElementById('fAdminJustif')? document.getElementById('fAdminJustif').value: null),
+    code_coach:       (document.getElementById('fCoachCode')  ? document.getElementById('fCoachCode').value : null),
+    specialites:      selSpecs,
+    diplome:          (document.getElementById('fDiplome')? document.getElementById('fDiplome').value : null),
+    experience:       (document.getElementById('fExp')    ? document.getElementById('fExp').value    : null),
+    disponibilites:   selDispos,
+    bio:              (document.getElementById('fBio')    ? document.getElementById('fBio').value    : null),
     formule_cotisation: cotisation,
-    groupe_sanguin:  document.getElementById('fSangA')?.value || document.getElementById('fSangP')?.value || null,
-    condition_medicale: document.getElementById('fMedA')?.value || null,
-    urgence_nom:     document.getElementById('fUrgNom')?.value || null,
-    urgence_tel:     document.getElementById('fUrgTel')?.value || document.getElementById('fUrgP')?.value || null,
-    disciplines:     selDiscs,
-    niveaux:         Object.fromEntries([...document.querySelectorAll('.dl-sel')].map(s => [s.dataset.d, s.value])),
-    source:          document.getElementById('fSource')?.value  || null,
-    interet:         document.getElementById('fInteret')?.value || null,
+    groupe_sanguin:   (document.getElementById('fSangA')  ? document.getElementById('fSangA').value  :
+                       document.getElementById('fSangP')  ? document.getElementById('fSangP').value  : null),
+    condition_medicale:(document.getElementById('fMedA')  ? document.getElementById('fMedA').value   : null),
+    urgence_nom:      (document.getElementById('fUrgNom') ? document.getElementById('fUrgNom').value : null),
+    urgence_tel:      (document.getElementById('fUrgTel') ? document.getElementById('fUrgTel').value :
+                       document.getElementById('fUrgP')   ? document.getElementById('fUrgP').value   : null),
+    disciplines:      selDiscs,
+    niveaux:          niveaux,
+    source:           (document.getElementById('fSource')  ? document.getElementById('fSource').value  : null),
+    interet:          (document.getElementById('fInteret') ? document.getElementById('fInteret').value : null)
   };
 
   fetch('../../api/register.php', {
@@ -781,47 +916,47 @@ function doSubmit() {
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(payload)
   })
-  .then(r => r.json())
-  .then(data => {
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
     if (data.success) {
       showSuccess(data.message || msgs[role]);
     } else {
-      Toast.error(data.message || 'Erreur lors de l'inscription.');
+      Toast.error(data.message || 'Erreur lors de l\'inscription.');
       if (btn) { btn.innerHTML = '<i class="fas fa-user-plus"></i> Créer mon Compte'; btn.disabled = false; }
     }
   })
-  .catch(() => {
-    // Fallback démo (sans serveur PHP)
-    setTimeout(() => showSuccess(msgs[role] || 'Compte créé avec succès !'), 1200);
+  .catch(function() {
+    /* Fallback démo (sans serveur PHP) */
+    setTimeout(function(){ showSuccess(msgs[role] || 'Compte créé avec succès !'); }, 1200);
   });
 }
 
 /* ── Utilitaires ── */
 function tglPwd(id, icon) {
-  const inp = document.getElementById(id);
+  var inp = document.getElementById(id);
   if (!inp) return;
-  const hidden = inp.type === 'password';
+  var hidden = inp.type === 'password';
   inp.type = hidden ? 'text' : 'password';
   icon.innerHTML = hidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
 }
 
 function chkStr(v) {
-  let s = 0;
+  var s = 0;
   if (v.length >= 8)          s++;
   if (/[A-Z]/.test(v))        s++;
   if (/[0-9]/.test(v))        s++;
   if (/[^A-Za-z0-9]/.test(v)) s++;
-  const lvl = [
-    { w:'0%',   c:'transparent',   t:'' },
-    { w:'25%',  c:'var(--danger)',  t:'🔴 Très faible' },
-    { w:'50%',  c:'var(--warning)', t:'🟡 Faible' },
-    { w:'75%',  c:'var(--info)',    t:'🔵 Moyen' },
-    { w:'100%', c:'var(--success)', t:'🟢 Fort' },
+  var lvl = [
+    { w:'0%',    c:'transparent',   t:'' },
+    { w:'25%',   c:'var(--danger)', t:'🔴 Très faible' },
+    { w:'50%',   c:'#f4a261',       t:'🟡 Faible' },
+    { w:'75%',   c:'#3498db',       t:'🔵 Moyen' },
+    { w:'100%',  c:'var(--success)',t:'🟢 Fort' }
   ];
-  const l = lvl[s] || lvl[0];
-  const fill  = document.getElementById('strFill');
-  const label = document.getElementById('strLbl');
-  if (fill)  fill.style.cssText  = `width:${l.w};background:${l.c}`;
+  var l = lvl[s] || lvl[0];
+  var fill  = document.getElementById('strFill');
+  var label = document.getElementById('strLbl');
+  if (fill)  fill.style.cssText  = 'width:' + l.w + ';background:' + l.c;
   if (label) { label.style.color = l.c; label.textContent = l.t; }
 }
 
