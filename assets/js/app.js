@@ -322,18 +322,45 @@ document.addEventListener('click', function (e) {
         const container = dropdownToggle.closest('.nav-item-dropdown');
         const isOpen = container.classList.toggle('open');
         dropdownToggle.setAttribute('aria-expanded', isOpen);
+        // Si le menu est ouvert, on met le focus sur le premier élément
+        if (isOpen) {
+            container.querySelector('.dropdown-menu a[role="menuitem"]')?.focus();
+        }
     }
 });
 
 // Fermeture du dropdown avec la touche Échap
 document.addEventListener('keydown', function (e) {
-    // 'Esc' est pour la compatibilité avec d'anciens navigateurs
+    const openDropdown = document.querySelector('.nav-item-dropdown.open');
+
+    // 1. Fermeture avec la touche "Échap"
     if (e.key === 'Escape' || e.key === 'Esc') {
-        document.querySelectorAll('.nav-item-dropdown.open').forEach(openDropdown => {
+        if (openDropdown) {
+            const toggle = openDropdown.querySelector('[aria-expanded="true"]');
             openDropdown.classList.remove('open');
-            const toggle = openDropdown.querySelector('.nav-link-dropdown-toggle');
-            if (toggle) toggle.setAttribute('aria-expanded', 'false');
-        });
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.focus(); // Important : retourne le focus au bouton qui a ouvert le menu
+            }
+        }
+    }
+
+    // 2. Navigation au clavier (flèches haut/bas)
+    if (openDropdown && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault(); // Empêche le défilement de la page
+
+        const items = Array.from(openDropdown.querySelectorAll('.dropdown-menu a[role="menuitem"]'));
+        if (!items.length) return;
+
+        let currentIndex = items.findIndex(item => item === document.activeElement);
+
+        if (e.key === 'ArrowDown') {
+            currentIndex = (currentIndex + 1) % items.length;
+        } else { // ArrowUp
+            currentIndex = (currentIndex - 1 + items.length) % items.length;
+        }
+        
+        items[currentIndex].focus();
     }
 });
 
