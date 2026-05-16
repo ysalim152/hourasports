@@ -43,13 +43,22 @@ $rootPath   = $rootPath   ?? '../';
     <li><a href="<?= $rootPath ?>public/activites.html" class="<?= $activePage==='activites'?'active':'' ?>">Activités</a></li>
     <li><a href="<?= $rootPath ?>public/apropos.html" class="<?= $activePage==='apropos'?'active':'' ?>">À Propos</a></li>
     <li><a href="<?= $rootPath ?>public/contact.html" class="<?= $activePage==='contact'?'active':'' ?>">Contact</a></li>
+
     <?php if (isset($_SESSION['user_id'])): ?>
-      <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'coach'): ?>
-        <li><a href="<?= $rootPath ?>public/admin/dashboard.html">Admin</a></li>
-      <?php endif; ?>
-      <li><a href="<?= $rootPath ?>public/auth/logout.php" class="nav-cta">Déconnexion</a></li>
+        <?php
+            $userPrenom = htmlspecialchars($_SESSION['user_prenom'] ?? 'Membre');
+            $userRole = $_SESSION['user_role'] ?? 'visiteur';
+            $espaceUrl = ($userRole === 'admin' || $userRole === 'coach') 
+                ? "{$rootPath}public/admin/profil.html" 
+                : "{$rootPath}public/espace-membre.html";
+        ?>
+        <li><a href="<?= $espaceUrl ?>">👤 Bonjour, <?= $userPrenom ?></a></li>
+        <?php if ($userRole === 'admin' || $userRole === 'coach'): ?>
+            <li><a href="<?= $rootPath ?>public/admin/dashboard.html">Tableau de bord</a></li>
+        <?php endif; ?>
+        <li><a href="<?= $rootPath ?>public/auth/logout.php" class="nav-cta">Déconnexion</a></li>
     <?php else: ?>
-      <li><a href="<?= $rootPath ?>public/auth/login.html" class="nav-cta">Connexion</a></li>
+        <li><a href="<?= $rootPath ?>public/auth/login.html" class="nav-cta">Connexion</a></li>
     <?php endif; ?>
   </ul>
 
