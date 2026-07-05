@@ -18,16 +18,28 @@ try {
     $data = [];
 
     if ($section === 'all' || $section === 'kpi') {
+        // Combine multiple counts into fewer queries for performance
+        $user_counts = dbFetchOne(
+            'SELECT
+                COUNT(CASE WHEN role_id IN (3,4) AND statut="actif" THEN 1 END) AS membres_actifs,
+                COUNT(CASE WHEN role_id=3 AND statut="actif" THEN 1 END) AS adherents,
+                COUNT(CASE WHEN role_id=4 AND statut="actif" THEN 1 END) AS participants,
+                COUNT(CASE WHEN role_id=2 AND statut="actif" THEN 1 END) AS coaches,
+                COUNT(CASE WHEN statut="en_attente" THEN 1 END) AS comptes_en_attente
+             FROM utilisateurs'
+        );
+        $session_counts = dbFetchOne(
+            'SELECT
+                COUNT(CASE WHEN DATE_FORMAT(date_debut,"%Y-%m")=DATE_FORMAT(NOW(),"%Y-%m") THEN 1 END) AS sessions_mois,
+                COUNT(CASE WHEN statut="planifie" THEN 1 END) AS sessions_planifiees
+             FROM sessions_entrainement'
+        );
+
         $data['kpi'] = [
-            'membres_actifs'     => (int)(dbFetchOne('SELECT COUNT(*) c FROM utilisateurs WHERE statut="actif" AND role_id IN (3,4)')['c'] ?? 0),
-            'adherents'          => (int)(dbFetchOne('SELECT COUNT(*) c FROM utilisateurs WHERE statut="actif" AND role_id=3')['c'] ?? 0),
-            'participants'       => (int)(dbFetchOne('SELECT COUNT(*) c FROM utilisateurs WHERE statut="actif" AND role_id=4')['c'] ?? 0),
-            'coaches'            => (int)(dbFetchOne('SELECT COUNT(*) c FROM utilisateurs WHERE statut="actif" AND role_id=2')['c'] ?? 0),
-            'equipes_actives'    => (int)(dbFetchOne('SELECT COUNT(*) c FROM equipes WHERE statut="actif"')['c'] ?? 0),
-            'sessions_mois'      => (int)(dbFetchOne('SELECT COUNT(*) c FROM sessions_entrainement WHERE DATE_FORMAT(date_debut,"%Y-%m")=DATE_FORMAT(NOW(),"%Y-%m")')['c'] ?? 0),
-            'sessions_planifiees'=> (int)(dbFetchOne('SELECT COUNT(*) c FROM sessions_entrainement WHERE statut="planifie"')['c'] ?? 0),
-            'messages_nouveaux'  => (int)(dbFetchOne('SELECT COUNT(*) c FROM contacts WHERE statut="nouveau"')['c'] ?? 0),
-            'comptes_en_attente' => (int)(dbFetchOne('SELECT COUNT(*) c FROM utilisateurs WHERE statut="en_attente"')['c'] ?? 0),
+            ...array_map('intval', $user_counts),
+            'equipes_actives'    => dbCount('equipes', ['statut' => 'actif']),
+            ...array_map('intval', $session_counts),
+            'messages_nouveaux'  => dbCount('contacts', ['statut' => 'nouveau']),
             'nouveaux_membres_mois' => (int)(dbFetchOne('SELECT COUNT(*) c FROM membres WHERE DATE_FORMAT(created_at,"%Y-%m")=DATE_FORMAT(NOW(),"%Y-%m")')['c'] ?? 0),
         ];
     }

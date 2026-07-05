@@ -39,8 +39,9 @@ try {
 
         // Anti-spam : 1 message / 5 minutes par IP
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+        $rateLimitMinutes = (int)getParam('contact_rate_limit_min', '5');
         $recent = dbFetchOne(
-            'SELECT id FROM contacts WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)',
+            "SELECT id FROM contacts WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL {$rateLimitMinutes} MINUTE)",
             [$ip]
         );
         if ($recent) {

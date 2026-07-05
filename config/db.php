@@ -10,8 +10,8 @@
 $dbHost = getenv('DB_HOST') ?: 'localhost';
 $dbPort = getenv('DB_PORT') ?: '3306';
 $dbName = getenv('DB_NAME') ?: 'association_db';
-$dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: 'Aylissam@26'; // 👈 REMPLACEZ CECI par le mot de passe que vous avez défini
+$dbUser = getenv('DB_USER') ?: 'horasports_user';
+$dbPass = getenv('DB_PASS') ?: ''; // 👈 NO DEFAULT PASSWORD IN CODE. Set it via environment variable or deployment script.
 $dbCharset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 /**
@@ -21,6 +21,12 @@ function getPDO(): PDO {
     static $pdo = null;
 
     global $dbHost, $dbPort, $dbName, $dbCharset, $dbUser, $dbPass;
+
+    if (empty($dbPass) && getenv('APP_ENV') !== 'dev') {
+        error_log('[DB] FATAL: Database password is not set.');
+        http_response_code(500);
+        die(json_encode(['success' => false, 'message' => 'Application is not configured correctly.']));
+    }
 
     if ($pdo === null) {
         $dsn = sprintf(

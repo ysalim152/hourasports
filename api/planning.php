@@ -69,6 +69,13 @@ try {
         case 'PUT':
             if (!$id) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'ID requis.']); exit; }
             $d = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            if (!hasAccess('admin')) {
+                $event = dbFetchOne('SELECT created_by FROM planning WHERE id = ?', [$id]);
+                if (!$event || $event['created_by'] !== currentUserId()) {
+                    http_response_code(403); echo json_encode(['success'=>false,'message'=>'Action non autorisée.']); exit;
+                }
+            }
             dbUpdate('planning', [
                 'titre'       => $d['titre'],
                 'description' => $d['description'] ?? null,
@@ -84,6 +91,12 @@ try {
 
         case 'DELETE':
             if (!$id) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'ID requis.']); exit; }
+            if (!hasAccess('admin')) {
+                $event = dbFetchOne('SELECT created_by FROM planning WHERE id = ?', [$id]);
+                if (!$event || $event['created_by'] !== currentUserId()) {
+                    http_response_code(403); echo json_encode(['success'=>false,'message'=>'Action non autorisée.']); exit;
+                }
+            }
             dbDelete('planning', ['id' => $id]);
             echo json_encode(['success'=>true,'message'=>'Événement supprimé.']);
             break;

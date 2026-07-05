@@ -11,9 +11,14 @@ echo "🚀 Starting deployment of HoraSports Web Application..."
 APP_NAME="horasports"
 WEB_ROOT="/var/www/html/$APP_NAME"
 DB_NAME="association_db"
-DB_USER="horasports_user"
-DB_PASS="secure_password_123"  # Change this!
-REPO_URL="https://github.com/yourusername/horasports.git"  # Replace with actual repo URL
+DB_USER="horasports_user" # Do not use 'root' for the application
+DB_PASS="CHANGEME_A_STRONG_PASSWORD"  # IMPORTANT: Change this to a strong, unique password
+REPO_URL="https://github.com/yourusername/horasports.git"  # IMPORTANT: Replace with your actual repository URL
+
+if [[ "$DB_PASS" == "CHANGEME_A_STRONG_PASSWORD" ]] || [[ "$REPO_URL" == "https://github.com/yourusername/horasports.git" ]]; then
+    echo "❌ ERROR: Please edit the script and change DB_PASS and REPO_URL variables."
+    exit 1
+fi
 
 # Update system
 echo "📦 Updating system packages..."
@@ -31,35 +36,43 @@ sudo systemctl enable mariadb
 
 # Secure MySQL installation (automated)
 echo "🔒 Securing MariaDB..."
-sudo mysql -e "UPDATE mysql.user SET Password=PASSWORD('$DB_PASS') WHERE User='root';"
-sudo mysql -e "DELETE FROM mysql.user WHERE User='';"
-sudo mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-sudo mysql -e "DROP DATABASE IF EXISTS test;"
-sudo mysql -e "FLUSH PRIVILEGES;"
+export MYSQL_PWD=$DB_PASS # Use env var to avoid password in process list for root user setup
+sudo mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$DB_PASS');"
+sudo mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
+sudo mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+sudo mysql -u root -e "DROP DATABASE IF EXISTS test;"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Create database and user
 echo "🗄️ Setting up database..."
-sudo mysql -u root -p$DB_PASS -e "CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mysql -u root -p$DB_PASS -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';"
-sudo mysql -u root -p$DB_PASS -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
-sudo mysql -u root -p$DB_PASS -e "FLUSH PRIVILEGES;"
+sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -u root -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';"
+sudo mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
+unset MYSQL_PWD # Unset the password variable
 
 # Clone or copy the repository
-echo "📥 Cloning repository..."
+echo "📥 Deploying application files..."
 if [ -d "$WEB_ROOT" ]; then
-    sudo rm -rf $WEB_ROOT
+    echo "Repository exists, pulling latest changes..."
+    cd $WEB_ROOT
+    sudo git pull
+else
+    echo "Cloning repository..."
+    sudo git clone $REPO_URL $WEB_ROOT
 fi
-sudo git clone $REPO_URL $WEB_ROOT
 
 # Import database schema
 echo "📊 Importing database schema..."
-sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < $WEB_ROOT/database/association_db.sql
-sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < $WEB_ROOT/database/migration_actualites_v2.sql
+export MYSQL_PWD=$DB_PASS
+sudo mysql -u $DB_USER $DB_NAME < $WEB_ROOT/database/association_db.sql
+sudo mysql -u $DB_USER $DB_NAME < $WEB_ROOT/database/migration_actualites_v2.sql
+unset MYSQL_PWD
 
 # Configure Apache
 echo "🌐 Configuring Apache..."
 sudo a2enmod rewrite
-sudo tee /etc/apache2/sites-available/$APP_NAME.conf > /dev/null <<EOF
+cat <<EOF | sudo tee /etc/apache2/sites-available/$APP_NAME.conf > /dev/null
 <VirtualHost *:80>
     ServerName localhost
     DocumentRoot $WEB_ROOT
@@ -82,13 +95,15 @@ sudo systemctl reload apache2
 echo "🔑 Setting file permissions..."
 sudo chown -R www-data:www-data $WEB_ROOT
 sudo chmod -R 755 $WEB_ROOT
-sudo chmod -R 777 $WEB_ROOT/uploads  # If uploads directory exists
+if [ -d "$WEB_ROOT/uploads" ]; then
+    sudo chmod -R 775 $WEB_ROOT/uploads  # 777 is insecure, 775 is better if www-data is the group
+fi
 
 # Update config/db.php with database credentials
-echo "⚙️ Updating database configuration..."
-sudo sed -i "s/'DB_NAME', '.*'/'DB_NAME', '$DB_NAME'/g" $WEB_ROOT/config/db.php
-sudo sed -i "s/'DB_USER', '.*'/'DB_USER', '$DB_USER'/g" $WEB_ROOT/config/db.php
-sudo sed -i "s/'DB_PASS', '.*'/'DB_PASS', '$DB_PASS'/g" $WEB_ROOT/config/db.php
+echo "⚙️ Updating database configuration... (This is brittle, consider using environment variables)"
+sudo sed -i "s/\$dbName = getenv('DB_NAME') \?: '.*';/\$dbName = getenv('DB_NAME') \?: '$DB_NAME';/" $WEB_ROOT/config/db.php
+sudo sed -i "s/\$dbUser = getenv('DB_USER') \?: '.*';/\$dbUser = getenv('DB_USER') \?: '$DB_USER';/" $WEB_ROOT/config/db.php
+sudo sed -i "s/\$dbPass = getenv('DB_PASS') \?: '.*';/\$dbPass = getenv('DB_PASS') \?: '$DB_PASS';/" $WEB_ROOT/config/db.php
 
 # Restart services
 echo "🔄 Restarting services..."

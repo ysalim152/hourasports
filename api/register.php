@@ -35,6 +35,11 @@ if (strlen($nom)    < 2) $errors[] = 'Le nom est requis (min. 2 caractères).';
 if (strlen($prenom) < 2) $errors[] = 'Le prénom est requis (min. 2 caractères).';
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email invalide.';
 if (strlen($password) < 8) $errors[] = 'Mot de passe trop court (min. 8 caractères).';
+
+$commonPasswords = require __DIR__ . '/../config/common-passwords.php';
+if (in_array(strtolower($password), $commonPasswords, true)) {
+    $errors[] = 'Le mot de passe est trop courant. Veuillez en choisir un plus sécurisé.';
+}
 if ($password !== $confirm) $errors[] = 'Les mots de passe ne correspondent pas.';
 
 // ── Mapping rôle → role_id ──
@@ -48,39 +53,29 @@ if (!empty($errors)) {
     exit;
 }
 
-// ── Vérifier codes secrets (admin/coach) ──
-if ($role === 'admin') {
-    $codeEntre = trim($d['code_admin'] ?? '');
+function validateInvitationCode(string $role, array $data): ?array {
+    $codeKey = 'code_' . $role;
+    if (empty($data[$codeKey])) return null;
+
+    $roleIdMap = ['admin' => 1, 'coach' => 2];
+    if (!isset($roleIdMap[$role])) return null;
+
+    $code = trim($data[$codeKey]);
     $codeDB = dbFetchOne(
         'SELECT id, usage_max, usage_count FROM codes_invitation
-         WHERE code = ? AND role_id = 1 AND actif = 1
+         WHERE code = ? AND role_id = ? AND actif = 1
            AND (expire_at IS NULL OR expire_at > NOW())',
-        [$codeEntre]
+        [$code, $roleIdMap[$role]]
     );
-    if (!$codeDB) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Code d\'invitation administrateur invalide ou expiré.']);
-        exit;
-    }
-    if ($codeDB['usage_max'] && $codeDB['usage_count'] >= $codeDB['usage_max']) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Ce code a atteint son nombre d\'utilisations maximum.']);
-        exit;
-    }
+
+    if (!$codeDB) throw new Exception('Code d\'invitation ' . $role . ' invalide ou expiré.', 403);
+    if ($codeDB['usage_max'] && $codeDB['usage_count'] >= $codeDB['usage_max']) throw new Exception('Ce code a atteint son nombre d\'utilisations maximum.', 403);
+
+    return $codeDB;
 }
-if ($role === 'coach') {
-    $codeEntre = trim($d['code_coach'] ?? '');
-    $codeDB = dbFetchOne(
-        'SELECT id, usage_max, usage_count FROM codes_invitation
-         WHERE code = ? AND role_id = 2 AND actif = 1
-           AND (expire_at IS NULL OR expire_at > NOW())',
-        [$codeEntre]
-    );
-    if (!$codeDB) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Code coach invalide ou expiré.']);
-        exit;
-    }
+
+try {
+    $codeDB = in_array($role, ['admin', 'coach']) ? validateInvitationCode($role, $d) : null;
 }
 
 // ── Email unique ──
@@ -97,7 +92,6 @@ $statut = ($role === 'admin') ? 'en_attente' : 'actif';
 // ── Hash mot de passe ──
 $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
 
-try {
     getPDO()->beginTransaction();
 
     // ── Créer l'utilisateur ──
@@ -160,14 +154,18 @@ try {
         case 'adherent':
             $formule = in_array($d['formule_cotisation'] ?? '', ['mensuel','semestriel','annuel'])
                        ? $d['formule_cotisation'] : null;
-            $montants = ['mensuel' => 500.00, 'semestriel' => 2500.00, 'annuel' => 4500.00];
+            $montants = [
+                'mensuel' => (float)getParam('cotisation_mensuel', '500.00'),
+                'semestriel' => (float)getParam('cotisation_semestriel', '2500.00'),
+                'annuel' => (float)getParam('cotisation_annuel', '4500.00')
+            ];
             dbInsert('membres', [
                 'utilisateur_id'      => $userId,
                 'numero_licence'      => 'LIC-'.date('Y').'-'.str_pad((string)$userId, 4, '0', STR_PAD_LEFT),
                 'date_adhesion'       => date('Y-m-d'),
                 'formule_cotisation'  => $formule,
                 'cotisation_payee'    => 'non',
-                'montant_cotisation'  => $formule ? ($montants[$formule] ?? null) : null,
+                'montant_cotisation'  => $formule ? $montants[$formule] : null,
                 'groupe_sanguin'      => $d['groupe_sanguin']    ?? null,
                 'condition_medicale'  => $d['condition_medicale'] ?? null,
                 'contact_urgence_nom' => $d['urgence_nom']       ?? null,
@@ -263,6 +261,11 @@ try {
         'statut'   => $statut,
     ]);
 
+} catch (Exception $e) {
+    if (getPDO()->inTransaction()) getPDO()->rollBack();
+    $code = is_int($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
+    http_response_code($code);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 } catch (PDOException $e) {
     getPDO()->rollBack();
     error_log('[Register] ' . $e->getMessage());

@@ -207,6 +207,10 @@ try {
         // ── UPDATE ──
         case 'PUT':
             if (!$id) { http_response_code(400); echo json_encode(['success' => false, 'message' => 'ID requis.']); exit; }
+            // Only admins should be able to update member profiles.
+            // Coaches might have read-only access or access to a subset of fields,
+            // but full PUT access is a high privilege.
+            requireRole('admin');
             $d = json_decode(file_get_contents('php://input'), true) ?? [];
 
             dbUpdate('utilisateurs', [
