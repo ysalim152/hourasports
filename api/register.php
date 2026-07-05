@@ -15,44 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$d = json_decode(file_get_contents('php://input'), true) ?? [];
-
-// ── Champs communs ──
-$nom      = trim($d['nom']      ?? '');
-$prenom   = trim($d['prenom']   ?? '');
-$email    = trim($d['email']    ?? '');
-$password = trim($d['mot_de_passe'] ?? '');
-$confirm  = trim($d['confirm_password'] ?? '');
-$role     = trim($d['role']     ?? 'visiteur');
-$tel      = trim($d['telephone'] ?? '');
-$ville    = trim($d['ville']    ?? '');
-$dob      = $d['date_naissance'] ?? null;
-$sexe     = $d['sexe'] ?? null;
-
-// ── Validation commune ──
-$errors = [];
-if (strlen($nom)    < 2) $errors[] = 'Le nom est requis (min. 2 caractères).';
-if (strlen($prenom) < 2) $errors[] = 'Le prénom est requis (min. 2 caractères).';
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email invalide.';
-if (strlen($password) < 8) $errors[] = 'Mot de passe trop court (min. 8 caractères).';
-
-$commonPasswords = require __DIR__ . '/../config/common-passwords.php';
-if (in_array(strtolower($password), $commonPasswords, true)) {
-    $errors[] = 'Le mot de passe est trop courant. Veuillez en choisir un plus sécurisé.';
-}
-if ($password !== $confirm) $errors[] = 'Les mots de passe ne correspondent pas.';
-
-// ── Mapping rôle → role_id ──
-$roleMap = ['admin' => 1, 'coach' => 2, 'adherent' => 3, 'participant' => 4, 'visiteur' => 5];
-if (!array_key_exists($role, $roleMap)) $errors[] = 'Rôle invalide.';
-$roleId = $roleMap[$role] ?? 5;
-
-if (!empty($errors)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => implode(' ', $errors)]);
-    exit;
-}
-
 function validateInvitationCode(string $role, array $data): ?array {
     $codeKey = 'code_' . $role;
     if (empty($data[$codeKey])) return null;
@@ -75,22 +37,55 @@ function validateInvitationCode(string $role, array $data): ?array {
 }
 
 try {
+    $d = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    // ── Champs communs ──
+    $nom      = trim($d['nom']      ?? '');
+    $prenom   = trim($d['prenom']   ?? '');
+    $email    = trim($d['email']    ?? '');
+    $password = trim($d['mot_de_passe'] ?? '');
+    $confirm  = trim($d['confirm_password'] ?? '');
+    $role     = trim($d['role']     ?? 'visiteur');
+    $tel      = trim($d['telephone'] ?? '');
+    $ville    = trim($d['ville']    ?? '');
+    $dob      = $d['date_naissance'] ?? null;
+    $sexe     = $d['sexe'] ?? null;
+
+    // ── Validation commune ──
+    $errors = [];
+    if (strlen($nom)    < 2) $errors[] = 'Le nom est requis (min. 2 caractères).';
+    if (strlen($prenom) < 2) $errors[] = 'Le prénom est requis (min. 2 caractères).';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email invalide.';
+    if (strlen($password) < 8) $errors[] = 'Mot de passe trop court (min. 8 caractères).';
+
+    $commonPasswords = require __DIR__ . '/../config/common-passwords.php';
+    if (in_array(strtolower($password), $commonPasswords, true)) {
+        $errors[] = 'Le mot de passe est trop courant. Veuillez en choisir un plus sécurisé.';
+    }
+    if ($password !== $confirm) $errors[] = 'Les mots de passe ne correspondent pas.';
+
+    // ── Mapping rôle → role_id ──
+    $roleMap = ['admin' => 1, 'coach' => 2, 'adherent' => 3, 'participant' => 4, 'visiteur' => 5];
+    if (!array_key_exists($role, $roleMap)) $errors[] = 'Rôle invalide.';
+    
+    if (!empty($errors)) {
+        throw new Exception(implode(' ', $errors), 400);
+    }
+    $roleId = $roleMap[$role];
+
+    // ── Vérifier codes secrets (admin/coach) ──
     $codeDB = in_array($role, ['admin', 'coach']) ? validateInvitationCode($role, $d) : null;
-}
 
-// ── Email unique ──
-if (dbFetchOne('SELECT id FROM utilisateurs WHERE email = ?', [$email])) {
-    http_response_code(409);
-    echo json_encode(['success' => false, 'message' => 'Cet email est déjà utilisé.']);
-    exit;
-}
+    // ── Email unique ──
+    if (dbFetchOne('SELECT id FROM utilisateurs WHERE email = ?', [$email])) {
+        throw new Exception('Cet email est déjà utilisé.', 409);
+    }
 
-// ── Statut selon rôle ──
-// admin → en_attente (validation manuelle), autres → actif
-$statut = ($role === 'admin') ? 'en_attente' : 'actif';
+    // ── Statut selon rôle ──
+    $statut = ($role === 'admin') ? 'en_attente' : 'actif';
 
-// ── Hash mot de passe ──
-$hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+    // ── Hash mot de passe ──
+    $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
 
     getPDO()->beginTransaction();
 
@@ -112,14 +107,12 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     switch ($role) {
 
         case 'admin':
-            // Profil coach réutilisé pour stocker la fonction + justification
             dbInsert('profils_coach', [
                 'utilisateur_id'      => $userId,
                 'fonction'            => $d['fonction']      ?? null,
                 'bio'                 => $d['justification'] ?? null,
                 'statut_validation'   => 'en_attente',
             ]);
-            // Incrémenter usage code
             if (!empty($codeDB)) {
                 dbQuery('UPDATE codes_invitation SET usage_count = usage_count + 1 WHERE id = ?', [$codeDB['id']]);
             }
@@ -133,16 +126,15 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                 'experience_ans'    => $d['experience']   ?? null,
                 'bio'               => $d['bio']          ?? null,
                 'disponibilites'    => !empty($d['disponibilites']) ? json_encode($d['disponibilites']) : null,
-                'statut_validation' => 'valide', // coach avec code valide immédiatement
+                'statut_validation' => 'valide',
             ]);
-            // Spécialités
             if (!empty($specs)) {
-                foreach ($specs as $catId) {
-                    $cat = dbFetchOne('SELECT id FROM categories WHERE id = ?', [(int)$catId]);
+                foreach ($specs as $catSlug) {
+                    $cat = dbFetchOne('SELECT id FROM categories WHERE slug = ?', [$catSlug]);
                     if ($cat) {
                         try {
-                            dbInsert('coach_specialites', ['coach_id' => $profilId, 'categorie_id' => (int)$catId]);
-                        } catch (Exception $e) { /* doublon ignoré */ }
+                            dbInsert('coach_specialites', ['coach_id' => $profilId, 'categorie_id' => $cat['id']]);
+                        } catch (PDOException $e) { if ($e->errorInfo[1] !== 1062) throw $e; }
                     }
                 }
             }
@@ -152,8 +144,7 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             break;
 
         case 'adherent':
-            $formule = in_array($d['formule_cotisation'] ?? '', ['mensuel','semestriel','annuel'])
-                       ? $d['formule_cotisation'] : null;
+            $formule = in_array($d['formule_cotisation'] ?? '', ['mensuel','semestriel','annuel']) ? $d['formule_cotisation'] : null;
             $montants = [
                 'mensuel' => (float)getParam('cotisation_mensuel', '500.00'),
                 'semestriel' => (float)getParam('cotisation_semestriel', '2500.00'),
@@ -174,8 +165,7 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             break;
 
         case 'participant':
-            // Créer l'entrée membre de base
-            $membreId = dbInsert('membres', [
+            dbInsert('membres', [
                 'utilisateur_id'   => $userId,
                 'numero_licence'   => 'LIC-'.date('Y').'-'.str_pad((string)$userId, 4, '0', STR_PAD_LEFT),
                 'date_adhesion'    => date('Y-m-d'),
@@ -183,55 +173,48 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                 'groupe_sanguin'   => $d['groupe_sanguin'] ?? null,
                 'contact_urgence_tel' => $d['urgence_tel'] ?? null,
             ]);
-            // Disciplines choisies
             $disciplines = $d['disciplines'] ?? [];
             $niveaux     = $d['niveaux']     ?? [];
-            foreach ($disciplines as $catId) {
-                $cat = dbFetchOne('SELECT id FROM categories WHERE id = ?', [(int)$catId]);
+            foreach ($disciplines as $catSlug) {
+                $cat = dbFetchOne('SELECT id FROM categories WHERE slug = ?', [$catSlug]);
                 if ($cat) {
-                    $niveau = in_array($niveaux[$catId] ?? '', ['debutant','intermediaire','avance','competiteur'])
-                              ? $niveaux[$catId] : 'debutant';
+                    $niveau = in_array($niveaux[$catSlug] ?? '', ['debutant','intermediaire','avance','competiteur']) ? $niveaux[$catSlug] : 'debutant';
                     try {
                         dbInsert('participant_disciplines', [
                             'utilisateur_id' => $userId,
-                            'categorie_id'   => (int)$catId,
+                            'categorie_id'   => $cat['id'],
                             'niveau'         => $niveau,
                         ]);
-                    } catch (Exception $e) { /* doublon ignoré */ }
+                    } catch (PDOException $e) { if ($e->errorInfo[1] !== 1062) throw $e; }
                 }
             }
             break;
 
         case 'visiteur':
-            // Pas de profil supplémentaire pour un visiteur
             break;
     }
 
     // ── Notification admin (nouveaux inscrits) ──
     $admins = dbFetchAll('SELECT id FROM utilisateurs WHERE role_id = 1 AND statut = "actif"');
     foreach ($admins as $admin) {
-        try {
-            dbInsert('notifications', [
-                'utilisateur_id' => $admin['id'],
-                'type'           => 'inscription',
-                'titre'          => 'Nouvelle inscription',
-                'message'        => "{$prenom} {$nom} ({$role}) vient de s'inscrire.",
-                'lien'           => '../admin/membres.html',
-            ]);
-        } catch (Exception $e) { /* non bloquant */ }
+        dbInsert('notifications', [
+            'utilisateur_id' => $admin['id'],
+            'type'           => 'inscription',
+            'titre'          => 'Nouvelle inscription',
+            'message'        => "{$prenom} {$nom} ({$role}) vient de s'inscrire.",
+            'lien'           => '../admin/membres.html',
+        ]);
     }
 
     // ── Journal d'audit ──
-    try {
-        dbInsert('audit_log', [
-            'utilisateur_id' => $userId,
-            'action'         => 'inscription',
-            'table_cible'    => 'utilisateurs',
-            'id_cible'       => $userId,
-            'details'        => json_encode(['role' => $role]),
-            'ip_address'     => $_SERVER['REMOTE_ADDR'] ?? null,
-        ]);
-    } catch (Exception $e) { /* non bloquant */ }
+    dbInsert('audit_log', [
+        'utilisateur_id' => $userId,
+        'action'         => 'inscription',
+        'table_cible'    => 'utilisateurs',
+        'id_cible'       => $userId,
+        'details'        => json_encode(['role' => $role]),
+        'ip_address'     => $_SERVER['REMOTE_ADDR'] ?? null,
+    ]);
 
     getPDO()->commit();
 
@@ -244,31 +227,27 @@ $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         'visiteur'    => 'Compte créé ! Bienvenue sur le site de l\'association.',
     ];
 
-    $redirects = [
-        'admin'       => 'login.html',
-        'coach'       => 'login.html',
-        'adherent'    => 'login.html',
-        'participant' => 'login.html',
-        'visiteur'    => 'login.html',
-    ];
-
     http_response_code(201);
     echo json_encode([
         'success'  => true,
         'message'  => $messages[$role] ?? 'Compte créé avec succès !',
-        'redirect' => $redirects[$role] ?? 'login.html',
+        'redirect' => 'login.html',
         'role'     => $role,
         'statut'   => $statut,
     ]);
 
+} catch (PDOException $e) {
+    if (getPDO()->inTransaction()) getPDO()->rollBack();
+    error_log('[Register] PDO Error: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erreur base de données. Veuillez réessayer.']);
 } catch (Exception $e) {
     if (getPDO()->inTransaction()) getPDO()->rollBack();
     $code = is_int($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
+    if ($code === 500) {
+        error_log('[Register] Error: ' . $e->getMessage());
+    }
     http_response_code($code);
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-} catch (PDOException $e) {
-    getPDO()->rollBack();
-    error_log('[Register] ' . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erreur serveur. Veuillez réessayer.']);
+    $message = $code === 500 ? 'Erreur serveur. Veuillez réessayer.' : $e->getMessage();
+    echo json_encode(['success' => false, 'message' => $message]);
 }
