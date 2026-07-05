@@ -67,15 +67,37 @@ try {
         case 'PUT':
             if (!$id) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'ID requis.']); exit; }
             $d = json_decode(file_get_contents('php://input'), true) ?? [];
-            dbUpdate('equipes', [
-                'nom'           => $d['nom'],
-                'categorie_id'  => (int)$d['categorie_id'],
-                'coach_id'      => !empty($d['coach_id']) ? (int)$d['coach_id'] : null,
-                'description'   => $d['description'] ?? null,
-                'effectif_max'  => (int)($d['effectif_max'] ?? 20),
-                'statut'        => $d['statut'] ?? 'actif',
-                'annee_creation'=> !empty($d['annee_creation']) ? (int)$d['annee_creation'] : null,
-            ], ['id' => $id]);
+
+            // Authorization: only admin or the assigned coach can update an equipe
+            if (!hasAccess('admin')) {
+                $equipe = dbFetchOne('SELECT coach_id FROM equipes WHERE id = ?', [$id]);
+                if (!$equipe || $equipe['coach_id'] !== currentUserId()) {
+                    http_response_code(403); echo json_encode(['success'=>false,'message'=>'Action non autorisée.']); exit;
+                }
+            }
+
+            // Build update array for partial updates
+            $updateData = [];
+            $allowedFields = ['nom', 'description', 'statut'];
+            foreach($allowedFields as $field) {
+                if (isset($d[$field])) $updateData[$field] = $d[$field];
+            }
+            // Integer/nullable fields
+            if (isset($d['categorie_id'])) $updateData['categorie_id'] = (int)$d['categorie_id'];
+            if (isset($d['effectif_max'])) $updateData['effectif_max'] = (int)$d['effectif_max'];
+            if (isset($d['annee_creation'])) $updateData['annee_creation'] = !empty($d['annee_creation']) ? (int)$d['annee_creation'] : null;
+
+            // Secure coach_id update: only admins can change it
+            if (hasAccess('admin') && isset($d['coach_id'])) {
+                $updateData['coach_id'] = !empty($d['coach_id']) ? (int)$d['coach_id'] : null;
+            }
+
+            if (empty($updateData)) {
+                echo json_encode(['success' => true, 'message' => 'Aucune donnée à mettre à jour.']);
+                exit;
+            }
+
+            dbUpdate('equipes', $updateData, ['id' => $id]);
             echo json_encode(['success'=>true,'message'=>'Équipe mise à jour.']);
             break;
 

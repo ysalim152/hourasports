@@ -76,16 +76,25 @@ try {
                     http_response_code(403); echo json_encode(['success'=>false,'message'=>'Action non autorisée.']); exit;
                 }
             }
-            dbUpdate('planning', [
-                'titre'       => $d['titre'],
-                'description' => $d['description'] ?? null,
-                'equipe_id'   => !empty($d['equipe_id']) ? (int)$d['equipe_id'] : null,
-                'couleur'     => $d['couleur'] ?? '#e63946',
-                'date_debut'  => $d['date_debut'],
-                'date_fin'    => $d['date_fin'],
-                'recurrence'  => $d['recurrence'] ?? 'aucune',
-                'lieu'        => $d['lieu'] ?? null,
-            ], ['id' => $id]);
+
+            // Build the update array dynamically to handle partial updates correctly
+            $updateData = [];
+            $allowedFields = ['titre', 'description', 'couleur', 'date_debut', 'date_fin', 'recurrence', 'lieu'];
+            foreach ($allowedFields as $field) {
+                if (array_key_exists($field, $d)) {
+                    $updateData[$field] = $d[$field] ?: null;
+                }
+            }
+            if (isset($d['equipe_id'])) {
+                $updateData['equipe_id'] = !empty($d['equipe_id']) ? (int)$d['equipe_id'] : null;
+            }
+
+            if (empty($updateData)) {
+                echo json_encode(['success' => true, 'message' => 'Aucune donnée à mettre à jour.']);
+                exit;
+            }
+
+            dbUpdate('planning', $updateData, ['id' => $id]);
             echo json_encode(['success'=>true,'message'=>'Événement mis à jour.']);
             break;
 
