@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article - Association Sportive</title>
+  <link rel="icon" href="../assets/img/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/article.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="blog.html" class="nav-logo">AS<span>Club</span></a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="blog.html">Actualités</a></li>
+          <li><a href="#">Équipes</a></li>
+          <li><a href="#">Planning</a></li>
+          <li><a href="#">Contact</a></li>
+          <li id="nav-auth-section">
+            <!-- Contenu injecté par app.js -->
+          </li>
+        </ul>
+      </nav>
+      <div class="hamburger">
+        <div class="line line1"></div>
+        <div class="line line2"></div>
+        <div class="line line3"></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="article-main-content">
+    <div id="loader" class="loader-container">
+      <div class="spinner"></div>
+      <p>Chargement de l'article...</p>
+    </div>
+    <!-- Le contenu de l'article et les erreurs seront injectés ici -->
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+        <a href="blog.html" class="footer-logo">AS<span>Club</span></a>
+        <ul class="footer-links">
+            <li><a href="blog.html">Actualités</a></li>
+            <li><a href="#">Le Club</a></li>
+            <li><a href="#">Mentions Légales</a></li>
+            <li><a href="auth/login.html">Connexion</a></li>
+        </ul>
+        <div class="footer-socials">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <p class="footer-copy">&copy; 2025 Association Sportive Club. Conçu avec <span style="color:var(--primary)">❤</span> par <a href="https://github.com/salim-y" target="_blank">Salim Y.</a></p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mainContent = document.getElementById('article-main-content');
+      const loader = document.getElementById('loader');
+
+      function renderError(message) {
+        return `<div class="container error-container">
+                    <div class="error-icon">😞</div>
+                    <h2>Erreur</h2>
+                    <p>${message}</p>
+                    <a href="blog.html" class="btn btn-primary">Retour aux actualités</a>
+                </div>`;
+      }
+
+      function renderArticle(article) {
+        document.title = `${article.titre} - Association Sportive`;
+        const articleHTML = `
+            <header class="article-header" style="background-image: url('..${article.image || '/assets/img/default-news.jpg'}');">
+                <div class="article-header-overlay">
+                    <div class="container">
+                        <a href="blog.html?categorie=${encodeURIComponent(article.categorie)}" class="article-cat">${article.categorie || 'Non classé'}</a>
+                        <h1>${article.titre}</h1>
+                        <div class="article-meta">
+                            <span><i class="fas fa-user"></i> Par <strong>${article.auteur || 'Anonyme'}</strong></span>
+                            <span><i class="fas fa-calendar-alt"></i> ${new Date(article.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                            <span><i class="fas fa-eye"></i> ${article.vues} vues</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="container article-content-wrap">
+                <div class="article-body">
+                    ${article.contenu || '<p>Contenu non disponible.</p>'}
+                </div>
+                <aside class="article-sidebar">
+                    <div class="widget">
+                        <h3 class="widget-title">Partager</h3>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn facebook"><i class="fab fa-facebook-f"></i> Facebook</a>
+                            <a href="#" class="share-btn twitter"><i class="fab fa-twitter"></i> Twitter</a>
+                            <a href="#" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                            <a href="#" class="share-btn email"><i class="fas fa-envelope"></i> Email</a>
+                        </div>
+                    </div>
+                    <!-- D'autres widgets (articles récents, etc.) pourraient être ajoutés ici -->
+                </aside>
+            </div>
+
+            <section id="comments-section" class="container">
+                <!-- Les commentaires seront chargés ici -->
+            </section>
+        `;
+        mainContent.innerHTML = articleHTML;
+      }
+
+      function renderCommentList(comments) {
+        if (!comments || comments.length === 0) {
+            return '<p class="no-comments">Soyez le premier à commenter !</p>';
+        }
+        return comments.map(comment => `
+            <li>
+                <div class="comment">
+                    <img src="${comment.avatar || '../assets/img/default-avatar.png'}" alt="Avatar de ${comment.user_name}" class="comment-avatar">
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <span class="comment-author">${comment.user_name}</span>
+                            <span class="comment-date">${new Date(comment.created_at).toLocaleString('fr-FR', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <p class="comment-text">${comment.contenu.replace(/\n/g, '<br>')}</p>
+                        <div class="comment-actions">
+                            <button class="btn-reply" data-comment-id="${comment.id}">Répondre</button>
+                        </div>
+                    </div>
+                </div>
+                ${comment.children && comment.children.length > 0 ? `
+                    <ul class="comment-list comment-replies">
+                        ${renderCommentList(comment.children)}
+                    </ul>
+                ` : ''}
+                <div id="reply-form-${comment.id}" class="reply-form-container"></div>
+            </li>
+        `).join('');
+      }
+
+      function renderCommentForm(articleId, parentId = null) {
+        if (!Auth.isLoggedIn()) {
+            return `<p class="comment-login-prompt">Vous devez être <a href="/public/auth/login.html?redirect=${window.location.pathname + window.location.search}">connecté</a> pour commenter.</p>`;
+        }
+        const formId = parentId ? `comment-form-${parentId}` : 'comment-form-main';
+        return `
+            <form id="${formId}" class="comment-form" data-parent-id="${parentId || ''}">
+                <h4>${parentId ? 'Répondre' : 'Laisser un commentaire'}</h4>
+                <div class="form-group">
+                    <textarea name="contenu" class="form-control" placeholder="Votre commentaire..." required rows="4"></textarea>
+                </div>
+                <div class="comment-form-actions">
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+                    ${parentId ? `<button type="button" class="btn btn-outline btn-cancel-reply" data-parent-id="${parentId}">Annuler</button>` : ''}
+                </div>
+            </form>
+        `;
+      }
+
+      async function loadComments(articleId) {
+        const commentsSection = document.getElementById('comments-section');
+        if (!commentsSection) return;
+
+        commentsSection.innerHTML = '<h2>Commentaires</h2><div class="spinner"></div>';
+
+        try {
+            const response = await fetch(`../api/comments.php?article_id=${articleId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const totalComments = result.data.reduce((acc, c) => acc + 1 + (c.children ? c.children.length : 0), 0);
+                commentsSection.innerHTML = `
+                    <h2>${totalComments} Commentaire(s)</h2>
+                    <ul class="comment-list">${renderCommentList(result.data)}</ul>
+                    <div id="main-comment-form-container">${renderCommentForm(articleId)}</div>
+                `;
+            } else {
+                throw new Error(result.message || 'Erreur de chargement des commentaires.');
+            }
+        } catch (error) {
+            commentsSection.innerHTML = `<h2>Commentaires</h2><p class="error-text">${error.message}</p>`;
+        }
+      }
+
+      async function loadArticle() {
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get('slug');
+
+        if (!slug) {
+            mainContent.innerHTML = renderError("Aucun article spécifié.");
+            loader.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`../api/actualites.php?slug=${slug}`);
+            if (!response.ok) {
+                if (response.status === 404) throw new Error("L'article demandé n'a pas été trouvé.");
+                throw new Error("Une erreur réseau est survenue.");
+            }
+            const result = await response.json();
+
+            if (result.success) {
+                renderArticle(result.data);
+                await loadComments(result.data.id);
+            } else {
+                throw new Error(result.message || "Impossible de charger l'article.");
+            }
+        } catch (error) {
+            mainContent.innerHTML = renderError(error.message);
+        } finally {
+            loader.style.display = 'none';
+        }
+      }
+
+      loadArticle();
+    });
+  </script>
+
+</body>
+</html>
