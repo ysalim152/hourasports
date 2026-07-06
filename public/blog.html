@@ -3,1587 +3,213 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASClub — Association Sportive Houra</title>
+  <title>Actualités - Association Sportive</title>
+  <link rel="icon" href="../assets/img/favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-/* ═══════════════════════════════════════════
-   DESIGN SYSTEM
-═══════════════════════════════════════════ */
-:root {
-  --red:       #e63946;
-  --red-dim:   rgba(230,57,70,.12);
-  --red-glow:  rgba(230,57,70,.35);
-  --gold:      #f5a623;
-  --night:     #080c12;
-  --deep:      #0c1119;
-  --panel:     #111822;
-  --card:      #141d28;
-  --border:    rgba(255,255,255,.07);
-  --border-hi: rgba(255,255,255,.14);
-  --white:     #ffffff;
-  --light:     #e8edf4;
-  --muted:     #8a96a8;
-  --dim:       #4a5568;
-  --font-d:    'Bebas Neue', sans-serif;
-  --font-b:    'Rajdhani', sans-serif;
-  --font-t:    'DM Sans', sans-serif;
-  --r:         10px;
-  --r-lg:      16px;
-  --ease:      cubic-bezier(.4,0,.2,1);
-  --ease-spring: cubic-bezier(.175,.885,.32,1.275);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: var(--font-t);
-  background: var(--night);
-  color: var(--light);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-a { text-decoration: none; color: inherit; }
-ul { list-style: none; }
-img { display: block; max-width: 100%; }
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--night); }
-::-webkit-scrollbar-thumb { background: var(--red); border-radius: 3px; }
-
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .65rem 1.4rem;
-  border-radius: var(--r);
-  font-family: var(--font-b);
-  font-size: .95rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: all .22s var(--ease);
-  white-space: nowrap;
-}
-.btn-primary {
-  background: var(--red);
-  color: white;
-  border-color: var(--red);
-  box-shadow: 0 4px 20px var(--red-glow);
-}
-.btn-primary:hover {
-  background: #f04450;
-  box-shadow: 0 6px 28px rgba(230,57,70,.5);
-  transform: translateY(-2px);
-}
-.btn-outline {
-  background: transparent;
-  color: var(--light);
-  border-color: var(--border-hi);
-}
-.btn-outline:hover {
-  border-color: var(--red);
-  color: var(--red);
-  transform: translateY(-2px);
-}
-.btn-lg { padding: .85rem 2rem; font-size: 1.05rem; }
-.btn-sm { padding: .4rem .9rem; font-size: .8rem; }
-.btn-ghost {
-  background: rgba(255,255,255,.05);
-  color: var(--muted);
-  border-color: var(--border);
-}
-.btn-ghost:hover { background: rgba(255,255,255,.09); color: var(--light); }
-
-/* ═══════════════════════════════════════════
-   NAVBAR
-═══════════════════════════════════════════ */
-.navbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1000;
-  height: 66px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2.5rem;
-  background: rgba(8,12,18,.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--border);
-  transition: background .3s;
-}
-.navbar.scrolled {
-  background: rgba(8,12,18,.97);
-  border-bottom-color: var(--border-hi);
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  font-family: var(--font-d);
-  font-size: 1.65rem;
-  letter-spacing: .06em;
-  color: var(--white);
-}
-.logo-icon {
-  width: 38px; height: 38px;
-  border-radius: 8px;
-  background: var(--red);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: 0 0 16px var(--red-glow);
-  transition: transform .3s var(--ease-spring);
-}
-.nav-logo:hover .logo-icon { transform: rotate(-8deg) scale(1.1); }
-.nav-logo span { color: var(--red); }
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: .3rem;
-}
-.nav-links a {
-  font-family: var(--font-b);
-  font-weight: 600;
-  font-size: .9rem;
-  letter-spacing: .06em;
-  color: var(--muted);
-  padding: .45rem .85rem;
-  border-radius: 6px;
-  transition: color .2s, background .2s;
-  text-transform: uppercase;
-}
-.nav-links a:hover,
-.nav-links a.active { color: var(--white); background: rgba(255,255,255,.06); }
-.nav-links a.active { color: var(--red); background: var(--red-dim); }
-
-.nav-cta {
-  background: var(--red) !important;
-  color: white !important;
-  border-radius: 6px;
-  box-shadow: 0 2px 12px var(--red-glow);
-}
-.nav-cta:hover {
-  background: #f04450 !important;
-  box-shadow: 0 4px 20px rgba(230,57,70,.5) !important;
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: .5rem;
-}
-.hamburger span {
-  display: block;
-  width: 24px; height: 2px;
-  background: var(--light);
-  border-radius: 2px;
-  transition: all .3s;
-}
-
-@media (max-width: 860px) {
-  .hamburger { display: flex; }
-  .nav-links {
-    position: fixed;
-    top: 66px; left: 0; right: 0;
-    background: var(--deep);
-    border-bottom: 1px solid var(--border);
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem 1.5rem 1.5rem;
-    gap: .25rem;
-    transform: translateY(-110%);
-    opacity: 0;
-    transition: transform .35s var(--ease), opacity .35s;
-    pointer-events: none;
-  }
-  .nav-links.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: all;
-  }
-  .nav-links a { font-size: 1rem; }
-}
-
-/* ═══════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════ */
-.hero {
-  position: relative;
-  min-height: 100svh;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  padding: 100px 2.5rem 60px;
-}
-
-/* Animated gradient mesh background */
-.hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 20% 40%, rgba(230,57,70,.16) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(29,53,87,.28) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(245,166,35,.06) 0%, transparent 50%);
-  animation: bgPulse 8s ease-in-out infinite alternate;
-}
-
-@keyframes bgPulse {
-  0%   { opacity: .7; }
-  100% { opacity: 1; }
-}
-
-/* Grid overlay */
-.hero-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-}
-
-/* Diagonal accent line */
-.hero::after {
-  content: '';
-  position: absolute;
-  top: 0; right: -80px;
-  width: 3px; height: 100%;
-  background: linear-gradient(180deg, transparent 0%, var(--red) 40%, var(--red) 60%, transparent 100%);
-  opacity: .22;
-  transform: rotate(12deg);
-  transform-origin: top right;
-}
-
-.hero-inner {
-  position: relative; z-index: 2;
-  width: 100%; max-width: 1260px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 420px;
-  gap: 4rem;
-  align-items: center;
-}
-
-/* TEXT SIDE */
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  background: rgba(245,166,35,.1);
-  border: 1px solid rgba(245,166,35,.25);
-  color: var(--gold);
-  font-family: var(--font-b);
-  font-size: .8rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: .3rem .85rem;
-  border-radius: 20px;
-  margin-bottom: 1.4rem;
-  opacity: 0;
-  animation: fadeUp .6s var(--ease) .1s forwards;
-}
-.hero-badge::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 8px var(--gold);
-  animation: blink 1.4s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-.hero-title {
-  font-family: var(--font-d);
-  font-size: clamp(3.5rem, 7vw, 6.5rem);
-  line-height: .95;
-  letter-spacing: .02em;
-  color: var(--white);
-  margin-bottom: 1.5rem;
-  opacity: 0;
-  animation: fadeUp .7s var(--ease) .25s forwards;
-}
-.hero-title em {
-  font-style: normal;
-  color: var(--red);
-  position: relative;
-}
-.hero-title em::after {
-  content: '';
-  position: absolute;
-  bottom: 4px; left: 0; right: 0;
-  height: 3px;
-  background: var(--red);
-  opacity: .4;
-  border-radius: 2px;
-}
-
-.hero-sub {
-  font-size: 1.05rem;
-  color: var(--muted);
-  line-height: 1.75;
-  max-width: 520px;
-  margin-bottom: 2.2rem;
-  font-weight: 300;
-  opacity: 0;
-  animation: fadeUp .7s var(--ease) .4s forwards;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: fadeUp .7s var(--ease) .55s forwards;
-}
-
-/* STATS SIDE */
-.hero-stats-panel {
-  opacity: 0;
-  animation: fadeUp .8s var(--ease) .4s forwards;
-}
-
-.stats-header {
-  font-family: var(--font-b);
-  font-size: .72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--dim);
-  margin-bottom: 1rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .7rem;
-}
-
-.stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 1.3rem 1.2rem;
-  transition: border-color .25s, transform .25s;
-  position: relative;
-  overflow: hidden;
-}
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--red);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .35s var(--ease);
-}
-.stat-card:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-3px);
-}
-.stat-card:hover::before { transform: scaleX(1); }
-
-.stat-card:nth-child(1) .stat-number { color: var(--red); }
-.stat-card:nth-child(2) .stat-number { color: var(--gold); }
-.stat-card:nth-child(3) .stat-number { color: #3fa7f5; }
-.stat-card:nth-child(4) .stat-number { color: #2ecc71; }
-.stat-card:nth-child(5) .stat-number { color: #c77dff; }
-.stat-card:nth-child(6) .stat-number { color: var(--muted); }
-
-.stat-number {
-  font-family: var(--font-d);
-  font-size: 2.3rem;
-  line-height: 1;
-  margin-bottom: .3rem;
-  letter-spacing: .02em;
-}
-.stat-label {
-  font-size: .75rem;
-  font-weight: 500;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-/* Scroll cue */
-.hero-scroll {
-  position: absolute;
-  bottom: 2rem; left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .5rem;
-  opacity: 0;
-  animation: fadeIn .8s var(--ease) 1.2s forwards;
-}
-.scroll-mouse {
-  width: 24px; height: 36px;
-  border: 2px solid var(--border-hi);
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  padding-top: 6px;
-}
-.scroll-wheel {
-  width: 4px; height: 8px;
-  background: var(--red);
-  border-radius: 2px;
-  animation: scrollDown 1.6s ease-in-out infinite;
-}
-@keyframes scrollDown {
-  0%   { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(10px); opacity: 0; }
-}
-.scroll-label {
-  font-size: .65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--dim);
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* ═══════════════════════════════════════════
-   TICKER STRIP
-═══════════════════════════════════════════ */
-.ticker {
-  background: var(--red);
-  overflow: hidden;
-  height: 38px;
-  display: flex;
-  align-items: center;
-}
-.ticker-inner {
-  display: flex;
-  gap: 3rem;
-  animation: ticker 28s linear infinite;
-  white-space: nowrap;
-}
-.ticker-item {
-  font-family: var(--font-b);
-  font-size: .82rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-  flex-shrink: 0;
-}
-.ticker-sep { opacity: .5; }
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-/* ═══════════════════════════════════════════
-   SECTIONS — SHARED
-═══════════════════════════════════════════ */
-.section {
-  padding: 90px 2.5rem;
-  max-width: 1260px;
-  margin: 0 auto;
-}
-.section-full {
-  padding: 90px 2.5rem;
-}
-
-.section-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  font-family: var(--font-b);
-  font-size: .75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .16em;
-  color: var(--red);
-  margin-bottom: .75rem;
-}
-.section-tag::before {
-  content: '';
-  width: 22px; height: 2px;
-  background: var(--red);
-  border-radius: 1px;
-}
-
-.section-title {
-  font-family: var(--font-d);
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  letter-spacing: .04em;
-  color: var(--white);
-  line-height: 1.05;
-  margin-bottom: .6rem;
-}
-.section-title span { color: var(--red); }
-.section-title em {
-  font-style: normal;
-  color: var(--gold);
-}
-
-.section-desc {
-  color: var(--muted);
-  font-size: .95rem;
-  line-height: 1.75;
-  max-width: 540px;
-}
-
-.divider {
-  width: 48px; height: 3px;
-  background: var(--red);
-  border-radius: 2px;
-  margin-top: 1rem;
-}
-
-/* Section with dark panel bg */
-.section-dark {
-  background: var(--panel);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-/* ═══════════════════════════════════════════
-   NEWS CARDS
-═══════════════════════════════════════════ */
-.news-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1.2rem;
-}
-
-.news-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: border-color .28s, transform .28s, box-shadow .28s;
-  cursor: pointer;
-}
-.news-card:hover {
-  border-color: rgba(230,57,70,.35);
-  transform: translateY(-6px);
-  box-shadow: 0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(230,57,70,.1);
-}
-
-.news-thumb {
-  height: 180px;
-  background: var(--deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  position: relative;
-  overflow: hidden;
-}
-.news-thumb::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(20,29,40,.9) 100%);
-}
-
-.news-thumb.football { background: linear-gradient(135deg, #0a1628 0%, #1a2d1a 100%); }
-.news-thumb.basketball { background: linear-gradient(135deg, #0a1628 0%, #2d1a0a 100%); }
-.news-thumb.assoc { background: linear-gradient(135deg, #0a1628 0%, #1a1a2d 100%); }
-
-.news-cat-tag {
-  position: absolute;
-  bottom: .8rem; left: .8rem;
-  z-index: 1;
-  font-family: var(--font-b);
-  font-size: .65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  padding: .2rem .6rem;
-  border-radius: 4px;
-  background: var(--red);
-  color: white;
-}
-
-.news-body {
-  padding: 1.3rem 1.3rem .8rem;
-  flex: 1;
-}
-.news-meta {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  font-size: .75rem;
-  color: var(--dim);
-  margin-bottom: .6rem;
-}
-.news-meta .dot { font-size: .4rem; }
-
-.news-title {
-  font-family: var(--font-b);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--white);
-  line-height: 1.35;
-  margin-bottom: .6rem;
-}
-
-.news-excerpt {
-  font-size: .85rem;
-  color: var(--muted);
-  line-height: 1.65;
-  font-weight: 300;
-}
-
-.news-footer {
-  padding: .9rem 1.3rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.news-author {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.avatar-sm {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--red-dim);
-  border: 1px solid rgba(230,57,70,.3);
-  color: var(--red);
-  font-size: .65rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ═══════════════════════════════════════════
-   SPORTS GRID
-═══════════════════════════════════════════ */
-.sports-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.sport-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 1.8rem 1.2rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all .28s var(--ease);
-  position: relative;
-  overflow: hidden;
-  group: true;
-}
-.sport-card::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--sport-color, var(--red));
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform .3s var(--ease);
-}
-.sport-card:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-5px);
-  box-shadow: 0 16px 40px rgba(0,0,0,.3);
-}
-.sport-card:hover::before { transform: scaleX(1); }
-
-.sport-icon {
-  font-size: 2.8rem;
-  margin-bottom: .9rem;
-  display: block;
-  transition: transform .3s var(--ease-spring);
-}
-.sport-card:hover .sport-icon { transform: scale(1.18) rotate(-5deg); }
-
-.sport-name {
-  font-family: var(--font-b);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: .3rem;
-}
-.sport-info {
-  font-size: .75rem;
-  color: var(--muted);
-  font-weight: 300;
-}
-.sport-badge {
-  display: inline-block;
-  margin-top: .6rem;
-  font-size: .65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  padding: .18rem .5rem;
-  border-radius: 4px;
-  background: var(--sport-color, var(--red));
-  color: white;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity .25s, transform .25s;
-}
-.sport-card:hover .sport-badge {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ═══════════════════════════════════════════
-   CTA SECTION
-═══════════════════════════════════════════ */
-.cta-section {
-  position: relative;
-  overflow: hidden;
-}
-.cta-section::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(230,57,70,.1) 0%, transparent 70%);
-}
-.cta-inner {
-  position: relative; z-index: 1;
-  max-width: 680px;
-  margin: 0 auto;
-  text-align: center;
-}
-.cta-title {
-  font-family: var(--font-d);
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  letter-spacing: .04em;
-  color: var(--white);
-  line-height: 1;
-  margin: 1rem 0 1.2rem;
-}
-.cta-title span { color: var(--red); }
-.cta-desc {
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.75;
-  margin-bottom: 2.2rem;
-  font-weight: 300;
-}
-.cta-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* CTA benefits strip */
-.cta-perks {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-top: 2.5rem;
-  flex-wrap: wrap;
-}
-.cta-perk {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.cta-perk i {
-  color: var(--red);
-  font-size: .85rem;
-}
-
-/* ═══════════════════════════════════════════
-   FEATURE STRIP
-═══════════════════════════════════════════ */
-.features-strip {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-}
-.feat {
-  padding: 1.8rem 1.5rem;
-  border-right: 1px solid var(--border);
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  transition: background .2s;
-}
-.feat:last-child { border-right: none; }
-.feat:hover { background: rgba(255,255,255,.025); }
-.feat-icon {
-  width: 44px; height: 44px;
-  border-radius: 10px;
-  background: var(--red-dim);
-  border: 1px solid rgba(230,57,70,.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-.feat-title {
-  font-family: var(--font-b);
-  font-size: .95rem;
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: .25rem;
-}
-.feat-desc {
-  font-size: .78rem;
-  color: var(--muted);
-  line-height: 1.55;
-  font-weight: 300;
-}
-
-/* ═══════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════ */
-.footer {
-  background: var(--deep);
-  border-top: 1px solid var(--border);
-  padding: 4rem 2.5rem 2rem;
-}
-.footer-grid {
-  max-width: 1260px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.8fr 1fr 1fr 1fr;
-  gap: 3rem;
-  padding-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border);
-}
-.footer-brand .nav-logo { margin-bottom: .9rem; display: inline-flex; }
-.footer-desc {
-  font-size: .85rem;
-  color: var(--muted);
-  line-height: 1.75;
-  font-weight: 300;
-  max-width: 280px;
-  margin-bottom: 1.2rem;
-}
-.footer-social {
-  display: flex;
-  gap: .5rem;
-}
-.social-btn {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: .85rem;
-  color: var(--muted);
-  transition: all .2s;
-}
-.social-btn:hover {
-  background: var(--red);
-  border-color: var(--red);
-  color: white;
-  transform: translateY(-3px);
-}
-
-.footer-col h5 {
-  font-family: var(--font-b);
-  font-size: .8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--white);
-  margin-bottom: 1rem;
-}
-.footer-links li {
-  margin-bottom: .4rem;
-}
-.footer-links a {
-  font-size: .85rem;
-  color: var(--muted);
-  font-weight: 300;
-  transition: color .2s;
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-}
-.footer-links a:hover { color: var(--red); }
-.footer-links a::before {
-  content: '';
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--dim);
-  flex-shrink: 0;
-  transition: background .2s;
-}
-.footer-links a:hover::before { background: var(--red); }
-
-.footer-bottom {
-  max-width: 1260px;
-  margin: 1.5rem auto 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: .78rem;
-  color: var(--dim);
-  flex-wrap: wrap;
-  gap: .5rem;
-}
-.footer-bottom a { color: var(--dim); }
-.footer-bottom a:hover { color: var(--muted); }
-
-/* ═══════════════════════════════════════════
-   BACK TO TOP
-═══════════════════════════════════════════ */
-.back-top {
-  position: fixed;
-  bottom: 2rem; right: 2rem;
-  width: 44px; height: 44px;
-  border-radius: 10px;
-  background: var(--red);
-  color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .9rem;
-  box-shadow: 0 4px 20px var(--red-glow);
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .3s, transform .3s;
-  pointer-events: none;
-  border: none;
-  z-index: 900;
-}
-.back-top.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
-.back-top:hover { background: #f04450; transform: translateY(-3px); }
-
-/* ═══════════════════════════════════════════
-   INTERSECTION OBSERVER ANIMATIONS
-═══════════════════════════════════════════ */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .65s var(--ease), transform .65s var(--ease);
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.reveal-delay-1 { transition-delay: .1s; }
-.reveal-delay-2 { transition-delay: .2s; }
-.reveal-delay-3 { transition-delay: .3s; }
-.reveal-delay-4 { transition-delay: .4s; }
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
-  .hero-stats-panel { display: grid; grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: repeat(3,1fr); }
-  .sports-grid { grid-template-columns: repeat(4,1fr); }
-  .features-strip { grid-template-columns: repeat(2,1fr); }
-  .features-strip .feat:nth-child(2) { border-right: none; }
-  .features-strip .feat:nth-child(3) { border-top: 1px solid var(--border); }
-  .features-strip .feat:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
-}
-@media (max-width: 860px) {
-  .hero { padding-top: 100px; }
-  .news-layout { grid-template-columns: 1fr; }
-  .sports-grid { grid-template-columns: repeat(2,1fr); }
-  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
-  .features-strip { grid-template-columns: 1fr; }
-  .features-strip .feat { border-right: none; border-top: 1px solid var(--border); }
-  .features-strip .feat:first-child { border-top: none; }
-}
-@media (max-width: 540px) {
-  .section { padding: 60px 1.2rem; }
-  .section-full { padding: 60px 1.2rem; }
-  .hero { padding: 90px 1.2rem 50px; }
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  .sports-grid { grid-template-columns: repeat(2,1fr); }
-  .footer-grid { grid-template-columns: 1fr; }
-  .navbar { padding: 0 1.2rem; }
-}
-  </style>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/blog.css">
 </head>
 <body>
 
-<!-- ═══ NAVBAR ═══ -->
-<nav class="navbar" id="navbar">
-  <a href="blog.html" class="nav-logo">
-    <div class="logo-icon">🏆</div>AS<span>Club</span>
-  </a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="blog.html" class="active">Accueil</a></li>
-    <li><a href="activites.html">Activités</a></li>
-    <li><a href="apropos.html">À Propos</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="auth/login.html" class="nav-cta" id="navLoginBtn">Connexion</a></li>
-  </ul>
-  <button class="hamburger" id="hamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<!-- ═══ HERO ═══ -->
-<section class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-inner">
-
-    <!-- Left: Text -->
-    <div class="hero-text">
-      <div class="hero-badge">⚡ Saison 2024–2025 en cours</div>
-      <h1 class="hero-title">L'<em>Excellence</em><br>Sportive<br>Commence Ici</h1>
-      <p class="hero-sub">Rejoignez notre association multidisciplinaire. Football, basketball, tennis, natation et bien plus — pour tous les niveaux, tous les âges.</p>
-      <div class="hero-actions">
-        <a href="auth/inscrire.html" class="btn btn-primary btn-lg">
-          <i class="fas fa-user-plus"></i> Rejoindre le Club
-        </a>
-        <a href="activites.html" class="btn btn-outline btn-lg">
-          <i class="fas fa-play"></i> Découvrir
-        </a>
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="blog.html" class="nav-logo">AS<span>Club</span></a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="blog.html" class="active">Actualités</a></li>
+          <li><a href="#">Équipes</a></li>
+          <li><a href="#">Planning</a></li>
+          <li><a href="#">Contact</a></li>
+          <li id="nav-auth-section">
+            <!-- Contenu injecté par app.js (bouton connexion ou menu utilisateur) -->
+          </li>
+        </ul>
+      </nav>
+      <div class="hamburger">
+        <div class="line line1"></div>
+        <div class="line line2"></div>
+        <div class="line line3"></div>
       </div>
     </div>
+  </header>
 
-    <!-- Right: Stats -->
-    <div class="hero-stats-panel">
-      <div class="stats-header">Nos Chiffres Clés</div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" data-counter="320">0</div>
-          <div class="stat-label">Membres</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-counter="8">0</div>
-          <div class="stat-label">Sports</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-counter="15">0</div>
-          <div class="stat-label">Équipes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-counter="42">0</div>
-          <div class="stat-label">Trophées</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-counter="12">0</div>
-          <div class="stat-label">Coachs</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-counter="2010">0</div>
-          <div class="stat-label">Fondé en</div>
-        </div>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Nos <span>Actualités</span></h1>
+        <p>Suivez la vie du club, les résultats des matchs et les événements à venir.</p>
       </div>
+    </section>
+
+    <div class="container">
+      <section class="blog-controls">
+        <div class="blog-filters" id="categoryFilters">
+          <!-- Les filtres de catégories seront injectés ici par JS -->
+        </div>
+        <div class="blog-search">
+          <i class="fas fa-search"></i>
+          <input type="search" id="blogSearchInput" class="form-control" placeholder="Rechercher un article...">
+        </div>
+      </section>
+
+      <div id="loader" class="loader" style="text-align:center; padding: 4rem 0;">
+        <div class="spinner" style="width:40px; height:40px; border-width: 3px; margin: 0 auto 1rem;"></div>
+        <p>Chargement des articles...</p>
+      </div>
+
+      <div class="blog-grid" id="blogGrid">
+        <!-- Les articles seront injectés ici par JS -->
+      </div>
+
+      <nav class="pagination" id="pagination">
+        <!-- La pagination sera injectée ici par JS -->
+      </nav>
     </div>
+  </main>
 
-  </div>
-
-  <!-- Scroll cue -->
-  <div class="hero-scroll">
-    <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
-    <div class="scroll-label">Défiler</div>
-  </div>
-</section>
-
-<!-- ═══ TICKER ═══ -->
-<div class="ticker" aria-hidden="true">
-  <div class="ticker-inner">
-    <!-- Duplicated for seamless loop -->
-    <span class="ticker-item">⚽ Football</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏀 Basketball</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🎾 Tennis</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏊 Natation</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏃 Athlétisme</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🥋 Arts Martiaux</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🚴 Cyclisme</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏐 Volleyball</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <!-- Duplicate -->
-    <span class="ticker-item">⚽ Football</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏀 Basketball</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🎾 Tennis</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏊 Natation</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏃 Athlétisme</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🥋 Arts Martiaux</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🚴 Cyclisme</span>
-    <span class="ticker-item ticker-sep">•</span>
-    <span class="ticker-item">🏐 Volleyball</span>
-    <span class="ticker-item ticker-sep">•</span>
-  </div>
-</div>
-
-<!-- ═══ FEATURES STRIP ═══ -->
-<div style="background:var(--panel); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
-  <div style="max-width:1260px; margin:0 auto; padding:0 2.5rem;">
-    <div class="features-strip reveal">
-      <div class="feat">
-        <div class="feat-icon">🏟️</div>
-        <div>
-          <div class="feat-title">Installations Modernes</div>
-          <div class="feat-desc">Stade, piscine olympique, salles couvertes et pistes synthétiques.</div>
+  <footer class="footer">
+    <div class="container footer-content">
+        <a href="blog.html" class="footer-logo">AS<span>Club</span></a>
+        <ul class="footer-links">
+            <li><a href="blog.html">Actualités</a></li>
+            <li><a href="#">Le Club</a></li>
+            <li><a href="#">Mentions Légales</a></li>
+            <li><a href="auth/login.html">Connexion</a></li>
+        </ul>
+        <div class="footer-socials">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
         </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🎽</div>
-        <div>
-          <div class="feat-title">Coachs Certifiés</div>
-          <div class="feat-desc">12 entraîneurs diplômés d&apos;État pour vous accompagner.</div>
-        </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">📅</div>
-        <div>
-          <div class="feat-title">Planning Flexible</div>
-          <div class="feat-desc">Sessions matin, midi et soir, 6 jours sur 7 selon les disciplines.</div>
-        </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🏆</div>
-        <div>
-          <div class="feat-title">Compétitions Régulières</div>
-          <div class="feat-desc">Tournois internes, championnats régionaux et nationaux.</div>
-        </div>
-      </div>
+        <p class="footer-copy">&copy; 2025 Association Sportive Club. Conçu avec <span style="color:var(--primary)">❤</span> par <a href="https://github.com/salim-y" target="_blank">Salim Y.</a></p>
     </div>
-  </div>
-</div>
+  </footer>
 
-<!-- ═══ ACTUALITÉS ═══ -->
-<section class="section">
-  <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; margin-bottom:2.5rem;">
-    <div class="reveal">
-      <div class="section-tag">📰 Actualités</div>
-      <h2 class="section-title">Dernières <span>Nouvelles</span></h2>
-      <div class="divider"></div>
-    </div>
-    <a href="actualites.html" class="btn btn-ghost reveal reveal-delay-1">
-      Toutes les actus <i class="fas fa-arrow-right"></i>
-    </a>
-  </div>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const blogGrid = document.getElementById('blogGrid');
+      const paginationContainer = document.getElementById('pagination');
+      const categoryFilters = document.getElementById('categoryFilters');
+      const searchInput = document.getElementById('blogSearchInput');
+      const loader = document.getElementById('loader');
 
-  <div class="news-layout" id="newsGrid">
-    <!-- Card 1 -->
-    <div class="news-card reveal reveal-delay-1">
-      <div class="news-thumb football">
-        <span>⚽</span>
-        <span class="news-cat-tag">Football</span>
-      </div>
-      <div class="news-body">
-        <div class="news-meta">
-          <span>5 mai 2025</span>
-          <span class="dot">●</span>
-          <span>5 min de lecture</span>
-        </div>
-        <h3 class="news-title">Victoire Éclatante en Finale Régionale</h3>
-        <p class="news-excerpt">Notre équipe première a remporté la finale régionale avec un score impressionnant de 3-1 contre les champions sortants.</p>
-      </div>
-      <div class="news-footer">
-        <div class="news-author">
-          <div class="avatar-sm">AD</div>
-          <span>Admin</span>
-        </div>
-        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
-      </div>
-    </div>
-    <!-- Card 2 -->
-    <div class="news-card reveal reveal-delay-2">
-      <div class="news-thumb assoc">
-        <span>📋</span>
-        <span class="news-cat-tag" style="background:#3fa7f5;">Association</span>
-      </div>
-      <div class="news-body">
-        <div class="news-meta">
-          <span>1 mai 2025</span>
-          <span class="dot">●</span>
-          <span>3 min de lecture</span>
-        </div>
-        <h3 class="news-title">Inscriptions Ouvertes Saison 2025–2026</h3>
-        <p class="news-excerpt">Les inscriptions pour la nouvelle saison sportive sont officiellement ouvertes. Nouveaux membres bienvenus dans toutes les disciplines.</p>
-      </div>
-      <div class="news-footer">
-        <div class="news-author">
-          <div class="avatar-sm">AD</div>
-          <span>Admin</span>
-        </div>
-        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
-      </div>
-    </div>
-    <!-- Card 3 -->
-    <div class="news-card reveal reveal-delay-3">
-      <div class="news-thumb basketball">
-        <span>🏀</span>
-        <span class="news-cat-tag" style="background:var(--gold);color:#0a0a0a;">Basketball</span>
-      </div>
-      <div class="news-body">
-        <div class="news-meta">
-          <span>28 avr. 2025</span>
-          <span class="dot">●</span>
-          <span>4 min de lecture</span>
-        </div>
-        <h3 class="news-title">Nouveau Coach pour l&apos;Équipe Basketball</h3>
-        <p class="news-excerpt">Nous avons le plaisir d&apos;accueillir notre nouveau coach professionnel au sein de la grande famille du club.</p>
-      </div>
-      <div class="news-footer">
-        <div class="news-author">
-          <div class="avatar-sm">AD</div>
-          <span>Admin</span>
-        </div>
-        <a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>
-      </div>
-    </div>
-  </div>
-</section>
+      let currentPage = 1;
+      let currentCategory = 'all';
+      let currentSearch = '';
 
-<!-- ═══ SPORTS ═══ -->
-<div class="section-dark section-full">
-  <div class="section" style="padding-top:0; padding-bottom:0;">
-    <div style="margin-bottom:2.5rem; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
-      <div class="reveal">
-        <div class="section-tag">🏅 Disciplines</div>
-        <h2 class="section-title">Nos <span>Sports</span></h2>
-        <div class="divider"></div>
-      </div>
-      <p class="section-desc reveal reveal-delay-1" style="max-width:360px;font-size:.88rem;">8 disciplines, des installations premium et des coachs certifiés pour chaque niveau.</p>
-    </div>
+      const CATEGORIES = ['Football', 'Basketball', 'Tennis', 'Natation', 'Événements', 'Club'];
 
-    <div class="sports-grid">
-      <div class="sport-card reveal reveal-delay-1" style="--sport-color:#2ecc71">
-        <span class="sport-icon">⚽</span>
-        <div class="sport-name">Football</div>
-        <div class="sport-info">3 équipes · 54 joueurs</div>
-        <span class="sport-badge">Places dispo</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-2" style="--sport-color:#f5a623">
-        <span class="sport-icon">🏀</span>
-        <div class="sport-name">Basketball</div>
-        <div class="sport-info">2 équipes · 24 joueurs</div>
-        <span class="sport-badge">Places dispo</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-3" style="--sport-color:#3fa7f5">
-        <span class="sport-icon">🎾</span>
-        <div class="sport-name">Tennis</div>
-        <div class="sport-info">Courts couverts · tournois</div>
-        <span class="sport-badge">8 places</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-4" style="--sport-color:#00bfff">
-        <span class="sport-icon">🏊</span>
-        <div class="sport-name">Natation</div>
-        <div class="sport-info">Piscine olympique · tous niveaux</div>
-        <span class="sport-badge">5 places</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-1" style="--sport-color:#ff6b35">
-        <span class="sport-icon">🏃</span>
-        <div class="sport-name">Athlétisme</div>
-        <div class="sport-info">Piste synthétique · stade</div>
-        <span class="sport-badge">Places dispo</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-2" style="--sport-color:#c77dff">
-        <span class="sport-icon">🥋</span>
-        <div class="sport-name">Arts Martiaux</div>
-        <div class="sport-info">Judo · Karaté · Taekwondo</div>
-        <span class="sport-badge">15 places</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-3" style="--sport-color:#52b788">
-        <span class="sport-icon">🚴</span>
-        <div class="sport-name">Cyclisme</div>
-        <div class="sport-info">VTT et route · sorties club</div>
-        <span class="sport-badge">8 places</span>
-      </div>
-      <div class="sport-card reveal reveal-delay-4" style="--sport-color:#4cc9f0">
-        <span class="sport-icon">🏐</span>
-        <div class="sport-name">Volleyball</div>
-        <div class="sport-info">Salle et beach-volley</div>
-        <span class="sport-badge">6 places</span>
-      </div>
-    </div>
+      function renderCategories() {
+        let html = '<button class="filter-btn active" data-category="all">Tous</button>';
+        CATEGORIES.forEach(cat => {
+          html += `<button class="filter-btn" data-category="${cat}">${cat}</button>`;
+        });
+        categoryFilters.innerHTML = html;
 
-    <div style="text-align:center; margin-top:2.5rem;" class="reveal">
-      <a href="activites.html" class="btn btn-primary btn-lg">
-        Voir toutes les activités <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ CTA ═══ -->
-<div class="section-full cta-section">
-  <div class="cta-inner reveal">
-    <div class="section-tag" style="justify-content:center;">🚀 Rejoignez-nous</div>
-    <h2 class="cta-title">Prêt à vivre<br><span>l'aventure</span>&nbsp;?</h2>
-    <p class="cta-desc">Inscrivez-vous aujourd&apos;hui et bénéficiez d&apos;un accès à toutes nos installations, entraîneurs professionnels et événements exclusifs.</p>
-    <div class="cta-actions">
-      <a href="auth/inscrire.html" class="btn btn-primary btn-lg">
-        <i class="fas fa-user-plus"></i> S&apos;inscrire Maintenant
-      </a>
-      <a href="contact.html" class="btn btn-outline btn-lg">
-        <i class="fas fa-envelope"></i> Nous Contacter
-      </a>
-    </div>
-    <div class="cta-perks">
-      <div class="cta-perk"><i class="fas fa-check-circle"></i> Sans engagement d&apos;abonnement</div>
-      <div class="cta-perk"><i class="fas fa-check-circle"></i> Essai gratuit 1 séance</div>
-      <div class="cta-perk"><i class="fas fa-check-circle"></i> Accès immédiat</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ FOOTER ═══ -->
-<footer class="footer">
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <a href="blog.html" class="nav-logo"><div class="logo-icon">🏆</div>AS<span>Club</span></a>
-      <p class="footer-desc">Club sportif multidisciplinaire fondé en 2010. Excellence, passion et esprit d&apos;équipe depuis plus de 15 ans.</p>
-      <div class="footer-social">
-        <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="social-btn" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
-        <a href="#" class="social-btn" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h5>Navigation</h5>
-      <ul class="footer-links">
-        <li><a href="blog.html">Accueil</a></li>
-        <li><a href="activites.html">Activités</a></li>
-        <li><a href="apropos.html">À Propos</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>Compte</h5>
-      <ul class="footer-links">
-        <li><a href="auth/login.html">Connexion</a></li>
-        <li><a href="auth/inscrire.html">Inscription</a></li>
-        <li><a href="espace-membre.html">Mon Espace</a></li>
-        <li><a href="admin/dashboard.html">Admin</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h5>Contact</h5>
-      <ul class="footer-links">
-        <li><a href="mailto:contact@association.dz">contact@association.dz</a></li>
-        <li><a href="#">+213 555 123 456</a></li>
-        <li><a href="#">12 Rue du Sport, Blida</a></li>
-        <li><a href="#">Lun–Ven 8h–20h</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>&copy; 2025 ASClub — Tous droits réservés</span>
-    <span>PHP 8 + MariaDB &nbsp;|&nbsp; <a href="#">Confidentialité</a></span>
-  </div>
-</footer>
-
-<!-- Back to top -->
-<button class="back-top" id="backTop" aria-label="Retour en haut">
-  <i class="fas fa-arrow-up"></i>
-</button>
-
-<script src="../assets/js/app.js"></script>
-<script>
-/* ═══════════════════════════════════════════
-   NAV SCROLL EFFECT
-═══════════════════════════════════════════ */
-var navbar = document.getElementById('navbar');
-window.addEventListener('scroll', function() {
-  if (window.scrollY > 40) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
-}, { passive: true });
-
-/* ═══════════════════════════════════════════
-   HAMBURGER
-═══════════════════════════════════════════ */
-var hamburger = document.getElementById('hamburger');
-var navLinks  = document.getElementById('navLinks');
-hamburger.addEventListener('click', function() {
-  navLinks.classList.toggle('open');
-  var spans = hamburger.querySelectorAll('span');
-  if (navLinks.classList.contains('open')) {
-    spans[0].style.cssText = 'transform:translateY(7px) rotate(45deg)';
-    spans[1].style.opacity = '0';
-    spans[2].style.cssText = 'transform:translateY(-7px) rotate(-45deg)';
-  } else {
-    spans[0].style.cssText = '';
-    spans[1].style.opacity = '';
-    spans[2].style.cssText = '';
-  }
-});
-
-/* ═══════════════════════════════════════════
-   COUNTER ANIMATION
-═══════════════════════════════════════════ */
-function animateCounter(el) {
-  var target = parseInt(el.getAttribute('data-counter'), 10);
-  var duration = 1600;
-  var start = null;
-  /* special: 2010 animates from 1990 */
-  var from = target > 1000 ? target - 20 : 0;
-
-  function step(ts) {
-    if (!start) start = ts;
-    var progress = Math.min((ts - start) / duration, 1);
-    /* ease-out quart */
-    var ease = 1 - Math.pow(1 - progress, 4);
-    el.textContent = Math.round(from + (target - from) * ease);
-    if (progress < 1) requestAnimationFrame(step);
-    else el.textContent = target;
-  }
-  requestAnimationFrame(step);
-}
-
-/* Trigger counters when hero stats visible */
-var countersRan = false;
-var counterEls = document.querySelectorAll('[data-counter]');
-function tryCounters() {
-  if (countersRan) return;
-  var first = counterEls[0];
-  if (!first) return;
-  var rect = first.getBoundingClientRect();
-  if (rect.top < window.innerHeight) {
-    countersRan = true;
-    counterEls.forEach(function(el) { animateCounter(el); });
-  }
-}
-window.addEventListener('scroll', tryCounters, { passive: true });
-/* Also run on load for above-fold stats */
-setTimeout(tryCounters, 600);
-
-/* ═══════════════════════════════════════════
-   INTERSECTION OBSERVER (reveal animations)
-═══════════════════════════════════════════ */
-var revealEls = document.querySelectorAll('.reveal');
-if ('IntersectionObserver' in window) {
-  var io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        io.unobserve(entry.target);
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelector('.filter-btn.active').classList.remove('active');
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category;
+            currentPage = 1;
+            fetchArticles();
+          });
+        });
       }
+
+      function renderPagination(totalPages, currentPage) {
+        if (totalPages <= 1) {
+          paginationContainer.innerHTML = '';
+          return;
+        }
+        let html = `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        html += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+        paginationContainer.innerHTML = html;
+
+        document.querySelectorAll('.page-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentPage = parseInt(btn.dataset.page);
+            fetchArticles();
+          });
+        });
+      }
+
+      function renderArticles(articles) {
+        if (!articles || articles.length === 0) {
+          blogGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--gray); padding: 2rem 0;">Aucun article ne correspond à votre recherche.</p>';
+          return;
+        }
+        blogGrid.innerHTML = articles.map(article => `
+          <article class="news-card">
+            <a href="article.html?slug=${article.slug}" class="card-img-link">
+              <div class="card-img" style="background-image: url('..${article.image || '/assets/img/default-news.jpg'}');"></div>
+            </a>
+            <div class="card-body">
+              <span class="card-cat">${article.categorie || 'Non classé'}</span>
+              <h2 class="card-title"><a href="article.html?slug=${article.slug}">${article.titre}</a></h2>
+              <p class="card-excerpt">${article.extrait || 'Pas d\\\'extrait disponible...'}</p>
+              <div class="card-meta">
+                <span><i class="fas fa-user"></i> ${article.auteur || 'Anonyme'}</span>
+                <span><i class="fas fa-calendar-alt"></i> ${new Date(article.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      async function fetchArticles() {
+        loader.style.display = 'block';
+        blogGrid.innerHTML = '';
+        paginationContainer.innerHTML = '';
+
+        let url = `../api/actualites.php?page=${currentPage}&per_page=6`;
+        if (currentCategory !== 'all') {
+          url += `&categorie=${encodeURIComponent(currentCategory)}`;
+        }
+        if (currentSearch) {
+          url += `&q=${encodeURIComponent(currentSearch)}`;
+        }
+
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('Erreur réseau');
+          const data = await res.json();
+          
+          if (data.success) {
+            renderArticles(data.data);
+            renderPagination(data.pages, data.page);
+          } else {
+            throw new Error(data.message || 'Erreur API');
+          }
+        } catch (error) {
+          console.error("Erreur de chargement des articles:", error);
+          blogGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--danger); padding: 2rem 0;">Impossible de charger les articles. Veuillez réessayer plus tard.</p>';
+        } finally {
+          loader.style.display = 'none';
+        }
+      }
+
+      let searchTimeout;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentSearch = searchInput.value;
+          currentPage = 1;
+          fetchArticles();
+        }, 300); // Debounce
+      });
+
+      // Initial load
+      renderCategories();
+      fetchArticles();
     });
-  }, { threshold: 0.12 });
-  revealEls.forEach(function(el) { io.observe(el); });
-} else {
-  revealEls.forEach(function(el) { el.classList.add('visible'); });
-}
-
-/* ═══════════════════════════════════════════
-   BACK TO TOP
-═══════════════════════════════════════════ */
-var backTop = document.getElementById('backTop');
-window.addEventListener('scroll', function() {
-  if (window.scrollY > 500) {
-    backTop.classList.add('show');
-  } else {
-    backTop.classList.remove('show');
-  }
-}, { passive: true });
-backTop.addEventListener('click', function() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-/* ═══════════════════════════════════════════
-   LOAD NEWS FROM API
-═══════════════════════════════════════════ */
-(async function loadBlogNews() {
-  try {
-    var res  = await fetch('../api/actualites.php?statut=publie&per_page=3');
-    var json = await res.json();
-    if (!json.success || !json.data.length) return;
-    var grid = document.getElementById('newsGrid');
-    if (!grid) return;
-    var catColors = {
-      Football:   '#e63946',
-      Basketball: '#f5a623',
-      Tennis:     '#3fa7f5',
-      Natation:   '#00bfff',
-      Association:'#3fa7f5',
-      'Événement':'#f5a623'
-    };
-    var catIcons = {
-      Football:   '⚽',
-      Basketball: '🏀',
-      Tennis:     '🎾',
-      Natation:   '🏊',
-      Association:'📋',
-      'Événement':'🏆'
-    };
-    grid.innerHTML = json.data.map(function(a) {
-      var color = catColors[a.categorie] || '#e63946';
-      var icon  = catIcons[a.categorie]  || '📰';
-      var initials = (a.auteur || '?').split(' ').map(function(w){ return w[0]; }).join('').substring(0, 2);
-      var date = (a.published_at || a.created_at || '').substring(0, 10);
-      return (
-        '<div class="news-card">' +
-          '<div class="news-thumb" style="background:linear-gradient(135deg,#0a1628 0%,#111822 100%)">' +
-            '<span>' + icon + '</span>' +
-            '<span class="news-cat-tag" style="background:' + color + '">' + (a.categorie || 'Actualité') + '</span>' +
-          '</div>' +
-          '<div class="news-body">' +
-            '<div class="news-meta"><span>' + date + '</span></div>' +
-            '<h3 class="news-title">' + a.titre + '</h3>' +
-            '<p class="news-excerpt">' + (a.extrait || '') + '</p>' +
-          '</div>' +
-          '<div class="news-footer">' +
-            '<div class="news-author"><div class="avatar-sm">' + initials + '</div><span>' + (a.auteur || 'Admin') + '</span></div>' +
-            '<a href="#" class="btn btn-sm btn-outline">Lire <i class="fas fa-arrow-right"></i></a>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
-  } catch(e) { /* keep demo cards */ }
-})();
-</script>
+  </script>
 
 </body>
 </html>

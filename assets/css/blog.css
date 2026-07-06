@@ -1,0 +1,225 @@
+/* ============================================================
+   blog.css — Styles spécifiques pour la page du blog
+   ============================================================ */
+
+/* ── Section Hero ── */
+.hero {
+  text-align: center;
+  padding: 5rem 1.5rem;
+  background:
+    linear-gradient(rgba(13,17,23,0.7), rgba(13,17,23,0.9)),
+    url('../img/hero-bg.jpg') no-repeat center center/cover; /* Assurez-vous que l'image existe */
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem); /* Responsive font size */
+  color: var(--white);
+  margin-bottom: .5rem;
+  line-height: 1.1;
+}
+
+.hero h1 span {
+  color: var(--primary);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: var(--gray);
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ── Filtres et Recherche ── */
+.blog-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 2rem 0 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 2rem;
+}
+
+.blog-filters {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.1);
+    color: var(--gray);
+    padding: .4rem 1rem;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-btn:hover {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.2);
+    color: var(--light);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+.blog-search {
+    position: relative;
+    min-width: 250px;
+}
+
+.blog-search .form-control {
+    padding-left: 2.5rem;
+}
+
+.blog-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray);
+}
+
+
+/* ── Grille des articles ── */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 3rem 0;
+}
+
+.news-card {
+  background: var(--dark2);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all .3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .2);
+  border-color: rgba(255, 255, 255, .15);
+}
+
+.card-img-link {
+    display: block;
+    height: 200px;
+    overflow: hidden;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform .4s ease;
+}
+
+.news-card:hover .card-img {
+    transform: scale(1.05);
+}
+
+.card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-cat {
+  display: inline-block;
+  background: rgba(230, 57, 70, .1);
+  color: var(--primary);
+  padding: .2rem .6rem;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: .8rem;
+  align-self: flex-start;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--white);
+  margin-bottom: .5rem;
+  line-height: 1.2;
+}
+
+.card-title a:hover {
+  color: var(--primary);
+}
+
+.card-excerpt {
+  font-size: .9rem;
+  color: var(--gray);
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .8rem;
+  color: var(--gray);
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  padding-top: 1rem;
+  margin-top: auto;
+}
+
+.card-meta span {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 2rem;
+}
+
+.page-btn {
+    background: var(--dark2);
+    border: 1px solid rgba(255,255,255,.1);
+    color: var(--gray);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.page-btn:hover {
+    background: rgba(255,255,255,.1);
+    color: var(--white);
+}
+.page-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+.page-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
